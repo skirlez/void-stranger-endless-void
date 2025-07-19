@@ -10,7 +10,7 @@
   "bitRate": 128,
   "compression": 1,
   "conversionMode": 0,
-  "duration": 81.001,
+  "duration": 80.861,
   "parent": {
     "name": "EV Music",
     "path": "folders/Sounds/EV Music.yy",
