@@ -29,10 +29,17 @@ function move_to_root_state() {
 }
 
 function move_to_node_state(state) {
+	var failsafe = 200;
 	var potential_next_state = state;
 	do {
 		current_node_state = potential_next_state;
 		potential_next_state = current_node_state.node.play_evaluate_immediate(current_node_state);
+		failsafe--;
+		if failsafe <= 0 {
+			ev_notify("Loop detected! Exiting pack")	
+			ev_leave_pack()
+			return;
+		}
 	} until (potential_next_state < 0)
 	
 	if potential_next_state == node_return_status.need_exits {
@@ -72,7 +79,6 @@ function on_room_create() {
 	}
 	if current_node_state == noone {
 		log_info("Choosing starting node")
-		
 		if global.playtesting {
 			ev_prepare_level_burdens(global.pack_playtest_parameters.burdens);
 			ds_grid_set(agi("obj_inventory").ds_player_info, 1, 1, global.pack_playtest_parameters.locust_count)

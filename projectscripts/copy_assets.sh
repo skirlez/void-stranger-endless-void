@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Shell script to copy required Void Stranger assets into Endless Void
 

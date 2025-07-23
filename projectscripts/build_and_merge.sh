@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Shell script to build Endless Void's GameMaker project and merge it with Void Stranger
 

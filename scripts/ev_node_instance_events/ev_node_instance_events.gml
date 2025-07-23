@@ -333,8 +333,12 @@ function node_instance_step() {
 				}
 				else { }
 				*/
-				global.pack_editor.start_play_transition(id)
-				global.mouse_layer = 1;	
+				if global.is_merged {
+					global.pack_editor.start_play_transition(id)
+					global.mouse_layer = 1;
+				}
+				else
+					audio_play_sound(snd_reveal, 10, false)
 			}
 		}
 	}

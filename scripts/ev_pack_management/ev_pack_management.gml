@@ -55,7 +55,6 @@ function convert_room_nodes_to_structs() {
 			return ds_map_find_value(explored_instances_map, node_inst);
 		
 		var node_state = global.pack_editor.get_node_state_from_instance(node_inst);
-		
 		ds_map_set(explored_instances_map, node_inst, node_state)
 		
 		
@@ -72,8 +71,10 @@ function convert_room_nodes_to_structs() {
 		return node_state;
 	}
 	var root_id = noone
-	with (root)
+	with (root) {
 		root_id = id;
+		
+	}
 	
 	var map = ds_map_create()
 	var node_state = explore_node_and_convert_to_struct(root_id, map)

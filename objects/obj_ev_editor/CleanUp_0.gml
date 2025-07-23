@@ -15,3 +15,5 @@ surface_free(spin_surface)
 ds_map_destroy(global.branefuck_command_functions)
 ds_map_destroy(global.branefuck_command_tiles)
 ds_map_destroy(global.locusts_collected_this_level)
+
+ds_map_destroy(global.blobtable)

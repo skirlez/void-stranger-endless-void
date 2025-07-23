@@ -1467,7 +1467,8 @@ objects_list = [object_player, object_leech, object_maggot, object_bull, object_
 
 global.music_names = ["", "msc_001", "msc_dungeon_wings", "msc_beecircle", "msc_dungeongroove", "msc_013",
 	"msc_gorcircle_lo", "msc_levcircle", "msc_escapewithfriend", "msc_cifcircle", "msc_006", "msc_beesong", "msc_themeofcif",
-	"msc_monstrail", "msc_endless", "msc_stg_extraboss", "msc_rytmi2", "msc_test2", "snd_ev_music_judgment_jingle"]
+	"msc_monstrail", "msc_endless", "msc_stg_extraboss", "msc_rytmi2", "msc_test2", "msc_voidpiano", "msc_finalapproach", "msc_universe",
+	"snd_ev_music_judgment_jingle"]
 
 function reset_global_level() {
 	global.tile_mode = false

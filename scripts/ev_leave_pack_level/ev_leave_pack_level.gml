@@ -7,6 +7,7 @@ function ev_leave_pack() {
 	global.playtesting = false;
 	ds_map_clear(global.locusts_collected_this_level)
 	global.editor.reset_branefuck_persistent_memory()
+	
 }
 
 function ev_pack_on_clear_level() {

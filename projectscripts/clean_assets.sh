@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Shell script to remove Void Stranger assets from Endless Void
 

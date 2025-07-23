@@ -193,9 +193,11 @@ function first_or_error(exits) {
 	return array_length(exits) > 0 ? exits[0] : node_return_status.need_exits;
 }
 
+// nodes usually return an exit number in `play_evaluate_immediate`.
+// if they don't, they return one of these.
 enum node_return_status {
-	need_exits = -1,
-	not_immediate = -2
+	need_exits = -1, // waaaahhhh
+	not_immediate = -2 // node can't return exit number because (see comments above play_evaluate_immediate and play_evaluate)
 }
 
 
@@ -294,10 +296,6 @@ music_node.read_function = function (properties_str /*, version */) {
 music_node.write_function = function (properties) {
 	return base64_encode(properties.music)
 }
-music_node.write_struct_function = function (node_state, node_id) {
-	return instance_create_layer(node_state.pos_x, node_state.pos_y, "Nodes", node_state.node.object_ind, 
-		{ music : node_state.properties.music, node_id : node_id })
-}
 music_node.on_config = function (node_instance) {
 	global.mouse_layer = 1;
 	new_window_with_pos(node_instance.x, node_instance.y, 6, 6, agi("obj_ev_music_node_window"), {
@@ -319,10 +317,6 @@ branefuck_node.read_function = function (properties_str /*, version */) {
 branefuck_node.write_function = function (properties) {
 	return string(properties.program)
 }
-branefuck_node.write_struct_function = function (node_state, node_id) {
-	return instance_create_layer(node_state.pos_x, node_state.pos_y, "Nodes", node_state.node.object_ind, 
-		{ program : node_state.properties.program, node_id : node_id })
-}
 branefuck_node.on_config = function (node_instance) {
 	global.mouse_layer = 1;
 	new_window_with_pos(node_instance.x, node_instance.y, 10, 6, agi("obj_ev_branefuck_node_window"), {
@@ -330,9 +324,9 @@ branefuck_node.on_config = function (node_instance) {
 	});
 }
 branefuck_node.play_evaluate_immediate = function(node_state) {
-	var program = string_to_array(node_state.properties.program);
 	if array_length(node_state.exits) == 0
 		return node_return_status.need_exits
+	var program = string_to_array(node_state.properties.program);
 	var return_value = execute_branefuck(program, "");
 	if return_value == "" {
 		ev_notify("Branefuck node errored!")

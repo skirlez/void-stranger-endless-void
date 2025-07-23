@@ -1,3 +1,3 @@
-node_instance.program = textbox_instance.txt;
+node_instance.properties.program = textbox_instance.txt;
 event_inherited();
 

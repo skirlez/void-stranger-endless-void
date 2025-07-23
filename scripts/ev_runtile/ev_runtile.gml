@@ -10,6 +10,7 @@
  * @param {real} y the y coordinate of the cell to evaluate
  */
  
+// destroyed in obj_ev_editor
 global.blobtable = ds_list_create();
 ds_list_add(global.blobtable,
  		-1, 255, 68, 17, 241, 124,

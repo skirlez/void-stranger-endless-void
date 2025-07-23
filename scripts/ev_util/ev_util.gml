@@ -53,6 +53,13 @@ function ev_array_contains(arr, value) {
 	}
 	return false;
 }
+function ev_array_get_index(arr, value) {
+	for (var i = 0; i < array_length(arr); i++) {
+		if (arr[@ i] == value)
+			return i;
+	}
+	return -1;
+}
 function ev_array_remove(arr, value) {
 	for (var i = 0; i < array_length(arr); i++) {
 		if (arr[@ i] == value) {

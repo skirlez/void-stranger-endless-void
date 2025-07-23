@@ -16,7 +16,7 @@ if (room == global.pack_editor_room) {
 	calculate_zoom()
 	
 	place_pack_into_room(global.pack)
-	
+	ds_map_clear(node_state_to_id_map)
 	selected_thing = pack_things.nothing
 	ev_switch_to_user_palette()
 	

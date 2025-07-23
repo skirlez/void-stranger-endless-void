@@ -27,8 +27,17 @@ function ev_play_void_radio() {
 	var start;
 	var endpoint;
 	do {
+		// i'm sorry..............................
+		static exclude = ["msc_universe"]
+		
+		var exclude_indices = array_create(array_length(exclude));
+		for (var i = 0; i < array_length(exclude); i++) {
+			exclude_indices[i] = ev_array_get_index(global.music_names, exclude[i])	
+		}
+		
+		
 		var previous_index = index;
-		while (index == previous_index)
+		while (index == previous_index || ev_array_contains(exclude_indices, index))
 			index = irandom_range(1, array_length(global.music_names) - 1)
 		track = agi(global.music_names[index]);
 		if (ev_is_music_elysium(track)) {
