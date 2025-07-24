@@ -4,7 +4,6 @@ enum branefuck_operation_status {
 	stay,
 	move,
 	done,
-	error,
 }
 
 
@@ -124,6 +123,7 @@ function compile_branefuck(program) {
 					operation : function(state) {
 						with (state) {
 							memory[@ pointer] = sign(memory[pointer])
+							return branefuck_operation_status.move;
 						}
 					}
 				});
@@ -233,7 +233,11 @@ function compile_branefuck(program) {
 	ds_map_destroy(bracket_index_map)
 	return instructions;
 }
-function execute_compiled_branefuck(instructions, error_value) {
+enum branefuck_execution_status {
+	ok,
+	error
+}
+function execute_branefuck(instructions) {
 	static temporary_memory = array_create(BRANEFUCK_MEMORY_AMOUNT)
 	for (var i = 0; i < BRANEFUCK_MEMORY_AMOUNT; i++)
 		temporary_memory[i] = int64(0);	
@@ -249,23 +253,133 @@ function execute_compiled_branefuck(instructions, error_value) {
 	while (state.instruction_pointer < array_length(instructions)) {
 		count++;
 		if count > 50000 {
-			ev_notify("BF code ran for too long!")
-			return error_value;
+			return { 
+				status: branefuck_execution_status.error,
+				summary : "BF code ran for too long!",
+				log : "BF code ran for too long!",
+			};
 		}
-		with (instructions[state.instruction_pointer]) {
-			var status = operation(state);
-			if status == branefuck_operation_status.move
-				state.instruction_pointer++;
-			else if status == branefuck_operation_status.done
-				return state.memory[state.pointer];
-			else if status == branefuck_operation_status.error
-				return error_value;
+		try {
+			with (instructions[state.instruction_pointer]) {
+				var status = operation(state);
+				if status == branefuck_operation_status.move
+					state.instruction_pointer++;
+				else if status == branefuck_operation_status.done
+					return state.memory[state.pointer];
+			}
+		}
+		catch (e) {
+			return { 
+				status: branefuck_execution_status.error,
+				summary : "BF execution error!",
+				log : "Branefuck execution error: " + e
+			};
 		}
 	}
-	return state.memory[state.pointer];
+	return { 
+		status: branefuck_execution_status.ok,
+		value : state.memory[state.pointer] 
+	};
 }
 
-function execute_branefuck(program, error_value) {
+
+
+function evaluate_expression(expr, temporary_memory, executer) {
+	var read_base = read_string_until(expr, 1, ":");
+	var base_name = read_base.substr;
+	var i = 1 + read_base.offset + 1;
+	
+	var remainder = string_copy(expr, i, string_length(expr) - i + 1);
+
+	var base;
+	if base_name == "g" || base_name == "global"
+		base = global;
+	else if base_name == "s" || base_name == "self" || base_name == "id" {
+		if executer.object_index == agi("obj_ev_pack_branefuck_node") {
+			throw $"Branefuck node tried to access {base_name} (there is no {base_name})"
+		}
+		base = executer.add_inst;
+	}
+	else if base_name == "t"
+		base = temporary_memory;
+	else if base_name == "p"
+		base = global.branefuck_persistent_memory;
+	else if agi(base_name) != -1
+		base = agi(base_name);
+	else
+		return noone;
+	return evaluate_expression_recursive(remainder, base);
+}
+function evaluate_expression_recursive(expr, base) {
+	if expr == ""
+		return base;
+
+	var read_vari = read_string_until(expr, 1, ":");
+	var vari_name = read_vari.substr;
+	var i = 1 + read_vari.offset + 1;
+	var remainder = string_copy(expr, i, string_length(expr) - i + 1);
+	if is_array(base) {
+		if !string_is_uint(vari_name)
+			return noone;
+		return evaluate_expression_recursive(remainder, base[int64(vari_name)])
+	}
+	if is_string(base) {
+		if !string_is_uint(vari_name) {
+			throw $"Invalid string index {vari_name}";
+		}
+		
+		var index = int64(vari_name);
+		if index > string_length(base) {
+			throw $"String index too big {vari_name} ({vari_name} >= {string_length(base)})"
+		}
+		var character = string_ord_at(base, index + 1)
+		
+		// we know this is a number so we can return
+		return character;
+	}
+	if is_struct(base) {
+		return evaluate_expression_recursive(remainder, variable_struct_get(base, vari_name))
+	}
+	if object_exists(base) {
+		var instance = instance_find(base, 0);
+		if instance_exists(instance) {
+			if (!variable_instance_exists(instance, vari_name))
+				return noone;
+			return evaluate_expression_recursive(remainder, variable_instance_get(instance, vari_name))
+		}
+		else
+			return noone;
+	}
+	if instance_exists(base) {
+		if (!variable_instance_exists(base, vari_name))
+			return noone;
+		return evaluate_expression_recursive(remainder, variable_instance_get(base, vari_name))
+	}
+	return noone;
+}
+
+// get the multiplier following this character, if it exists.
+function get_bf_multiplier(program, i) {
+	var num_string = "";
+	i++;
+	var count = 0;
+	while (i < array_length(program)) {
+		var read_char = program[i]
+		if !is_digit(read_char)
+			break;
+		num_string += read_char
+		i++;
+		count++;
+	}
+	if (num_string == "")
+		num_string = "1"
+	var num = int64(num_string)
+	return { mult : num, offset : count };
+}
+
+
+
+function execute_branefuck_im_old(program, error_value) {
 	static temporary_memory = array_create(BRANEFUCK_MEMORY_AMOUNT)
 	for (var i = 0; i < BRANEFUCK_MEMORY_AMOUNT; i++)
 		temporary_memory[i] = int64(0);	
@@ -412,102 +526,4 @@ function execute_branefuck(program, error_value) {
 		}
 	}
 	return memory[pointer];
-}
-
-function evaluate_expression(expr, temporary_memory, executer) {
-	var read_base = read_string_until(expr, 1, ":");
-	var base_name = read_base.substr;
-	var i = 1 + read_base.offset + 1;
-	
-	var remainder = string_copy(expr, i, string_length(expr) - i + 1);
-
-	var base;
-	if base_name == "g" || base_name == "global"
-		base = global;
-	else if base_name == "s" || base_name == "self" || base_name == "id" {
-		if executer.object_index != agi("obj_ev_branefucker") {
-			ev_notify($"(there is no {base_name})")
-			ev_notify($"Branefuck node tried to access {base_name}")
-			return 0;
-		}
-		base = executer.add_inst;
-	}
-	else if base_name == "t"
-		base = temporary_memory;
-	else if base_name == "p"
-		base = global.branefuck_persistent_memory;
-	else if agi(base_name) != -1
-		base = agi(base_name);
-	else
-		return noone;
-	return evaluate_expression_recursive(remainder, base);
-}
-function evaluate_expression_recursive(expr, base) {
-	if expr == ""
-		return base;
-
-	var read_vari = read_string_until(expr, 1, ":");
-	var vari_name = read_vari.substr;
-	var i = 1 + read_vari.offset + 1;
-	var remainder = string_copy(expr, i, string_length(expr) - i + 1);
-	if is_array(base) {
-		if !string_is_uint(vari_name)
-			return noone;
-		return evaluate_expression_recursive(remainder, base[int64(vari_name)])
-	}
-	if is_string(base) {
-		if !string_is_uint(vari_name) {
-			ev_notify($"({vari_name})")
-			ev_notify("Invalid string index")
-			return noone;
-		}
-		
-		var index = int64(vari_name);
-		if index > string_length(base) {
-			ev_notify($"({vari_name} >= {string_length(base)})")
-			ev_notify("String index too big")
-		}
-		var character = string_ord_at(base, index + 1)
-		
-		// we know this is a number so we can return
-		return character;
-	}
-	if is_struct(base) {
-		return evaluate_expression_recursive(remainder, variable_struct_get(base, vari_name))
-	}
-	if object_exists(base) {
-		var instance = instance_find(base, 0);
-		if instance_exists(instance) {
-			if (!variable_instance_exists(instance, vari_name))
-				return noone;
-			return evaluate_expression_recursive(remainder, variable_instance_get(instance, vari_name))
-		}
-		else
-			return noone;
-	}
-	if instance_exists(base) {
-		if (!variable_instance_exists(base, vari_name))
-			return noone;
-		return evaluate_expression_recursive(remainder, variable_instance_get(base, vari_name))
-	}
-	return noone;
-}
-
-// get the multiplier following this character, if it exists.
-function get_bf_multiplier(program, i) {
-	var num_string = "";
-	i++;
-	var count = 0;
-	while (i < array_length(program)) {
-		var read_char = program[i]
-		if !is_digit(read_char)
-			break;
-		num_string += read_char
-		i++;
-		count++;
-	}
-	if (num_string == "")
-		num_string = "1"
-	var num = int64(num_string)
-	return { mult : num, offset : count };
 }

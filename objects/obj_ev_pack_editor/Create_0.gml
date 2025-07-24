@@ -327,10 +327,29 @@ branefuck_node.play_evaluate_immediate = function(node_state) {
 	if array_length(node_state.exits) == 0
 		return node_return_status.need_exits
 	var program = string_to_array(node_state.properties.program);
-	var return_value = execute_branefuck(program, "");
-	if return_value == "" {
-		ev_notify("Branefuck node errored!")
+	var instructions = compile_branefuck(program)
+	if is_string(instructions) {
+		ev_notify("Branefuck compilation error!")
+		log_error("Branefuck compilation error: " + instructions)
+		ev_leave_pack()
+		return node_return_status.not_immediate;
+	}
+	var result = execute_branefuck(instructions);
+	var return_value;
+	if result.status == branefuck_execution_status.error {
+		ev_notify(result.summary)
+		log_error(result.log)
 		return_value = 1
+	}
+	else {
+		try {
+			return_value = int64(result.value)	
+		}
+		catch (e) {
+			ev_notify("Invalid BF return value!")
+			log_error($"Return value couldn't be converted to number: " + string(result.value))
+			return_value = 1;
+		}
 	}
 	var index = clamp(return_value, 1, array_length(node_state.exits)) - 1
 	return node_state.exits[index];

@@ -8,18 +8,17 @@ if global.is_merged {
 }
 
 
-var destroy_value;
-if destroy_value_str == ""
-	destroy_value = "" // statue will never destroy (unless errors)
-else if string_is_int(destroy_value_str)
-	destroy_value = int64(destroy_value_str)
-else {
-	destroy_value = execute_branefuck($",g:{destroy_value_str},", 0)
+
+var result = execute_branefuck(instructions)
+if result.status == branefuck_execution_status.error {
+	ev_notify(result.summary)
+	log_info(result.log)	
+	with (add_inst)
+		event_perform(ev_other, ev_user1)
+	instance_destroy(id)
+	exit;
 }
-
-
-value = execute_compiled_branefuck(instructions, destroy_value)
-if (value == destroy_value) {
+if (is_int64(destroy_value) && result.value == destroy_value) {
 	with (add_inst)
 		event_perform(ev_other, ev_user1)
 	instance_destroy(id)	

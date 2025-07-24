@@ -29,8 +29,6 @@
   "properties": [
     {"resourceType":"GMObjectProperty","resourceVersion":"1.0","name":"add_inst","filters":[],"listItems":[],"multiselect":false,"rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"value":"noone","varType":0,},
     {"resourceType":"GMObjectProperty","resourceVersion":"1.0","name":"program_str","filters":[],"listItems":[],"multiselect":false,"rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"value":"\"\"","varType":2,},
-    {"resourceType":"GMObjectProperty","resourceVersion":"1.0","name":"input_1_str","filters":[],"listItems":[],"multiselect":false,"rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"value":"\"\"","varType":2,},
-    {"resourceType":"GMObjectProperty","resourceVersion":"1.0","name":"input_2_str","filters":[],"listItems":[],"multiselect":false,"rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"value":"\"\"","varType":2,},
     {"resourceType":"GMObjectProperty","resourceVersion":"1.0","name":"destroy_value_str","filters":[],"listItems":[],"multiselect":false,"rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"value":"\"\"","varType":2,},
   ],
   "solid": false,

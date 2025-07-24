@@ -8,3 +8,11 @@ if is_string(instructions) {
 	ev_notify("Branefuck compilation error!")
 	log_error("Branefuck compilation error: " + instructions)
 }
+
+
+
+if string_is_int(destroy_value_str)
+	destroy_value = int64(destroy_value_str)
+else
+	destroy_value = ""
+// statue will never destroy if destroy value isn't a number
