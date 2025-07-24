@@ -942,9 +942,9 @@ object_cif.iostruct = {
 
 
 global.branefuck_characterset = ".,+-[]><?^_#:; ";
-global.branefuck_persistent_memory = array_create(ADD_STATUE_MEMORY_AMOUNT)
+global.branefuck_persistent_memory = array_create(BRANEFUCK_MEMORY_AMOUNT)
 function reset_branefuck_persistent_memory() {
-	for (var i = 0; i < ADD_STATUE_MEMORY_AMOUNT; i++)
+	for (var i = 0; i < BRANEFUCK_MEMORY_AMOUNT; i++)
 		global.branefuck_persistent_memory[i] = int64(0);
 }
 reset_branefuck_persistent_memory()

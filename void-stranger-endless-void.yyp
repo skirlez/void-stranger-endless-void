@@ -89,6 +89,7 @@
     {"id":{"name":"rm_ev_pack_editor","path":"rooms/rm_ev_pack_editor/rm_ev_pack_editor.yy",},},
     {"id":{"name":"snd_ev_select","path":"sounds/snd_ev_select/snd_ev_select.yy",},},
     {"id":{"name":"obj_ev_falling_pack_number","path":"objects/obj_ev_falling_pack_number/obj_ev_falling_pack_number.yy",},},
+    {"id":{"name":"ev_branefuck_operations","path":"scripts/ev_branefuck_operations/ev_branefuck_operations.yy",},},
     {"id":{"name":"ev_level_management","path":"scripts/ev_level_management/ev_level_management.yy",},},
     {"id":{"name":"obj_ev_window_element","path":"objects/obj_ev_window_element/obj_ev_window_element.yy",},},
     {"id":{"name":"spr_ev_refresh","path":"sprites/spr_ev_refresh/spr_ev_refresh.yy",},},

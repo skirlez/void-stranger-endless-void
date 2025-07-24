@@ -43,23 +43,19 @@ function select(element) {
 }
 
 function find_selected_element() {
+	var candidate = noone;
+	var best_depth = infinity;
 	for (var i = 0; i < array_length(children); i++) {
 		var child = children[i];
-		if position_meeting(mouse_x, mouse_y, child) {
-			
-			if selected_element != noone {
-				if child == selected_element
-					return;
-				deselect(selected_element)
-			}
-			
-			select(child)
-			return
+		if position_meeting(mouse_x, mouse_y, child) && child.depth < best_depth {
+			candidate = child;
+			best_depth = candidate.depth;
 		}
 	}
-	if selected_element != noone {
+	if candidate == selected_element
+		return;
+	if selected_element != noone
 		deselect(selected_element)
-		selected_element = noone
-	}
-		
+	if candidate != noone
+		select(candidate);
 }

@@ -236,6 +236,9 @@ global.branefuck_command_functions[? "show"] = function(memory, pointer){
 global.branefuck_command_functions[? "log"] = function(memory, pointer){
 	log_info($"Slot {pointer}: {memory[pointer]}");
 }
+global.branefuck_command_functions[? "abs"] = function(memory, pointer){
+	command_return(memory, pointer, abs(memory[pointer]))
+}
 
 global.branefuck_command_functions[? "mul"] = function(memory, pointer) {
 	var params = get_command_parameters(memory, pointer, 2)

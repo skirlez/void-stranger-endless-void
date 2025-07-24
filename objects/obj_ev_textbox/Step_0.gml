@@ -133,6 +133,7 @@ if window != -1 && window.selected_element == id {
 
 			break;
 		case vk_escape:
+		case vk_tab:
 			window.selected_element = noone
 			break;
 		case ord("C"):

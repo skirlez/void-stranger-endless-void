@@ -64,6 +64,7 @@
     {"name":"rm_ev_pack_editor","order":11,"path":"rooms/rm_ev_pack_editor/rm_ev_pack_editor.yy",},
     {"name":"snd_ev_select","order":13,"path":"sounds/snd_ev_select/snd_ev_select.yy",},
     {"name":"obj_ev_falling_pack_number","order":92,"path":"objects/obj_ev_falling_pack_number/obj_ev_falling_pack_number.yy",},
+    {"name":"ev_branefuck_operations","order":47,"path":"scripts/ev_branefuck_operations/ev_branefuck_operations.yy",},
     {"name":"ev_level_management","order":2,"path":"scripts/ev_level_management/ev_level_management.yy",},
     {"name":"obj_ev_window_element","order":27,"path":"objects/obj_ev_window_element/obj_ev_window_element.yy",},
     {"name":"spr_ev_refresh","order":34,"path":"sprites/spr_ev_refresh/spr_ev_refresh.yy",},

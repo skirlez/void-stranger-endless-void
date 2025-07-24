@@ -3,6 +3,9 @@ function ev_notify(txt) {
 	move_all_notifications_up()
 	with (object) {
 		y += 40
+		if y - 2 > room_height {
+			instance_destroy(id)	
+		}
 	}
 	//instance_destroy(obj)
 	var i = instance_create_layer(5, -30, "Notifications", object)

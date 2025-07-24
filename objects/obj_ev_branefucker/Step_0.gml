@@ -10,12 +10,15 @@ if global.is_merged {
 
 var destroy_value;
 if destroy_value_str == ""
-	destroy_value = "" // statue will never destroy
+	destroy_value = "" // statue will never destroy (unless errors)
 else if string_is_int(destroy_value_str)
 	destroy_value = int64(destroy_value_str)
-else
+else {
 	destroy_value = execute_branefuck($",g:{destroy_value_str},", 0)
-value = execute_branefuck(program, destroy_value)
+}
+
+
+value = execute_compiled_branefuck(instructions, destroy_value)
 if (value == destroy_value) {
 	with (add_inst)
 		event_perform(ev_other, ev_user1)
