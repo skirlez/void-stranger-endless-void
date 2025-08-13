@@ -1,6 +1,24 @@
 if !global.is_merged {
 	if keyboard_check_pressed(vk_f4)
 		window_set_fullscreen(!window_get_fullscreen())	
+	if global.is_html5 {
+		var ratio = browser_width / browser_height;
+		var desired_width;
+		var desired_height
+		if ratio >= (224 / 144) {
+			desired_width = round(browser_height * (224 / 144))
+			desired_height = round(browser_height)
+		}
+		else {
+			desired_width = round(browser_width)
+			desired_height = round(browser_width  * (144 / 224))
+		}
+	
+		if desired_width != surface_get_width(application_surface) || desired_height != surface_get_height(application_surface) {
+			surface_resize(application_surface, desired_width, desired_height)
+		}
+		window_set_rectangle((browser_width - desired_width) / 2, (browser_height - desired_height) / 2, desired_width, desired_height);
+	}
 }
 
 var list = ds_list_create()
@@ -10,7 +28,7 @@ var min_inst = noone
 for (var i = 0; i < length; i++) {
 	var inst = list[| i]
 	if (inst.depth < min_depth && inst.visible) {
-		min_inst = inst
+		min_inst = inst.id;
 		min_depth = inst.depth	
 	}
 }

@@ -1,7 +1,7 @@
 
 var scale = 1;
 var mouse_on_me = pressable && ev_is_mouse_on_me();
-	
+
 if global.allow_moving_elements && mouse_check_button(mb_middle) && ev_is_mouse_on_me() {
 	x = mouse_x
 	y = mouse_y

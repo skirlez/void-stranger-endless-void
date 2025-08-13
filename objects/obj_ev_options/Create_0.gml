@@ -64,7 +64,7 @@ change_blade = instance_create_layer(112 - 14, 72 + 30, "Instances", agi("obj_ev
 add_child(change_blade)
 */
 
-author_textbox = instance_create_layer(112, 72 - 20, "Instances", agi("obj_ev_textbox"), 
+author_textbox = instance_create_layer(112, 72 - 20, "Textboxes", agi("obj_ev_textbox"), 
 {
 	empty_text : "Username",
 	allow_newlines : false,
@@ -76,24 +76,28 @@ author_textbox = instance_create_layer(112, 72 - 20, "Instances", agi("obj_ev_te
 add_child(author_textbox)
 
 
-server_textbox = instance_create_layer(112 - 36, 72 - 40, "Instances", agi("obj_ev_textbox"), 
+server_textbox = instance_create_layer(64, 32, "Textboxes", agi("obj_ev_textbox"), 
 {
 	empty_text : "Server IP",
 	allow_newlines : false,
-	automatic_newline : false,
-	char_limit : 100,
-	base_scale_x : 4.5,
+	automatic_newline : true,
+	opened_x : 112,
+	opened_y : 72,
+	char_limit : 300,
+	base_scale_x : 7.1,
 	txt : global.server_ip
 })
 add_child(server_textbox)
 
-port_textbox = instance_create_layer(112 + 36, 72 - 40, "Instances", agi("obj_ev_textbox"), 
+port_textbox = instance_create_layer(112 + 36, 72 - 40, "Textboxes", agi("obj_ev_textbox"), 
 {
 	empty_text : "Port",
 	allow_newlines : false,
 	allow_alphanumeric : false,
 	automatic_newline : false,
 	exceptions : "0123456789",
+	opened_x : 112,
+	opened_y : 72,
 	char_limit : 7,
 	base_scale_x : 3,
 	txt : string(global.server_port)
@@ -143,7 +147,7 @@ log_ip_textbox = instance_create_layer(112 - 36, 144 + 120, "Instances", agi("ob
 	txt : global.logging_ip
 })
 add_child(server_textbox)
-log_port_textbox = instance_create_layer(112 + 36, 144 + 120, "Instances", agi("obj_ev_textbox"), 
+log_port_textbox = instance_create_layer(112 + 36, 144 + 120, "Textboxes", agi("obj_ev_textbox"), 
 {
 	empty_text : "Port",
 	allow_newlines : false,
@@ -166,7 +170,7 @@ function switch_page(new_page) {
 		new_page = max_page
 	current_page = new_page;
 }
-max_page = 1;
+max_page = 2;
 current_page = 0;
 
 
@@ -192,3 +196,19 @@ scroll_button_up = instance_create_layer(200, 56, "Instances", agi("obj_ev_execu
 those_who_special = [scroll_button_down, scroll_button_up]
 add_child(scroll_button_down)
 add_child(scroll_button_up)
+
+
+/* under construction
+question = instance_create_layer(112, 144 * 2 + 72, "Instances", agi("obj_ev_executing_button"), {
+	txt : "?",
+	func : function () {
+		if global.is_merged {
+			global.mouse_layer++;
+			instance_create_layer(0, 0, "EditorObject", agi("obj_ev_question_mark_darkness"));
+		}
+	}
+})
+add_child(question)
+*/
+
+textbox_depth = layer_get_depth(layer_get_id("Textboxes"))

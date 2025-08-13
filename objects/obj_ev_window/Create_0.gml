@@ -48,7 +48,7 @@ function find_selected_element() {
 	for (var i = 0; i < array_length(children); i++) {
 		var child = children[i];
 		if position_meeting(mouse_x, mouse_y, child) && child.depth < best_depth {
-			candidate = child;
+			candidate = child.id;
 			best_depth = candidate.depth;
 		}
 	}

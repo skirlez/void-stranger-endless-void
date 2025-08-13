@@ -1,3 +1,4 @@
+draw_set_color(c_white)
 if (room == global.editor_room) {
 	
 	if (global.selected_thing == thing_placeable) && global.mouse_layer == 0 {

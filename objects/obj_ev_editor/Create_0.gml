@@ -3,16 +3,25 @@
 // handles transitions, startup networking/file io and more
 
 randomize()
+
+global.is_html5 = (os_browser != browser_not_a_browser)
+
 surface_depth_disable(false)
-global.g_mode = false;
 global.latest_lvl_format = 3;
 global.latest_pack_format = 1;
 global.ev_version = "0.99";
 global.ev_fall_down_next_level = false;
 
+
+
+if global.is_html5 {
+	http_set_request_crossorigin("use-credentials");	
+}
 // debug flag that allows you to move buttons and textboxes with middle mouse
 global.allow_moving_elements = true;
 
+
+#macro agi asset_get_index 
 global.is_merged = (agi("obj_game") != -1)
 if (!global.is_merged) {
 	var ratio = display_get_height() / 144	
@@ -30,6 +39,10 @@ if (!global.is_merged) {
 #macro pack_save_extension "vspks"
 
 global.save_directory = game_save_id
+if global.is_html5
+	global.save_directory = "";
+
+
 global.server_ip = "skirlez.com"
 
 global.author = { username : "Anonymous", brand : int64(irandom_range(0, $FFFFFFFFF)) }
@@ -42,10 +55,16 @@ if !file_exists(global.save_directory + "ev_options.ini") {
 }
 else
 	ev_load()
+	
+global.need_file_registry = global.is_html5
+if global.need_file_registry
+	global.file_registry = read_file_registry()
 
 // Since there is no destructor for structs, we need to create a map
 // to track structs that use maps so we can destroy them when they're garbage collected.
 // This function is ran every set interval in alarm 0.
+
+// This is completely unused and I don't remember what it was for.
 global.struct_map_cleaner = ds_map_create()
 function clean_struct_maps() {
 	var keys = ds_map_keys_to_array_fix(global.struct_map_cleaner)
@@ -86,6 +105,7 @@ global.mouse_right_pressed = false;
 global.mouse_right_held = false;
 global.mouse_right_released = false;
 
+global.g_mode = false;
 global.void_radio_on = false;
 
 #macro thing_nothing -1
@@ -213,8 +233,6 @@ function editor_object(display_name, spr_ind, tile_id, obj_name, obj_layer = "In
 	// this flag must be set manually for the displays to render an object's offset
 	has_offset_properties = false;
 } 
-
-#macro agi asset_get_index 
 
 #macro egg_statue_obj "obj_boulder"
 
@@ -1069,11 +1087,9 @@ object_add.iostruct = {
 		inst.b_form = 8;
 		
 		var mode = tile_state.properties.mde;
-		
 		if mode == 0
 			return;
-			
-		
+
 		var program 
 		if mode == 1 {
 			program = $",g:{ tile_state.properties.pgm},";
@@ -1122,7 +1138,7 @@ object_gor.iostruct = voidlord_io(5)
 object_jukebox = new editor_object("Jukebox", agi("spr_jb"), "jb", egg_statue_obj)
 object_jukebox.iostruct = voidlord_io(9)
 
-object_tis = new editor_object("Tis Statue", agi("spr_ev_tis_statue"), "ts", egg_statue_obj, "Player")
+object_tis = new editor_object("Tis Statue", agi("spr_ev_tis_statue"), "ts", egg_statue_obj, "Tis")
 object_tis.iostruct = voidlord_io(10)
 
 var surface_tree = surface_create(16, 16)
@@ -1741,8 +1757,10 @@ function on_startup_finish() {
 global.beaten_levels_map = ds_map_create()
 function read_beaten_levels() {
 	ds_map_clear(global.beaten_levels_map)
+	if !global.is_merged
+		return;
 	if !file_exists(global.levels_directory + "beaten_levels.txt")
-		exit
+		return;
 	var file = file_text_open_read(global.levels_directory + "beaten_levels.txt")
 	
 	var arr = []

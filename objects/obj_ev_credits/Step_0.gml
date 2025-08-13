@@ -36,6 +36,8 @@ grube_button.y = ypos + 30
 var cache = ds_map_create();
 
 function find_grubes_above(grube, cache) {
+	if global.is_html5
+		grube = grube.id;
 	static grube_object = agi("obj_ev_grube")
 	
 	if !ds_map_exists(cache, grube) {
@@ -53,7 +55,7 @@ function find_grubes_above(grube, cache) {
 					continue;
 				if (arr[i].death_timer != -1)
 					continue;
-				above_grube = arr[i]
+				above_grube = arr[i];
 			}
 			
 			
@@ -94,7 +96,7 @@ if dense_check_timer <= 0 &&  array_length(grubes) != 0 {
 	if random_grube.death_timer == -1 {
 	
 		var max_close_grubes = 8;
-		var close_dist = 30;
+		var close_dist = 32;
 		var close_grubes = 0;
 	
 		for (var i = 0; i < array_length(grubes); i++) {

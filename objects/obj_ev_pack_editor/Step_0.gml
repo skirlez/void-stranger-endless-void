@@ -1,6 +1,6 @@
 if room != global.pack_editor_room
 	exit;
-	
+
 	
 var gain = (1 - (global.pack_editor.zoom + 10) / (global.pack_editor.last_possible_zoom + 10)) * 2
 global.pack_zoom_gain = clamp(gain, 0.2, 1.6)
@@ -48,6 +48,36 @@ if (global.mouse_layer == 0 || selected_thing == pack_things.wrench) {
 
 	if (prev_zoom != zoom) {
 		calculate_zoom()
+	}
+	
+	if keyboard_check(vk_control) && keyboard_check_pressed(ord("V")) {
+		var str = clipboard_get_text();
+		var read_version = read_string_until(str, 1, "|").substr
+		var version = int64_safe(read_version, 0)
+		if version > global.latest_lvl_format {
+			ev_notify("Unsupported level version! Update EV!") // waahh
+		}
+		else if version != 0 {
+			var level = import_level(str);
+			strip_level_for_pack(level);
+			var level_node_state = new node_with_state(global.pack_editor.level_node, 
+				mouse_x - global.level_node_display_scale * 224 / 2, 
+				mouse_y - global.level_node_display_scale * 144 / 2, 
+				{
+					level : level,
+				});
+			
+			var node_instance = level_node_state.create_instance();
+			
+			global.pack_editor.add_undo_action(function (args) {
+				var instance = ds_map_find_value(global.pack_editor.node_id_to_instance_map, args.node_id)
+				instance_destroy(instance)
+			}, {
+				node_id : node_instance.node_id,
+			})
+			ev_notify("Level pasted!")
+		}
+	
 	}
 }
 

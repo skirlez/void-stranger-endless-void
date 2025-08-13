@@ -87,17 +87,7 @@ function level_clicked(display_inst) {
 	else {
 		var lvl = display_inst.lvl;
 		
-		// no reason for us to store these things
-		lvl.description = ""
-		lvl.music = ""
-		lvl.author = ""
-		lvl.burdens = [false, false, false, false, false]
-		lvl.upload_date = ""
-		lvl.last_edit_date = ""
-		lvl.save_name = ""
-		
-		// don't display brand (it hides level number)
-		lvl.author_brand = 0;
+		strip_level_for_pack(lvl)
 		
 		instance_destroy(id)
 		

@@ -9,6 +9,8 @@ function pack_struct() constructor {
 	
 	password_brand = int64(0)
 	
+	// this array contains enough nodes such that any node can be traversed to
+	// by starting from at least one of these.
 	starting_node_states = []
 	
 	// This name will be used for when the file is saved
@@ -58,7 +60,7 @@ function convert_room_nodes_to_structs() {
 		ds_map_set(explored_instances_map, node_inst, node_state)
 		
 		
-		var exits = []
+		var exits = [];
 		for (var i = 0; i < array_length(node_inst.exit_instances); i++) {
 			var exit_node_state = explore_node_and_convert_to_struct(node_inst.exit_instances[i], explored_instances_map)
 			array_push(exits, exit_node_state)
@@ -124,7 +126,6 @@ function place_default_nodes(pack) {
 	2160 / 2 - global.level_node_display_scale * 144 / 2,
 	{
 		level : level,
-		
 	});
 
 	array_push(music_node_state.exits, level_node_state)
@@ -161,24 +162,31 @@ function import_pack(pack_string) {
 		array_push(all_node_states, node_state)
 	}
 		
-	// this list is the same size as `all_node_states`, and keeps track of if the node at that index has any other nodes connecting to it.
-	// later we check for nodes without any connections - those are the starting nodes.
-	var has_anyone_connected = array_create(array_length(all_node_states), false);
-		
-	for (var i = 0; i < array_length(all_node_states); i++) {
-		var node_state = all_node_states[i];
-		for (var j = 0; j < array_length(node_state.intermediary_numbered_exits); j++) {
-			var index = node_state.intermediary_numbered_exits[j];
-			array_push(node_state.exits, all_node_states[index])
-			has_anyone_connected[index] = true;
+	// this list is the same size as `all_node_states`, and keeps track of if the node at that index has been visited
+	// any node we visit through iteration of an array, and not through jumping 
+	// through its `intermediary_numbered_exits`, is labelled a starting node
+	var visited = array_create(array_length(all_node_states), false);
+	
+	function explore_index_and_mark_visited(all_node_states, visited, index) {
+		if visited[index]
+			return;
+		visited[@ index] = true;
+		var node_state = all_node_states[index];
+		for (var i = 0; i < array_length(node_state.intermediary_numbered_exits); i++) {
+			var new_index = node_state.intermediary_numbered_exits[i];
+			explore_index_and_mark_visited(all_node_states, visited, new_index);
+			array_push(node_state.exits, all_node_states[new_index])
 		}
 		node_state.intermediary_numbered_exits = [];
 	}
 	
-	for (var i = 0; i < array_length(has_anyone_connected); i++) {
-		if (!has_anyone_connected[i])
-			array_push(pack.starting_node_states, all_node_states[i])
+	for (var i = 0; i < array_length(all_node_states); i++) {
+		if visited[i]
+			continue;
+		explore_index_and_mark_visited(all_node_states, visited, i)
+		array_push(pack.starting_node_states, all_node_states[i]);
 	}
+	
 	if array_length(pack.starting_node_states) == 0 {
 		log_error($"Trying to import invalid pack with no starting nodes: {pack_string}")
 		place_default_nodes(pack);
@@ -186,6 +194,7 @@ function import_pack(pack_string) {
 	}
 	
 	// Find root node and put it in the first index
+	/*
 	for (var i = 1; i < array_length(pack.starting_node_states); i++) {
 		var node_state = pack.starting_node_states[i]
 		if node_state.node == global.pack_editor.root_node {
@@ -194,6 +203,7 @@ function import_pack(pack_string) {
 			pack.starting_node_states[i] = temp;
 		}
 	}
+	*/
 	if pack.starting_node_states[0].node != global.pack_editor.root_node {
 		log_error($"Tried to import invalid pack with no root node: {pack_string}")
 		pack.starting_node_states = []

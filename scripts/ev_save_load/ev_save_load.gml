@@ -1,5 +1,4 @@
-
-function ev_save(){
+function ev_save() {
 	ini_open(global.save_directory + "ev_options.ini")
 	ini_write_string("options", "username", global.author.username)
 	ini_write_string("options", "brand", global.author.brand)
@@ -25,8 +24,9 @@ function ev_load() {
 	ini_open(global.save_directory + "ev_options.ini")
 	global.author.username = ini_read_string("options", "username", "Anonymous")
 	global.author.brand = int64(ini_read_string("options", "brand", 0))
-	global.server_ip = ini_read_string("options", "server_ip", "skirlez.com")
-	global.server_port = ini_read_string("options", "server_port", 3000)
+	global.server_ip = ini_read_string("options", "server_ip", "http://skirlez.com")
+	
+	global.server_port = ini_read_string("options", "server_port", 443)
 	global.stranger = ini_read_real("options", "stranger", 0)
 	global.memory_style = ini_read_real("options", "memory", 0)
 	global.wings_style = ini_read_real("options", "wings", 0)
@@ -41,16 +41,80 @@ function ev_load() {
 	ev_update_vars()
 }
 
+function get_folder_and_file_names(location) {
+	var filename_start = string_length(location);
+	for (var i = string_length(location); i >= 1; i--) {
+		if string_char_at(location, i) == "/"
+			break;
+		filename_start = i;
+	}
+	var foldername = string_copy(location, 1, filename_start - 1)
+	var filename = string_copy(location, filename_start, string_length(location) - filename_start + 1)
+	return { foldername : foldername, filename : filename }
+}
+function read_file_registry() {
+	var registry_location = global.save_directory + "file_registry.json"
+	var file = file_text_open_read(registry_location)
+	if file == -1 {
+		return {};	
+	}
+	var registry_string = file_text_read_string(file);
+	file_text_close(file);
+	
+	return json_parse(registry_string);	
+}
+function write_file_registry(registry) {
+	var registry_location = global.save_directory + "file_registry.json"
+	var file = file_text_open_write(registry_location)
+	if file == -1
+		return false;	
+	var registry_string = json_stringify(registry, false)
+	file_text_write_string(file, registry_string)
+	file_text_close(file);
+}
+function add_to_file_registry(registry, location) {
+	var names = get_folder_and_file_names(location);
+	var folder;
+	if !variable_struct_exists(registry, names.foldername)
+		registry[$ names.foldername] = {};
+	folder = registry[$ names.foldername];
+	if !variable_struct_exists(folder, names.filename) {
+		folder[$ names.filename] = true;
+		write_file_registry(registry)
+	}
+}
+function delete_from_file_registry(registry, location) {
+	var names = get_folder_and_file_names(location);
+	if variable_struct_exists(registry, names.foldername) {
+		var folder = registry[$ names.foldername];
+		variable_struct_remove(folder, names.filename);	
+		write_file_registry(registry)
+	}
+}
 function ev_update_vars() {
-	global.server = $"http://{global.server_ip}:{global.server_port}/voyager"
+	var prefix = "";
+	if !string_starts_with(global.server_ip, "http://") && !string_starts_with(global.server_ip, "https://") {
+		prefix = "http://"
+	}
+	global.server = $"{prefix}{global.server_ip}:{global.server_port}/voyager"
+	
+	var ip_without_http_prefix;
+	if string_starts_with(global.server_ip, "https://") {
+		ip_without_http_prefix = string_delete(global.server_ip, 1, string_length("https://"))
+	}
+	else if string_starts_with(global.server_ip, "http://") {
+		ip_without_http_prefix = string_delete(global.server_ip, 1, string_length("http://"))
+	}
+	else
+		ip_without_http_prefix = global.server_ip
 	var folder;
 	if global.server_port == 3000
-		folder = string_lettersdigits(global.server_ip);
+		folder = string_lettersdigits(ip_without_http_prefix);
 	else {
-		folder = $"{string_lettersdigits(global.server_ip)}_{global.server_port}";
+		folder = $"{string_lettersdigits(ip_without_http_prefix)}_{global.server_port}";
 	}
-	global.levels_directory = game_save_id + folder + "/levels/"
-	global.packs_directory = game_save_id + folder + "/packs/"
+	global.levels_directory = global.save_directory + folder + "/levels/"
+	global.packs_directory = global.save_directory + folder + "/packs/"
 	if (global.is_merged)
 		agi("scr_menueyecatch")(0)
 	
@@ -65,20 +129,26 @@ function ev_update_vars() {
 
 }
 
-function save_level(lvl)
-{
+function save_level(lvl) {
 	var str = export_level(lvl)
-	var file = file_text_open_write(global.levels_directory + lvl.save_name + "." + level_extension)
+	var location = global.levels_directory + lvl.save_name + "." + level_extension;
+	var file = file_text_open_write(location)
 	if (file == -1)
 		return false;
 	file_text_write_string(file, str)
 	file_text_close(file)
+	if global.need_file_registry {
+		add_to_file_registry(global.file_registry, location)
+	}
 	return true;
 }
 function delete_level(save_name) {
-	file_delete(global.levels_directory + save_name + "." + level_extension)	
+	var location = global.levels_directory + save_name + "." + level_extension
+	file_delete(location)
+	if global.need_file_registry {
+		delete_from_file_registry(global.file_registry, location)
+	}
 }
-
 
 function save_pack(pack) {
 	var str = export_pack(pack)

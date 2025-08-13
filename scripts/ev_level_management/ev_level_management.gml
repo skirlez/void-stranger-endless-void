@@ -284,7 +284,6 @@ function import_process_tiles(tile_string, level, height, failsafe_tile, version
 	}
 }
 
-
 function get_multiplier(str, pointer) {
 	if string_copy(str, pointer, 1) != MULTIPLIER_CHAR
 		return { mult : 1, offset : 0};
@@ -303,6 +302,7 @@ function get_multiplier(str, pointer) {
 	return { mult : num, offset : count };
 }
 
+
 function level_get_exit_count(lvl) {
 	static tile_exit = global.editor.tile_exit;
 	static object_secret_exit = global.editor.object_secret_exit; 
@@ -317,3 +317,14 @@ function level_get_exit_count(lvl) {
 	}
 	return exits;
 }
+function strip_level_for_pack(lvl) {
+	lvl.description = ""
+	lvl.music = ""
+	lvl.author = ""
+	lvl.burdens = [false, false, false, false, false]
+	lvl.upload_date = ""
+	lvl.last_edit_date = ""
+	lvl.save_name = ""
+	lvl.author_brand = 0;	
+}
+

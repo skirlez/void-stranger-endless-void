@@ -2,11 +2,9 @@ if global.is_merged {
 	if (!instance_exists(add_inst)
 			|| array_length(program) == 0)
 		return;
-
 	global.add_current_x = add_inst.x div 16
 	global.add_current_y = add_inst.y div 16
 }
-
 
 
 var result = execute_branefuck(instructions)

@@ -1,11 +1,5 @@
 #macro BRANEFUCK_MEMORY_AMOUNT 230
 
-enum branefuck_operation_status {
-	stay,
-	move,
-	done,
-}
-
 
 function compile_branefuck(program) {
 	var instructions = [];
@@ -18,12 +12,7 @@ function compile_branefuck(program) {
 				var ret = get_bf_multiplier(program, i);
 				ret.mult %= BRANEFUCK_MEMORY_AMOUNT;
 				array_push(instructions, {
-					operation : function (state) {
-						state.pointer -= amount;
-						if (state.pointer < 0)
-							state.pointer += BRANEFUCK_MEMORY_AMOUNT;
-						return branefuck_operation_status.move;
-					},
+					operation : bf_left_operation,
 					amount : ret.mult
 				});
 				i += ret.offset + 1;
@@ -32,12 +21,7 @@ function compile_branefuck(program) {
 				var ret = get_bf_multiplier(program, i);
 				ret.mult %= BRANEFUCK_MEMORY_AMOUNT;
 				array_push(instructions, {
-					operation : function (state) {
-						state.pointer += amount;
-						if (state.pointer >= BRANEFUCK_MEMORY_AMOUNT)
-							state.pointer -= BRANEFUCK_MEMORY_AMOUNT;
-						return branefuck_operation_status.move;
-					},
+					operation : bf_right_operation,
 					amount : ret.mult
 				});
 				i += ret.offset + 1;
@@ -45,10 +29,7 @@ function compile_branefuck(program) {
 			case "+":
 				var ret = get_bf_multiplier(program, i);
 				array_push(instructions, {
-					operation : function (state) {
-						state.memory[@ state.pointer] += amount;
-						return branefuck_operation_status.move;
-					},
+					operation : bf_plus_operation,
 					amount : ret.mult
 				});
 				i += ret.offset + 1;
@@ -56,10 +37,7 @@ function compile_branefuck(program) {
 			case "-":
 				var ret = get_bf_multiplier(program, i);
 				array_push(instructions, {
-					operation : function (state) {
-						state.memory[@ state.pointer] -= amount;
-						return branefuck_operation_status.move;
-					},
+					operation : bf_minus_operation,
 					amount : ret.mult
 				});
 				i += ret.offset + 1;
@@ -112,20 +90,13 @@ function compile_branefuck(program) {
 				break;
 			case ".":
 				array_push(instructions, {
-					operation : function() {
-						return branefuck_operation_status.done;	
-					}
+					operation : bf_out_operation
 				});
 				i++;
 				break;
 			case "?":
 				array_push(instructions, {
-					operation : function(state) {
-						with (state) {
-							memory[@ pointer] = sign(memory[pointer])
-							return branefuck_operation_status.move;
-						}
-					}
+					operation : bf_sign_operation
 				});
 				i++;
 				break;
@@ -144,10 +115,7 @@ function compile_branefuck(program) {
 				
 				if ds_map_exists(global.branefuck_command_functions, func) {
 					array_push(instructions, {
-						operation : function(state) {
-							func(state.memory, state.pointer, state.executer);
-							return branefuck_operation_status.move;
-						},
+						operation : bf_call_operation,
 						func : global.branefuck_command_functions[? func]
 					});
 				}
@@ -158,26 +126,14 @@ function compile_branefuck(program) {
 				break;
 			case "^":
 				array_push(instructions, {
-					operation : function (state) {
-						with (state) {
-							global.branefuck_persistent_memory[@ pointer] = temporary_memory[pointer];
-							memory = global.branefuck_persistent_memory;
-						}
-						return branefuck_operation_status.move;
-					}
+					operation : bf_persistmem_operation
 				});
 				i++;
 				break;
 			case "v":
 			case "V":
 				array_push(instructions, {
-					operation : function (state) {
-						with (state) {
-							temporary_memory[@ pointer] = global.branefuck_persistent_memory[pointer];
-							memory = temporary_memory;
-						}
-						return branefuck_operation_status.move;
-					}
+					operation : bf_tempmem_operation
 				});
 				i++;
 				break;
@@ -194,12 +150,7 @@ function compile_branefuck(program) {
 						return missing_input_error + string(i);
 				}
 				array_push(instructions, {
-					operation : function (state) {
-						with (state) {
-							memory[@ pointer] = evaluate_expression(other.expression, temporary_memory, executer);
-						}
-						return branefuck_operation_status.move;
-					},
+					operation : bf_input_operation,
 					expression : expression
 				});
 				i++;
@@ -249,35 +200,33 @@ function execute_branefuck(instructions) {
 		instruction_pointer : 0,
 		executer : id,
 	}
-	var count = 0;
-	while (state.instruction_pointer < array_length(instructions)) {
-		count++;
-		if count > 50000 {
-			return { 
-				status: branefuck_execution_status.error,
-				summary : "BF code ran for too long!",
-				log : "BF code ran for too long!",
-			};
-		}
-		try {
-			with (instructions[state.instruction_pointer]) {
-				var status = operation(state);
-				if status == branefuck_operation_status.move
-					state.instruction_pointer++;
-				else if status == branefuck_operation_status.done
-					return state.memory[state.pointer];
+	with (state) {
+		var count = 0;
+		while (instruction_pointer < array_length(instructions)) {
+			count++;
+			if count > 100000 {
+				return { 
+					status: branefuck_execution_status.error,
+					summary : "BF code ran for too long!",
+					log : "BF code ran for too long!",
+				};
 			}
-		}
-		catch (e) {
-			return { 
-				status: branefuck_execution_status.error,
-				summary : "BF execution error!",
-				log : "Branefuck execution error: " + e
-			};
+			try {
+				var func = instructions[instruction_pointer].operation
+				func(instructions[instruction_pointer]);
+				instruction_pointer++;
+			}
+			catch (e) {
+				return { 
+					status: branefuck_execution_status.error,
+					summary : "BF execution error!",
+					log : "Branefuck execution error: " + string(e)
+				};
+			}
 		}
 	}
 	return { 
-		status: branefuck_execution_status.ok,
+		status : branefuck_execution_status.ok,
 		value : state.memory[state.pointer] 
 	};
 }
@@ -378,7 +327,7 @@ function get_bf_multiplier(program, i) {
 }
 
 
-
+/*
 function execute_branefuck_im_old(program, error_value) {
 	static temporary_memory = array_create(BRANEFUCK_MEMORY_AMOUNT)
 	for (var i = 0; i < BRANEFUCK_MEMORY_AMOUNT; i++)

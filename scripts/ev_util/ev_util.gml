@@ -36,11 +36,25 @@ function copy_array(arr) {
 
 
 function get_all_files(dir, ext) {
+	if global.need_file_registry {
+		if !variable_struct_exists(global.file_registry, dir)
+			return [];
+		var folder = global.file_registry[$ dir]
+		var names = variable_struct_get_names(folder);
+		var files = [];
+		for (var i = 0; i < array_length(names); i++) {
+			if string_ends_with(names[i], ext) {
+				var filename = string_replace(names[i], "." + ext, "");
+				array_push(files, filename)
+			}
+		}
+		return files;
+	}
 	var files = [];
-	var file_name = string_replace(file_find_first(dir + "*." + ext, 0), "." + ext, "");
-	while (file_name != "") {
-		array_push(files, file_name);
-		file_name = string_replace(file_find_next(),  "." + ext, "");
+	var filename = string_replace(file_find_first(dir + "*." + ext, 0), "." + ext, "");
+	while (filename != "") {
+		array_push(files, filename);
+		filename = string_replace(file_find_next(),  "." + ext, "");
 	}
 	file_find_close(); 
 	return files;
