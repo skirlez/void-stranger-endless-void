@@ -7,6 +7,15 @@ play.display_instance = display_instance
 play.highlighter = id;
 play.image_alpha = 0
 
+
+
+var play_t = instance_create_layer(8, room_height - 8, "LevelHighlightButtons", agi("obj_ev_play_pack_button"))
+play_t.layer_num = 1
+play_t.nodeless_pack = nodeless_pack
+play_t.display_instance = display_instance
+play_t.highlighter = id;
+play_t.tis = true;
+
 var copy = instance_create_layer(192, 40, "LevelHighlightButtons", agi("obj_ev_executing_button"), {
 	layer_num : 1,
 	nodeless_pack : nodeless_pack,

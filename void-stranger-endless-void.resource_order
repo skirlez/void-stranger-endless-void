@@ -273,6 +273,7 @@
     {"name":"obj_ev_main_menu_button","order":10,"path":"objects/obj_ev_main_menu_button/obj_ev_main_menu_button.yy",},
     {"name":"obj_ev_tool","order":3,"path":"objects/obj_ev_tool/obj_ev_tool.yy",},
     {"name":"msc_beecircle","order":2,"path":"sounds/msc_beecircle/msc_beecircle.yy",},
+    {"name":"ev_reset_editor_variables","order":48,"path":"scripts/ev_reset_editor_variables/ev_reset_editor_variables.yy",},
     {"name":"spr_ev_orb_thing_up","order":3,"path":"sprites/spr_ev_orb_thing_up/spr_ev_orb_thing_up.yy",},
     {"name":"spr_ev_orb_thing_right","order":2,"path":"sprites/spr_ev_orb_thing_right/spr_ev_orb_thing_right.yy",},
     {"name":"spr_floor_white","order":16,"path":"sprites/spr_floor_white/spr_floor_white.yy",},

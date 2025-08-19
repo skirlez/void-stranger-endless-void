@@ -179,30 +179,30 @@ function draw() {
 		}
 	
 		else if global.selected_thing == thing_placeable 
-				&& held_tile_state.tile != global.editor.object_empty {
+				&& global.held_tile_state.tile != global.editor.object_empty {
 			var alpha = ((dsin(global.editor_time * 3) / 4) + 0.75);
 		
-			if held_tile_state.tile.has_offset() {
+			if global.held_tile_state.tile.has_offset() {
 				draw_set_alpha(alpha / 2)
-				draw_tile_state(tile_i, tile_j, held_tile_state, true)
+				draw_tile_state(tile_i, tile_j, global.held_tile_state, true)
 				draw_set_alpha(alpha)
 				draw_tile_state(
-					tile_i + held_tile_state.properties.ofy,
-					tile_j + held_tile_state.properties.ofx,
-					held_tile_state, true)
+					tile_i + global.held_tile_state.properties.ofy,
+					tile_j + global.held_tile_state.properties.ofx,
+					global.held_tile_state, true)
 			}
 			else {
 				draw_set_alpha(alpha)
-				draw_tile_state(tile_i, tile_j, held_tile_state, true)
+				draw_tile_state(tile_i, tile_j, global.held_tile_state, true)
 			}
 		
 			draw_set_alpha(1)
 		}
 		else if global.selected_thing == thing_multiplaceable {
 			draw_set_alpha((dsin(global.editor_time * 3) / 4) + 0.75)
-			for (var i = 0; i < array_length(held_tile_array); i++) {
-				for (var j = 0; j < array_length(held_tile_array[i]); j++) {
-					var tile_state = held_tile_array[i][j]
+			for (var i = 0; i < array_length(global.held_tile_array); i++) {
+				for (var j = 0; j < array_length(global.held_tile_array[i]); j++) {
+					var tile_state = global.held_tile_array[i][j]
 					if (tile_state.tile == global.editor.current_empty_tile)
 						continue;
 					var new_tile_i = tile_i + i;

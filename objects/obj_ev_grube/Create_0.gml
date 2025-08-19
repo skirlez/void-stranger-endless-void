@@ -39,6 +39,7 @@ physics_fixture_set_angular_damping(fix, 0.1);
 physics_fixture_set_linear_damping(fix, 0.1);
 physics_fixture_set_friction(fix, 0.2);
 
+
 switch (type) {
 	case ev_grube_types.level_cube:
 		if array_length(global.online_levels) > 0 {
@@ -56,7 +57,7 @@ switch (type) {
 	case ev_grube_types.player_cube:
 		touched_enemy_cube = false;
 		hit_sprite = noone;
-		var stranger = choose(0, 0, 0, irandom_range(1, 2));
+		var stranger = choose(0, 0, 0, 0, irandom_range(1, 2));
 		switch (stranger) {
 			case 0:
 				sprite_index = agi("spr_player_down");
@@ -73,11 +74,16 @@ switch (type) {
 		}
 		break;
 	case ev_grube_types.enemy_cube:
-		sprite_index = agi("spr_cl_right")
-		fall_sprite = agi("spr_cl_falling");
+	
+		var sprites = ["spr_cl_right", "spr_cc_down", "spr_ch", "spr_cg_idle"]
+		var fall_sprites = ["spr_cl_falling", "spr_cc_falling", "spr_ch_falling", "spr_cg_falling"]
+		var ind = irandom_range(0, array_length(sprites) - 1)
+		sprite_index = agi(sprites[ind])
+		fall_sprite = agi(fall_sprites[ind])
 		break;
 	case ev_grube_types.egg_cube:
-		sprite_index = global.editor.object_egg.spr_ind
+		sprite_index = choose(agi("spr_boulder"), agi("spr_boulder"),  agi("spr_boulder"),
+			agi("spr_smiler"), agi("spr_lamp"), agi("spr_ev_ninnie"));
 		cube_size *= 1.5;
 		image_xscale *= 1.5;
 		image_yscale *= 1.5;
@@ -88,5 +94,3 @@ switch (type) {
 phy_active = true;
 physics_fixture_bind(fix, id);
 
-
-leech_sprite = global.editor.object_leech.spr_ind;

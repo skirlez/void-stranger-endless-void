@@ -159,3 +159,10 @@ function remove_connections_to_node(target) {
 	}
 	return list;
 }
+
+function create_pack_parameters(burdens = [false, false, false, false, false],
+		locust_count = 0, 
+		tis = false, 
+		node_id = -1) {
+	return { burdens : burdens, locust_count : locust_count, tis : tis, node_id : node_id }	
+}

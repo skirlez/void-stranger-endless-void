@@ -1,7 +1,7 @@
 switch (display_context) {
 	case display_contexts.level_editor:
 		if (ev_is_mouse_on_me()) {
-	
+
 			var tile_j = floor((mouse_x - x) / (16 * image_xscale))
 			var tile_i = floor((mouse_y - y) / (16 * image_yscale))
 	
@@ -34,8 +34,8 @@ switch (display_context) {
 
 			if (!dragging && mouse_check_button_pressed(mb_right)
 					&& !(global.selected_thing == thing_placeable 
-						&& held_tile_state != noone 
-						&& held_tile_state.tile.flags & tile_flags.only_one)
+						&& global.held_tile_state != noone 
+						&& global.held_tile_state.tile.flags & tile_flags.only_one)
 					&& global.selected_thing != thing_multiplaceable)
 					&& global.selected_thing != thing_nothing {
 				dragging = true
@@ -120,11 +120,11 @@ switch (display_context) {
 	
 			if global.selected_thing == thing_placeable 
 				&& ev_is_action_pressed()
-				&& held_tile_state.tile.zed_function != noone 
+				&& global.held_tile_state.tile.zed_function != noone 
 				&& !ctrl_held
 			{
 				audio_play_sound(zed_sound, 10, false)
-				held_tile_state.tile.zed_function(held_tile_state)
+				global.held_tile_state.tile.zed_function(global.held_tile_state)
 			}
 	
 			last_i = tile_i;

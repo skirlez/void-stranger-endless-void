@@ -64,6 +64,7 @@ if global.erasing != -1 {
 		var retain_save_name = global.level.save_name
 		ev_stop_music()
 		reset_global_level()
+		reset_editor_variables()
 		ev_claim_level(global.level)
 		global.level.save_name = retain_save_name
 		audio_play_sound(global.goes_sound, 10, false)	
@@ -273,7 +274,6 @@ else if ev_is_room_gameplay(room) {
 				break;
 		}
 	}
-	// I really don't want to mess with this... But this should *probably* go in the editor object...
 	var current_deaths = 0
 	current_deaths += ds_list_find_value(agi("obj_inventory").ds_rcrds, 5)
 	current_deaths += ds_list_find_value(agi("obj_inventory").ds_rcrds, 6)

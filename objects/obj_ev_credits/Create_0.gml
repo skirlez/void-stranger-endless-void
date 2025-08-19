@@ -15,7 +15,9 @@ grube_button = instance_create_layer(200, camera_y + 30, "WindowElements", agi("
 		if count < 5
 			type = ev_grube_types.player_cube;
 		else
-			type = choose(ev_grube_types.player_cube, irandom_range(0, ev_grube_types.size - 1));
+			type = choose(ev_grube_types.player_cube, 
+						ev_grube_types.player_cube,
+						irandom_range(1, ev_grube_types.size - 1));
 		var grube = instance_create_layer(200 + irandom_range(-20, 20), y + 42, "Grube", grube_obj, {
 			type : type
 		})
@@ -23,6 +25,8 @@ grube_button = instance_create_layer(200, camera_y + 30, "WindowElements", agi("
 		array_push(window.grubes, grube)
 		count++;
 		if count == 5 {
+			// in case we get a level cube lol
+			global.tile_mode = false;
 			with (window) {
 				grube_mode = true;
 				remove_child(scroll_button_up)

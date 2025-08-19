@@ -60,6 +60,8 @@ if (global.mouse_layer == 0 || selected_thing == pack_things.wrench) {
 		else if version != 0 {
 			var level = import_level(str);
 			strip_level_for_pack(level);
+			var level_nodes = get_all_level_node_instances()
+			try_level_name_and_rename(level, level_nodes)
 			var level_node_state = new node_with_state(global.pack_editor.level_node, 
 				mouse_x - global.level_node_display_scale * 224 / 2, 
 				mouse_y - global.level_node_display_scale * 144 / 2, 
@@ -100,12 +102,10 @@ if play_transition_time != -1 {
 		global.mouse_layer = 0;
 		global.playtesting = true;
 		global.pack.starting_node_states = convert_room_nodes_to_structs() 
-		
 		with (agi("obj_ev_pack_editor_play_button")) {
-			global.pack_playtest_parameters = get_playtest_parameters();
+			global.pack_parameters = get_playtest_parameters();
 		}
-		global.pack_playtest_parameters.node_id = play_transition_target.node_id;
-		
+		global.pack_parameters.node_id = play_transition_target.node_id
 		room_goto(global.pack_level_room)
 		play_transition_time = -1;
 	}

@@ -309,6 +309,7 @@
     {"id":{"name":"obj_ev_main_menu_button","path":"objects/obj_ev_main_menu_button/obj_ev_main_menu_button.yy",},},
     {"id":{"name":"obj_ev_tool","path":"objects/obj_ev_tool/obj_ev_tool.yy",},},
     {"id":{"name":"msc_beecircle","path":"sounds/msc_beecircle/msc_beecircle.yy",},},
+    {"id":{"name":"ev_reset_editor_variables","path":"scripts/ev_reset_editor_variables/ev_reset_editor_variables.yy",},},
     {"id":{"name":"spr_ev_orb_thing_up","path":"sprites/spr_ev_orb_thing_up/spr_ev_orb_thing_up.yy",},},
     {"id":{"name":"spr_ev_orb_thing_right","path":"sprites/spr_ev_orb_thing_right/spr_ev_orb_thing_right.yy",},},
     {"id":{"name":"spr_floor_white","path":"sprites/spr_floor_white/spr_floor_white.yy",},},

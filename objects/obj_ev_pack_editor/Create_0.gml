@@ -303,7 +303,8 @@ music_node.on_config = function (node_instance) {
 	});
 }
 music_node.play_evaluate_immediate = function (node_state) {
-	ev_play_music(agi(node_state.properties.music), true, false)
+	if !global.pack_parameters.tis
+		ev_play_music(agi(node_state.properties.music), true, false)
 	return first_or_error(node_state.exits);
 }
 
@@ -467,4 +468,3 @@ undo_repeat_frames_speed = 0
 undo_repeat_frames_max_speed = 10
 
 in_pack_editor = false;
-

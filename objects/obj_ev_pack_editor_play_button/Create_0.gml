@@ -16,7 +16,7 @@ function get_playtest_parameters() {
 	for (var i = 0; i < array_length(chudlings); i++) {
 		burdens[i] = chudlings[i].image_index	
 	}
-	return { burdens : burdens, locust_count : 0 }	
+	return create_pack_parameters(burdens, 0, false, -1)	
 }
 
 function update_chudlings_position() {

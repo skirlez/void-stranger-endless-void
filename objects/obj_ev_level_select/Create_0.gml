@@ -28,8 +28,10 @@ if mode != level_selector_modes.selecting_level_for_pack {
 			txt : "NEW",
 			func : function () {
 				global.editor.reset_global_level();
+				global.editor.reset_editor_variables();
 				ev_claim_level(global.level)
-				room_goto(agi("rm_ev_editor"))	
+				room_goto(agi("rm_ev_editor"))
+				
 			}
 		});
 	}

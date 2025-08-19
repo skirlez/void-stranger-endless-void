@@ -11,22 +11,23 @@ dragging = false
 
 painting = false;
 
-held_tile_state = new tile_with_state(global.editor.object_empty)
-place_sound = agi("snd_ev_place")
-drag_sound = agi("snd_ev_drag")
-erase_sound = agi("snd_ev_erase")
-zed_sound = agi("snd_ev_zed")
-pluck_sound = agi("snd_ev_pluck")
-pick_sound = agi("snd_ev_pick")
+if display_context == display_contexts.level_editor {
 
+	place_sound = agi("snd_ev_place")
+	drag_sound = agi("snd_ev_drag")
+	erase_sound = agi("snd_ev_erase")
+	zed_sound = agi("snd_ev_zed")
+	pluck_sound = agi("snd_ev_pluck")
+	pick_sound = agi("snd_ev_pick")
+
+}
 
 function switch_held_tile(tile_state) {
-	held_tile_state = tile_state
+	global.held_tile_state = tile_state
 	global.selected_thing_time = 0
 }
 
-held_tile_array = []
-held_tile_offset = [0, 0]
+
 
 
 function place_placeable(tile_i, tile_j, new_tile, properties = global.empty_struct, run_place_func = true) {
@@ -65,12 +66,12 @@ function handle_click_before(tile_i, tile_j) {
 			if dragging {
 				var height = tile_i - small_tile_i + 1;
 				var width = tile_j - small_tile_j + 1;
-				held_tile_offset = [small_tile_i, small_tile_j]
-				held_tile_array = array_create(height)
+				global.held_tile_offset = [small_tile_i, small_tile_j]
+				global.held_tile_array = array_create(height)
 				
 				
-				for (var i = 0; i < array_length(held_tile_array); i++) {
-					held_tile_array[i] = array_create(width, new tile_with_state(global.editor.current_empty_tile))	
+				for (var i = 0; i < array_length(global.held_tile_array); i++) {
+					global.held_tile_array[i] = array_create(width, new tile_with_state(global.editor.current_empty_tile))	
 				}
 			}
 			return;
@@ -80,7 +81,7 @@ function handle_click_before(tile_i, tile_j) {
 			return;
 
 		case thing_placeable:
-			if tile_state.tile != held_tile_state.tile || dragging {
+			if tile_state.tile != global.held_tile_state.tile || dragging {
 				audio_stop_sound(place_sound)
 				audio_play_sound(place_sound, 10, false, 1, 0, random_range(0.8, 1.2))	
 			}
@@ -107,9 +108,9 @@ function handle_click(tile_i, tile_j) {
 			if dragging {
 				var tile_state = global.editor.current_placeables[tile_i][tile_j];
 				if !(tile_state.tile.flags & tile_flags.unplaceable) {
-					var local_tile_i = tile_i - held_tile_offset[0]
-					var local_tile_j = tile_j - held_tile_offset[1]
-					held_tile_array[local_tile_i][local_tile_j] = tile_state
+					var local_tile_i = tile_i - global.held_tile_offset[0]
+					var local_tile_j = tile_j - global.held_tile_offset[1]
+					global.held_tile_array[local_tile_i][local_tile_j] = tile_state
 					if (global.selected_thing == thing_plucker)
 						place_placeable(tile_i, tile_j, global.editor.current_empty_tile)
 				}
@@ -151,14 +152,14 @@ function handle_click(tile_i, tile_j) {
 			place_placeable(tile_i, tile_j, global.editor.current_empty_tile)
 			return;
 		case thing_placeable:
-			if (held_tile_state == global.editor.object_empty)
+			if (global.held_tile_state == global.editor.object_empty)
 				return;
-			place_placeable(tile_i, tile_j, held_tile_state.tile, struct_copy(held_tile_state.properties))
+			place_placeable(tile_i, tile_j, global.held_tile_state.tile, struct_copy(global.held_tile_state.properties))
 			return;
 		case thing_multiplaceable:
-			for (var i = 0; i < array_length(held_tile_array); i++) {
-				for (var j = 0; j < array_length(held_tile_array[i]); j++) {
-					var tile_state = held_tile_array[i][j]
+			for (var i = 0; i < array_length(global.held_tile_array); i++) {
+				for (var j = 0; j < array_length(global.held_tile_array[i]); j++) {
+					var tile_state = global.held_tile_array[i][j]
 					if (tile_state.tile == global.editor.current_empty_tile)
 						continue;
 					var new_tile_i = tile_i + i;
@@ -188,10 +189,10 @@ function handle_click_after(tile_i, tile_j) {
 				return;
 			var initial_empty_in_row = 14
 			var empty_row = true
-			for (var i = 0; i < array_length(held_tile_array); i++) {
+			for (var i = 0; i < array_length(global.held_tile_array); i++) {
 				
-				for (var j = 0; j < array_length(held_tile_array[i]); j++) {
-					var tile_state = held_tile_array[i][j]
+				for (var j = 0; j < array_length(global.held_tile_array[i]); j++) {
+					var tile_state = global.held_tile_array[i][j]
 					var is_empty = (tile_state.tile == global.editor.current_empty_tile)
 					if !is_empty {
 						empty_row = false;
@@ -200,17 +201,17 @@ function handle_click_after(tile_i, tile_j) {
 				}
 				
 				if empty_row {
-					array_delete(held_tile_array, i, 1)
+					array_delete(global.held_tile_array, i, 1)
 					i--;	
 				}
 			}
 				
-			if (array_length(held_tile_array) == 0)
+			if (array_length(global.held_tile_array) == 0)
 				return;
 				
 			if initial_empty_in_row != 0 {
-				for (var i = 0; i < array_length(held_tile_array); i++) {
-					array_delete(held_tile_array[i], 0, initial_empty_in_row)
+				for (var i = 0; i < array_length(global.held_tile_array); i++) {
+					array_delete(global.held_tile_array[i], 0, initial_empty_in_row)
 				}	
 			}
 				
@@ -229,8 +230,6 @@ scale_x_start = image_xscale
 scale_y_start = image_yscale
 
 base_ui = agi("spr_ev_base_ui")
-
-ind = 0
 
 voidrod_sprite = agi("spr_voidrod_icon")
 stackrod_sprite = agi("spr_voidrod_icon2")
@@ -254,7 +253,6 @@ cached_author_brand = lvl.author_brand;
 highlighted = false
 
 outside_view = false;
-mouse_moving = false;
 
 function destroy() {
 	var gain = (room == global.pack_editor_room) ? global.pack_zoom_gain : 1

@@ -79,11 +79,10 @@ function on_room_create() {
 	}
 	if current_node_state == noone {
 		log_info("Choosing starting node")
-		if global.playtesting {
-			ev_prepare_level_burdens(global.pack_playtest_parameters.burdens);
-			ds_grid_set(agi("obj_inventory").ds_player_info, 1, 1, global.pack_playtest_parameters.locust_count)
-			
-			var node_id = global.pack_playtest_parameters.node_id;
+		ev_prepare_level_burdens(global.pack_parameters.burdens);
+		ds_grid_set(agi("obj_inventory").ds_player_info, 1, 1, global.pack_parameters.locust_count)
+		if global.pack_parameters.node_id != -1 {
+			var node_id = global.pack_parameters.node_id;
 			var node_states = ds_map_keys_to_array_fix(global.pack_editor.node_state_to_id_map);
 			for (var i = 0; i < array_length(node_states); i++) {
 				if (ds_map_find_value(global.pack_editor.node_state_to_id_map, node_states[i]) == node_id) {
@@ -105,6 +104,19 @@ function on_room_create() {
 			}
 			move_to_node_state(first_state)
 		}
+		
+		if global.pack_parameters.tis {
+			ev_play_music(agi("msc_stg_extraboss"), true, false)
+			global.cc_state = 1
+	        global.cc_medalstate = 1
+	        global.cc_score = 0
+	        global.cc_multiplier = 1
+	        global.cc_chain = 10
+	        global.cc_cat = "ABCDEFGHI"
+	        global.cc_catscore = 1280
+	        global.cc_music_state = 0	
+		}
+		
 	}
 	else {
 		current_node_state.node.play_evaluate(current_node_state);

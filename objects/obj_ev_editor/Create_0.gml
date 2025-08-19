@@ -78,6 +78,7 @@ function clean_struct_maps() {
 alarm[0] = 120;
 
 
+
 window_set_cursor(cr_default)
 
 // global.level is used for the level currently being edited / played.
@@ -1481,27 +1482,33 @@ objects_list = [object_player, object_leech, object_maggot, object_bull, object_
 
 #endregion
 
+
+// Tile holding in editor
+global.held_tile_state = new tile_with_state(global.editor.object_empty)
+// 2D array 
+global.held_tile_array = []
+global.held_tile_offset = [0, 0]
+
 global.music_names = ["", "msc_001", "msc_dungeon_wings", "msc_beecircle", "msc_dungeongroove", "msc_013",
 	"msc_gorcircle_lo", "msc_levcircle", "msc_escapewithfriend", "msc_cifcircle", "msc_006", "msc_beesong", "msc_themeofcif",
 	"msc_monstrail", "msc_endless", "msc_stg_extraboss", "msc_rytmi2", "msc_test2", "msc_voidpiano", "msc_finalapproach", "msc_universe",
 	"snd_ev_music_judgment_jingle"]
 
 function reset_global_level() {
-	global.tile_mode = false
-	global.mouse_layer = 0
-	global.selected_thing = -1 
-	global.selected_placeable_num = 0
-	
 	global.level = new level_struct()
-
 	place_default_tiles(global.level)
-	
+}
+reset_global_level()
+function reset_editor_variables() {
+	global.selected_thing = -1;
+	global.tile_mode = false
+	global.selected_thing = -1 
+	global.selected_placeable_num = -1
 	current_list = objects_list;
 	current_placeables = global.level.objects
 	current_empty_tile = object_empty
 }
-reset_global_level()
-
+reset_editor_variables()
 
 
 
@@ -1639,7 +1646,7 @@ function play_level_transition(lvl, lvl_sha, display_instance) {
 
 play_pack_transition_time = -1
 max_play_pack_transition = 250
-function play_pack_transition(nodeless_pack, display_instance) {
+function play_pack_transition(nodeless_pack, display_instance, tis) {
 	var pack_string = read_pack_string_from_file(nodeless_pack.save_name)
 	global.pack = import_pack(pack_string)
 	global.pack.save_name = nodeless_pack.save_name;
@@ -1842,3 +1849,5 @@ function get_universe_instance() {
 		return noone;
 	return universe_instance;
 }
+
+
