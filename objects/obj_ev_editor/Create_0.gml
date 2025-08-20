@@ -8,11 +8,9 @@ global.is_html5 = (os_browser != browser_not_a_browser)
 
 surface_depth_disable(false)
 global.latest_lvl_format = 3;
-global.latest_pack_format = 1;
+global.latest_pack_format = 2;
 global.ev_version = "0.99";
 global.ev_fall_down_next_level = false;
-
-
 
 if global.is_html5 {
 	http_set_request_crossorigin("use-credentials");	
@@ -37,6 +35,7 @@ if (!global.is_merged) {
 #macro pack_extension "vspk"
 #macro pack_password_extension "vspkp"
 #macro pack_save_extension "vspks"
+#macro pack_highscore_extension "vspkh"
 
 global.save_directory = game_save_id
 if global.is_html5
@@ -78,6 +77,18 @@ function clean_struct_maps() {
 alarm[0] = 120;
 
 
+// we can't really get unix time in milliseconds in gamemaker, so we just add current_time to this
+date_set_timezone(timezone_utc)
+try {
+	var unix_seconds = int64(date_second_span(date_create_datetime(1970, 1, 1, 0, 0, 0), date_current_datetime()));
+	global.unix_time = unix_seconds * int64(1000);
+}
+catch (e) {
+	// very unnecessary futureproofing. i have no idea if this'll work, and no doubt nobody will be executing this when this
+	// theoretically would be executed
+	global.unix_time = int64(random_range(0, 70368744177664))	// 2^46
+}
+date_set_timezone(timezone_local)
 
 window_set_cursor(cr_default)
 
@@ -1649,7 +1660,8 @@ max_play_pack_transition = 250
 function play_pack_transition(nodeless_pack, display_instance, tis) {
 	var pack_string = read_pack_string_from_file(nodeless_pack.save_name)
 	global.pack = import_pack(pack_string)
-	global.pack.save_name = nodeless_pack.save_name;
+	if global.pack.version == 1
+		global.pack.save_name = nodeless_pack.save_name;
 	ev_stop_music();
 	global.mouse_layer = -1
 	display_instance.destroy();

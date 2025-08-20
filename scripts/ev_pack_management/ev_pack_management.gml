@@ -14,7 +14,7 @@ function pack_struct() constructor {
 	starting_node_states = []
 	
 	// This name will be used for when the file is saved
-	save_name = generate_save_name()
+	save_name = generate_ulid()
 }
 
 function place_pack_into_room(pack) {
@@ -97,8 +97,11 @@ function convert_room_nodes_to_structs() {
 
 function import_pack_nodeless(pack_string) {
 	var pack = new pack_struct();
-	var arr = ev_string_split_stop(pack_string, "&", 8)
+	var arr = ev_string_split_stop(pack_string, "&", 9)
 	pack.version = int64_safe(arr[0], 1);
+	if (pack.version == 1) {
+		array_insert(arr, 8, generate_ulid())	
+	}
 	pack.name = base64_decode(arr[1])
 	pack.description = base64_decode(arr[2])
 	pack.author = base64_decode(arr[3])
@@ -106,6 +109,7 @@ function import_pack_nodeless(pack_string) {
 	pack.upload_date = arr[5]
 	pack.last_edit_date = arr[6];
 	pack.password_brand = int64_safe(base64_decode(arr[7]), 0);
+	pack.save_name = arr[8];
 	return pack;
 }
 
@@ -142,6 +146,10 @@ function import_pack(pack_string) {
 	
 	var arr = ev_string_split_buffer(pack_string, "&", string_length(pack_string))
 	pack.version = int64_safe(arr[0], 1);
+	if (pack.version == 1) {
+		array_insert(arr, 8, generate_ulid())	
+	}
+	
 	pack.name = base64_decode(arr[1])
 	pack.description = base64_decode(arr[2])
 	pack.author = base64_decode(arr[3])
@@ -149,7 +157,8 @@ function import_pack(pack_string) {
 	pack.upload_date = arr[5]
 	pack.last_edit_date = arr[6];
 	pack.password_brand = int64_safe(base64_decode(arr[7]), 0);
-	var node_string = arr[8];
+	pack.save_name = arr[8];
+	var node_string = arr[9];
 	
 	var all_node_states = [];
 	
@@ -282,6 +291,7 @@ function export_pack_arr(pack) {
 	var upload_date_string = "";
 	var last_edit_date_string = "";
 	var password_brand_string = base64_encode(string(pack.password_brand))
+	var ulid_string = pack.save_name;
 	var node_string = ""
 	
 	
@@ -317,7 +327,7 @@ function export_pack_arr(pack) {
 	
 	return [version_string, name_string, description_string, author_string, 
 			author_brand_string, upload_date_string, last_edit_date_string, 
-			password_brand_string, node_string]
+			password_brand_string, ulid_string, node_string]
 	
 }
 

@@ -18,7 +18,6 @@ if (room == global.pack_editor_room) {
 	place_pack_into_room(global.pack)
 	ds_map_clear(node_state_to_id_map)
 	selected_thing = pack_things.nothing
-	ev_switch_to_user_palette()
 	
 	// exit creates this when you use it and it does persist so we Kill It
 	if global.is_merged

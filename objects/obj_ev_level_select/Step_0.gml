@@ -12,7 +12,7 @@ if keyboard_check(vk_control) && keyboard_check_pressed(ord("V")) && !global.onl
 		}
 	
 		try {
-			var file = file_text_open_write(global.levels_directory + generate_save_name() + "." + level_extension)
+			var file = file_text_open_write(global.levels_directory + generate_ulid() + "." + level_extension)
 			file_text_write_string(file, str);
 			file_text_close(file)
 			ev_notify("Level pasted!")
@@ -34,19 +34,47 @@ if keyboard_check(vk_control) && keyboard_check_pressed(ord("V")) && !global.onl
 			ev_notify("Unsupported pack version! Update EV!")
 			exit;
 		}
-	
-		try {
-			var file = file_text_open_write(global.packs_directory + generate_save_name() + "." + pack_extension)
-			file_text_write_string(file, str);
-			file_text_close(file)
-			ev_notify("Pack pasted!")
-		}
-		catch (e) {
+		
+		if version == 1 {
 			ev_notify("Couldn't paste pack!")
-			log_error(e)
+			exit;
 		}
-
-
+		else {
+			var pack = import_pack(str);
+			if file_exists(global.packs_directory + pack.save_name + "." + pack_extension) {
+				var old_pack_string;
+				try {
+					var file = file_text_open_read(global.packs_directory + pack.save_name + "." + pack_extension)
+					old_pack_string = file_text_read_string(file)
+					file_text_close(file)
+				}
+				catch (e) {
+					ev_notify("Couldn't paste pack!")
+					exit;
+				}
+					
+				global.mouse_layer++;
+				new_window(11, 8, agi("obj_ev_update_pack_window"), {
+					layer_num : global.mouse_layer,
+					old_pack : import_pack(old_pack_string),
+					new_pack : pack,
+					old_pack_string : old_pack_string,
+					new_pack_string : str,
+					level_select : id,
+				})
+			}
+			else {
+				try {
+					var file = file_text_open_write(global.packs_directory + pack.save_name + "." + pack_extension)
+					file_text_write_string(file, str);
+					file_text_close(file)
+					ev_notify("Pack pasted!")
+				}
+				catch (e) {
+					ev_notify("Couldn't paste pack!")
+				}
+			}
+		}
 		on_level_update();
 	}
 }

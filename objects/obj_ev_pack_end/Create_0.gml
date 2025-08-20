@@ -21,8 +21,6 @@ var seconds = num_to_string((total_play_time div 1000) % 60, 2)
 var minutes = num_to_string((total_play_time div 60000) % 60, 2)
 var hours = num_to_string(total_play_time div 3600000, 2)
 
-stat_texts_x = [-200, 424, -200, 424, -200]
-stat_values_y = [200, 200, 200, 200, 200]
 stat_texts = [
 	"Deaths",
 	"Time spent",
@@ -36,6 +34,18 @@ stat_values = [
 	string(pack_player.total_locusts_collected),
 	string(ds_map_size(pack_player.visited_levels))
 ]
+
+stat_texts_x = array_create(array_length(stat_values))
+for (var i = 0; i < array_length(stat_values); i++) {
+	var alt;
+	if i % 2 == 0
+		alt = -200;
+	else
+		alt = 424;
+	stat_texts_x[i] = alt;
+
+}
+stat_values_y = array_create(array_length(stat_values), 200)
 
 stats_level = -1
 stats_delay = 25

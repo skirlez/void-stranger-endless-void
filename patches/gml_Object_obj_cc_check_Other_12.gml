@@ -6,7 +6,7 @@ if (false)
 
 // TARGET: LINENUMBER_REPLACE
 // 7
-var ibrane = global.tis_challenge_levels_cleared;
+var ibrane = ds_map_size(obj_ev_pack_player.visited_levels);
 
 // TARGET: LINENUMBER_REPLACE
 // 5
@@ -14,4 +14,4 @@ if (true)
 
 // TARGET: LINENUMBER_REPLACE
 // 3
-var ibrane = global.tis_challenge_levels_cleared;
+var ibrane = ds_map_size(obj_ev_pack_player.visited_levels);

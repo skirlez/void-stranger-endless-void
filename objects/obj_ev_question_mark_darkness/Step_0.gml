@@ -16,6 +16,7 @@ if state == 0 {
 
 		global.pack = pack;
 		global.mouse_layer--;
+		global.pack_parameters = create_pack_parameters()
 		room_goto(global.pack_level_room)
 		
 		state = 1	

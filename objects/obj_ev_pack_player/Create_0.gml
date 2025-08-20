@@ -49,7 +49,7 @@ function move_to_node_state(state) {
 	else if potential_next_state == node_return_status.not_immediate {
 		if current_node_state.node == global.pack_editor.level_node {
 			ds_map_set(visited_levels, current_node_state.properties.level.name, 1)
-			if !global.playtesting && !is_first_level
+			if !global.playtesting && !is_first_level && !global.pack_parameters.tis
 				save_pack_progress(current_node_state.properties.level.name)
 		}
 
@@ -77,7 +77,14 @@ function on_room_create() {
 		}
 		log_info($"We have {array_length(brand_node_states)} brand nodes")
 	}
+
+	
 	if current_node_state == noone {
+		if global.pack_parameters.tis {
+			ev_play_music(agi("msc_stg_extraboss"), true, false)
+			ev_set_tis_up()
+		}
+		
 		log_info("Choosing starting node")
 		ev_prepare_level_burdens(global.pack_parameters.burdens);
 		ds_grid_set(agi("obj_inventory").ds_player_info, 1, 1, global.pack_parameters.locust_count)
@@ -93,7 +100,11 @@ function on_room_create() {
 		}
 		else {
 			var first_state = noone;
-			var save = load_pack_progress(global.pack);
+			var save;
+			if global.pack_parameters.tis
+				save = noone;
+			else
+				save = load_pack_progress(global.pack.save_name);
 			if save == noone {
 				log_info("No save, choosing root")
 				first_state = global.pack.starting_node_states[0];
@@ -104,26 +115,10 @@ function on_room_create() {
 			}
 			move_to_node_state(first_state)
 		}
-		
-		if global.pack_parameters.tis {
-			ev_play_music(agi("msc_stg_extraboss"), true, false)
-			global.cc_state = 1
-	        global.cc_medalstate = 1
-	        global.cc_score = 0
-	        global.cc_multiplier = 1
-	        global.cc_chain = 10
-	        global.cc_cat = "ABCDEFGHI"
-	        global.cc_catscore = 1280
-	        global.cc_music_state = 0	
-		}
-		
 	}
 	else {
 		current_node_state.node.play_evaluate(current_node_state);
-		
 	}
-	
-	alarm[0] = 1
 }
 
 // checked and changed at level_node.play_evaluate

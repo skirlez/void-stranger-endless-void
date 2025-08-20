@@ -8,6 +8,11 @@ function ev_leave_pack() {
 	ds_map_clear(global.locusts_collected_this_level)
 	global.editor.reset_branefuck_persistent_memory()
 	
+	// may exist after tis' challenge
+	instance_destroy(agi("obj_cc_check"))
+	instance_destroy(agi("obj_cc_medal"))
+	
+	ev_switch_to_user_palette()
 }
 
 function ev_pack_on_clear_level() {

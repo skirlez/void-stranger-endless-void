@@ -260,6 +260,13 @@ level_node.play_evaluate = function (node_state) {
 	global.level = node_state.properties.level;
 	ev_prepare_level_visuals(global.level)
 
+	if global.pack_parameters.tis {
+		with (agi("obj_cc_check")) {
+			medal_creation_state = 1;
+			medal_creation_counter = 0;
+		}
+		global.cc_medalstate = 2		
+	}
 	with (agi("obj_ev_pack_player")) {
 		var should_create_memory = !ds_map_exists(pack_memories, global.level.name)
 		ev_place_level_instances(global.level, should_create_memory)
@@ -415,7 +422,20 @@ palette_node.on_config = function (node_instance) {
 
 end_node = new node_struct("en", "obj_ev_pack_end_node");
 end_node.play_evaluate = function () {
-	instance_create_layer(0, 0, "Text", agi("obj_ev_pack_end"))
+	if global.pack_parameters.tis {
+		with (agi("obj_cc_check")) {
+			if (check_state == 1)
+				check_state = 777
+			if (check_timelimit != 0) {
+				finaltime = timelimit_value - check_timelimit
+				bonus[1] = 1
+				allclear_scorebonus = 1000 * check_timelimit
+				allclear_scorestring = string(check_timelimit) + " X " + "1000"
+			}
+		}
+	}
+	else
+		instance_create_layer(0, 0, "Text", agi("obj_ev_pack_end"))
 
 }
 

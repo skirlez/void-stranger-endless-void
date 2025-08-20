@@ -20,7 +20,7 @@ function level_struct() constructor {
 		objects[i] = array_create(14, new tile_with_state(global.editor.object_empty))	
 		
 	// This name will be used for when the file is saved.
-	save_name = generate_save_name()
+	save_name = generate_ulid()
 	upload_date = "";
 	last_edit_date = "";
 	
@@ -33,21 +33,6 @@ function place_default_tiles(level) {
 			level.tiles[@ 3 + i][5 + j] = new tile_with_state(global.editor.tile_default)
 	}	
 	return level;
-}
-
-// just needs to be unique
-function generate_save_name() {
-	return base64_encode(date_string() + string(irandom($7fffffffffffffff)));	
-}
-function date_string() {
-	var date = date_current_datetime();
-	var year = date_get_year(date)
-	var month = date_get_month(date)
-	var day = date_get_day(date)
-	var hour = date_get_hour(date)
-	var minute = date_get_minute(date)
-	var second = date_get_second(date)
-	return string(second) + string(minute) + string(hour) + string(day) + string(month) + string(year);
 }
 
 

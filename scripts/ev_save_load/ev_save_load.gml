@@ -17,6 +17,7 @@ function ev_save() {
 	ini_write_string("options", "disable_3d_cube_bs", global.disable_3d_cube_bs)
 	
 	ini_write_string("stats", "grube", global.highest_grube_stack)
+	ini_write_string("misc", "tis_pack_button", global.tis_pack_button)
 	
 	ini_close()
 }
@@ -37,6 +38,8 @@ function ev_load() {
 	global.logging_ip = ini_read_string("options", "logging_ip", "localhost")
 	global.logging_port = ini_read_real("options", "logging_port", 1235)
 	global.disable_3d_cube_bs = ini_read_real("options", "disable_3d_cube_bs", false)
+	global.tis_pack_button = ini_read_real("misc", "tis_pack_button", false)
+	
 	ini_close()
 	ev_update_vars()
 }
@@ -165,7 +168,7 @@ function save_pack(pack) {
 }
 function delete_pack(save_name) {
 	file_delete(global.packs_directory + save_name + "." + pack_extension)
-	file_delete(global.packs_directory + save_name + "." + pack_password_extension)	
+	file_delete(global.packs_directory + save_name + "." + pack_password_extension)
 }
 
 function save_pack_password(pack) {
@@ -184,7 +187,12 @@ function load_pack_password(pack) {
 	return int64_safe(brand_string, 0);
 }
 
-
+function pack_progress_exists(save_name) {
+	return file_exists(global.packs_directory + save_name + "." + pack_save_extension)
+}
+function delete_pack_progress(save_name) {
+	file_delete(global.packs_directory + save_name + "." + pack_save_extension)
+}
 
 function save_pack_progress(current_level_name) {
 	static inv = agi("obj_inventory")
@@ -198,14 +206,14 @@ function save_pack_progress(current_level_name) {
 	return true;
 }
 
-function load_pack_progress(pack) {
-	var file = file_text_open_read(global.packs_directory + pack.save_name + "." + pack_save_extension)
+function load_pack_progress(save_name) {
+	var file = file_text_open_read(global.packs_directory + save_name + "." + pack_save_extension)
 	if (file == -1)
 		return noone;
 	var save_string = file_text_read_string(file)
 	file_text_close(file)
 	try {
-		return json_parse(save_string);	
+		return json_parse(save_string);
 	}
 	catch (e) {
 		ev_notify("Failed to parse save!")
@@ -217,6 +225,40 @@ function load_pack_progress(pack) {
 		
 		return noone;
 	}
+}
+
+function save_pack_highscores(save_name, json) {
+	var str = json_stringify(json);
+	var file = file_text_open_write(global.packs_directory + save_name + "." + pack_highscore_extension)
+	if (file == -1)
+		return false;
+	file_text_write_string(file, str)
+	file_text_close(file)
+	return true;
+}
+
+function load_pack_highscores(save_name) {
+	var file = file_text_open_read(global.packs_directory + save_name + "." + pack_highscore_extension)
+	var json;
+	
+	if (file == -1) {
+		json = {}
+	}
+	else {
+		var save_string = file_text_read_string(file)
+		file_text_close(file)
+		try {
+			json = json_parse(save_string);	
+		}
+		catch (e) {
+			json = {};
+		}
+	}
+	if !variable_struct_exists(json, "scores")
+		json.scores = []
+	if !variable_struct_exists(json, "times")
+		json.times = [];
+	return json;
 }
 
 function apply_pack_save(save) {
@@ -238,7 +280,10 @@ function apply_pack_save(save) {
 		save.locust_count = 0
 	if !variable_struct_exists(save, "pack_memories")
 		save.pack_memories = []
+	if !variable_struct_exists(save, "palette")
+		save.palette = global.s_g_pal
 	
+	agi("set_palette")(save.palette);
 		
 	ds_grid_set(inv.ds_player_info, 1, 1, save.locust_count)
 	ev_prepare_level_burdens(save.burdens);
@@ -282,6 +327,9 @@ function apply_pack_save(save) {
 		}
 	}
 	ds_map_destroy(map)
+	
+	
+	
 			
 	if first_state == noone {
 		log_error($"Save existed, but could not find node with name {save.level_name}."
@@ -303,6 +351,7 @@ function create_pack_save_struct(current_level_name) {
 		death_count : global.death_count,
 		visited_levels : ds_map_keys_to_array_fix(player.visited_levels),
 		pack_memories : ds_map_keys_to_array_fix(player.pack_memories),
+		palette : global.s_g_pal,
 		play_time : player.play_time + (current_time - player.start_time),
 		burdens : [ds_grid_get(inv.ds_equipment, 0, 0) != 0,
 					ds_grid_get(inv.ds_equipment, 0, 1) != 0,

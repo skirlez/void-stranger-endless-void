@@ -9,12 +9,30 @@ play.image_alpha = 0
 
 
 
-var play_t = instance_create_layer(8, room_height - 8, "LevelHighlightButtons", agi("obj_ev_play_pack_button"))
+var play_t = instance_create_layer(8, room_height - 10, "LevelHighlightButtons", agi("obj_ev_play_pack_button"))
 play_t.layer_num = 1
 play_t.nodeless_pack = nodeless_pack
 play_t.display_instance = display_instance
 play_t.highlighter = id;
 play_t.tis = true;
+play_t.image_alpha = 0;
+
+if global.tis_pack_button {
+	var scores = instance_create_layer(24, room_height - 10, "LevelHighlightButtons", agi("obj_ev_executing_button"), {
+		sprite_index : agi("spr_ev_score_list"),
+		highlighter : id,
+		layer_num : 1,
+		image_alpha : 0,
+		func : function () {
+			new_window(11, 7, agi("obj_ev_tis_score_window"), {
+				save_name : highlighter.nodeless_pack.save_name,
+				layer_num : 2,
+			})
+			global.mouse_layer++;
+		}
+	})
+	add_child(scores)
+}
 
 var copy = instance_create_layer(192, 40, "LevelHighlightButtons", agi("obj_ev_executing_button"), {
 	layer_num : 1,
@@ -39,6 +57,7 @@ var back = instance_create_layer(200, 16, "LevelHighlightButtons", agi("obj_ev_m
 
 
 
+add_child(play_t)
 add_child(play)
 add_child(back)
 add_child(copy)
@@ -100,6 +119,17 @@ if (!global.online_mode) {
 		display_instance : display_instance,
 		image_alpha : 0,
 	})
+	
+	if pack_progress_exists(nodeless_pack.save_name) {
+		var delete_save_button = instance_create_layer(208, 90, "LevelHighlightButtons", agi("obj_ev_delete_pack_save_button"), {
+			layer_num : 1,
+			level_select : instance_find(agi("obj_ev_level_select"), 0),
+			save_name : nodeless_pack.save_name,
+			display_instance : display_instance,
+			image_alpha : 0,
+		})
+		add_child(delete_save_button)
+	}
 
 	/*
 	var upload = instance_create_layer(208, 90, "LevelHighlightButtons", agi("obj_ev_upload_button"))
@@ -111,6 +141,7 @@ if (!global.online_mode) {
 	
 
 	add_child(deleteb)
+	
 	//add_child(upload)
 
 

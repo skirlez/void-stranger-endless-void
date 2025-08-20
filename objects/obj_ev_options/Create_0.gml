@@ -198,7 +198,7 @@ add_child(scroll_button_down)
 add_child(scroll_button_up)
 
 
-/* under construction
+
 question = instance_create_layer(112, 144 * 2 + 72, "Instances", agi("obj_ev_executing_button"), {
 	txt : "?",
 	func : function () {
@@ -209,6 +209,6 @@ question = instance_create_layer(112, 144 * 2 + 72, "Instances", agi("obj_ev_exe
 	}
 })
 add_child(question)
-*/
+
 
 textbox_depth = layer_get_depth(layer_get_id("Textboxes"))
