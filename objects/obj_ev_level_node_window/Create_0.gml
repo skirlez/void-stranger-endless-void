@@ -47,11 +47,32 @@ var copy = instance_create_layer(x + 55, y + 30, "WindowElements", agi("obj_ev_e
 	}
 })
 
+var edit = instance_create_layer(x + 55, y + 5, "WindowElements", agi("obj_ev_executing_button"), {
+	layer_num : 1,
+	lvl : level,
+	sprite_index : agi("spr_ev_edit_level"),
+	func : function () {
+		with (global.pack_editor) {
+			remember_zoom = zoom;
+			remember_camera_x = camera_get_view_x(view_camera[0])
+			remember_camera_y = camera_get_view_y(view_camera[0])		
+		}
+		global.level = lvl;
+		
+		// set to false again on obj_ev_pack_level_node create, once the one with the same node id is created
+		global.editing_pack_level = true;
+		
+		global.editing_pack_level_nid = window.node_instance.node_id;
+		room_goto(global.editor_room)
+	}
+})
+
 
 add_child(bount_textbox);
 add_child(name_textbox);
 add_child(name_warning);
 add_child(copy);
+add_child(edit);
 
 is_brand_room = is_level_brand_room(level)
 

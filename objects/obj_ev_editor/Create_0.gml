@@ -16,7 +16,7 @@ if global.is_html5 {
 	http_set_request_crossorigin("use-credentials");	
 }
 // debug flag that allows you to move buttons and textboxes with middle mouse
-global.allow_moving_elements = true;
+global.allow_moving_elements = false;
 
 
 #macro agi asset_get_index 
@@ -1505,6 +1505,11 @@ global.music_names = ["", "msc_001", "msc_dungeon_wings", "msc_beecircle", "msc_
 	"msc_monstrail", "msc_endless", "msc_stg_extraboss", "msc_rytmi2", "msc_test2", "msc_voidpiano", "msc_finalapproach", "msc_universe",
 	"snd_ev_music_judgment_jingle"]
 
+// true when level being edited is from a pack and doesn't have a file
+global.editing_pack_level = false;
+// nid of the level node being edited
+global.editing_pack_level_nid = -1;
+
 function reset_global_level() {
 	global.level = new level_struct()
 	place_default_tiles(global.level)
@@ -1516,23 +1521,19 @@ function reset_editor_variables() {
 	global.selected_thing = -1 
 	global.selected_placeable_num = -1
 	current_list = objects_list;
-	current_placeables = global.level.objects
 	current_empty_tile = object_empty
 }
 reset_editor_variables()
-
 
 
 function switch_tile_mode(new_tile_mode) {
 	global.tile_mode = new_tile_mode;
 	if (global.tile_mode) {
 		current_list = tiles_list
-		current_placeables = global.level.tiles
 		current_empty_tile = tile_pit
 	}
 	else {
 		current_list = objects_list
-		current_placeables = global.level.objects
 		current_empty_tile = object_empty
 	}
 	if (global.selected_thing == thing_placeable || global.selected_thing == thing_multiplaceable) {
@@ -1541,11 +1542,15 @@ function switch_tile_mode(new_tile_mode) {
 	}
 }
 
+function get_current_placeables() {
+	if global.tile_mode
+		return global.level.tiles;
+	return global.level.objects;
+}
+
 global.erasing = -1;
 erasing_surface = surface_create(224, 144)
 global.goes_sound = agi("snd_ex_vacuumgoes")
-
-
 
 
 

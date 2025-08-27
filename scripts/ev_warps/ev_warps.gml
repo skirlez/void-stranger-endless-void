@@ -21,6 +21,8 @@ function ev_on_bee_warp() {
 		ev_clear_level()
 	}
 	else if (room == global.pack_level_room) {
+		// may exist
+		instance_destroy(agi("obj_cc_medal"))
 		var state = noone;
 		var bount_string = ds_grid_get(agi("obj_inventory").ds_player_info, 0, 2)
 		if bount_string != "V???" {
@@ -68,6 +70,8 @@ function ev_on_floor_warp() {
 		ev_clear_level()
 	}
 	else if (room == global.pack_level_room) {
+		// may exist
+		instance_destroy(agi("obj_cc_medal"))
 		var bount_string = ds_grid_get(agi("obj_inventory").ds_player_info, 0, 2)
 		var state = noone;
 		if bount_string == "V???" {

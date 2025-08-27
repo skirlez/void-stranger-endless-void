@@ -1,14 +1,14 @@
 {
   "resourceType": "GMRoom",
   "resourceVersion": "1.0",
-  "name": "rm_ev_extras",
-  "creationCodeFile": "rooms/rm_ev_extras/RoomCreationCode.gml",
+  "name": "rm_ev_info",
+  "creationCodeFile": "rooms/rm_ev_info/RoomCreationCode.gml",
   "inheritCode": false,
   "inheritCreationOrder": false,
   "inheritLayers": false,
   "instanceCreationOrder": [
-    {"name":"inst_97B1D47","path":"rooms/rm_ev_extras/rm_ev_extras.yy",},
-    {"name":"inst_7B3FAD0","path":"rooms/rm_ev_extras/rm_ev_extras.yy",},
+    {"name":"inst_97B1D47","path":"rooms/rm_ev_info/rm_ev_info.yy",},
+    {"name":"inst_7B3FAD0","path":"rooms/rm_ev_info/rm_ev_info.yy",},
   ],
   "isDnd": false,
   "layers": [

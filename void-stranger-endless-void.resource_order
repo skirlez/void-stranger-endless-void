@@ -352,7 +352,7 @@
     {"name":"obj_ev_display","order":8,"path":"objects/obj_ev_display/obj_ev_display.yy",},
     {"name":"spr_ev_claim","order":30,"path":"sprites/spr_ev_claim/spr_ev_claim.yy",},
     {"name":"spr_ev_dpad","order":62,"path":"sprites/spr_ev_dpad/spr_ev_dpad.yy",},
-    {"name":"rm_ev_extras","order":9,"path":"rooms/rm_ev_extras/rm_ev_extras.yy",},
+    {"name":"rm_ev_info","order":9,"path":"rooms/rm_ev_info/rm_ev_info.yy",},
     {"name":"spr_smiler","order":34,"path":"sprites/spr_smiler/spr_smiler.yy",},
     {"name":"spr_ev_lily_gblink_r","order":8,"path":"sprites/spr_ev_lily_gblink_r/spr_ev_lily_gblink_r.yy",},
     {"name":"snd_ev_node_connect","order":3,"path":"sounds/snd_ev_node_connect/snd_ev_node_connect.yy",},

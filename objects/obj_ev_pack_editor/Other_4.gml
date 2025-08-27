@@ -4,7 +4,6 @@ if (room == global.pack_editor_room) {
 		remember_camera_y = 993;
 		remember_zoom = 0;
 		in_pack_editor = true;
-		
 	}
 
 	if global.void_radio_on
@@ -22,6 +21,16 @@ if (room == global.pack_editor_room) {
 	// exit creates this when you use it and it does persist so we Kill It
 	if global.is_merged
 		instance_destroy(agi("obj_darkness"))
+	
+
 		
 	save_timestamp = current_time
+}
+if (room != global.editor_room && room != global.pack_editor_room && room != global.pack_level_room && in_pack_editor) {
+	log_info("leaving pack editor")
+	ds_map_clear(node_state_to_id_map)
+	ds_map_clear(node_id_to_instance_map)
+	undo_actions = []
+	in_pack_editor = false;
+	last_nid = -1
 }

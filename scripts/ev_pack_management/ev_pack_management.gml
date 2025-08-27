@@ -125,6 +125,7 @@ function place_default_nodes(pack) {
 	level.name = "Level!!"
 	level.bount = 1;
 	place_default_tiles(level);
+	strip_level_for_pack(level)
 	var level_node_state = new node_with_state(global.pack_editor.level_node, 
 	390 - global.level_node_display_scale * 224 / 2, 
 	2160 / 2 - global.level_node_display_scale * 144 / 2,

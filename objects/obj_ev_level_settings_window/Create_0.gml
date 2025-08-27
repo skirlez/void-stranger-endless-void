@@ -1,10 +1,11 @@
 event_inherited()
 
-elements_depth = layer_get_depth("WindowElements")
 function commit() {
 	with (agi("obj_ev_level_settings_window")) {
-		global.level.name = name_textbox.txt
-		global.level.description = description_textbox.txt
+		if !global.editing_pack_level {
+			global.level.name = name_textbox.txt
+			global.level.description = description_textbox.txt
+		}
 		global.level.music = global.music_names[music_select.index]
 		for (var i = 0; i < 5; i++) {
 			global.level.burdens[i] = burdens[i].image_index
@@ -13,6 +14,52 @@ function commit() {
 	}
 }
 
+
+burdens = array_create(5)
+for (var i = 0; i < 5; i++) {
+	burdens[i] = instance_create_layer(112 - 72 + i * 16, 72 + 30, "WindowElements", agi("obj_ev_burden_toggle"), 
+	{
+		burden_ind : i,
+		layer_num : global.mouse_layer,
+		image_index : global.level.burdens[i]
+	})
+	
+	add_child(burdens[i])
+}
+
+
+var theme_selector_y = global.editing_pack_level ? 72 + 35 : 72 - 35
+theme_selector = instance_create_layer(112 + 50, theme_selector_y, "WindowElements", agi("obj_ev_selector"), {
+	elements : ["Regular", "Universe"],
+	selected_element : global.level.theme,
+	max_radius : 20
+})
+add_child(theme_selector)
+
+music_select = instance_create_layer(112 + 48, 72 + 4, "WindowElements", agi("obj_ev_music_select"), {
+	base_scale_x : 1,
+	preselected_music : global.level.music
+})
+add_child(music_select)
+
+if global.editing_pack_level {
+	leave_button = instance_create_layer(112 - 35, 72 - 20, "WindowElements", agi("obj_ev_executing_button"), 
+	{
+		txt : "LEAVE",
+		base_scale_x : 3,
+		base_scale_y : 2,
+		func : function () {
+			strip_level_for_pack(global.level)
+			room_goto(global.pack_editor_room)	
+		}
+	})
+	add_child(leave_button)
+	exit;
+}
+
+
+
+elements_depth = layer_get_depth("WindowElements")
 save_button = instance_create_layer(112 - 65, 72 - 34, "WindowElements", agi("obj_ev_save_button"), 
 {
 	txt : "Save",
@@ -63,31 +110,11 @@ add_child(save_button)
 add_child(name_textbox)
 add_child(description_textbox)
 	
-burdens = array_create(5)
-for (var i = 0; i < 5; i++) {
-	burdens[i] = instance_create_layer(112 - 72 + i * 16, 72 + 30, "WindowElements", agi("obj_ev_burden_toggle"), 
-	{
-		burden_ind : i,
-		layer_num : global.mouse_layer,
-		image_index : global.level.burdens[i]
-	})
-	
-	add_child(burdens[i])
-}
 
 var man = instance_create_layer(112 + 43, 72 - 14, "WindowElements", agi("obj_ev_man"))
 add_child(man)
 
-music_select = instance_create_layer(112 + 48, 72 + 4, "WindowElements", agi("obj_ev_music_select"), {
-	base_scale_x : 1,
-	preselected_music : global.level.music
-})
 
-theme_selector = instance_create_layer(112 + 50, 72 - 35, "WindowElements", agi("obj_ev_selector"), {
-	elements : ["Regular", "Universe"],
-	selected_element : global.level.theme,
-	max_radius : 20
-})
 var claim_button = instance_create_layer(112 + 46, 72 + 40, "WindowElements", agi("obj_ev_executing_button"), {
 	func : function () {
 		global.mouse_layer++
@@ -100,6 +127,6 @@ var claim_button = instance_create_layer(112 + 46, 72 + 40, "WindowElements", ag
 	sprite_index : agi("spr_ev_claim")
 })
 
-add_child(theme_selector)
-add_child(music_select)
+
+
 add_child(claim_button)

@@ -25,12 +25,13 @@ if timer > 100 {
 	draw_set_halign(fa_center)
 	draw_set_halign(fa_middle)
 	draw_set_color(c_gray)
+	var txt = "YOUR SAVE IS GETTING DELETED!!!!";
 	draw_text(room_width / 2 + rand[0] * jumparound,
 		room_height / 2 - 16 + rand[1] * jumparound,
-		"Your save is getting deleted!!!!")
+		txt)
 	draw_set_color(c_black)
 	draw_text(room_width / 2 + rand[2] * jumparound,
 		room_height / 2 - 16 + rand[3] * jumparound,
-		"Your save is getting deleted!!!!")
+		txt)
 	
 }

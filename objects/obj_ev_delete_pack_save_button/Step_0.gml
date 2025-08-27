@@ -26,6 +26,7 @@ if deleting {
 	}
 	if timer == 580 {
 		delete_pack_progress(save_name)
+		audio_resume_sound(global.music_inst)
 		var file = file_text_open_read(global.packs_directory + save_name + "." + pack_extension)
 		if file == -1 {
 			deleting = false;

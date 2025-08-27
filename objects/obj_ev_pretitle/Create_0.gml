@@ -12,3 +12,5 @@ else
 	
 dust_emit_counter = 0;
 dust_emit_limit = 0;
+
+increase_lerp = 0;

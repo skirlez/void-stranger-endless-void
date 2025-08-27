@@ -62,11 +62,21 @@ if global.erasing != -1 {
 		// undo erasing the level, but now i'd have to implement metadata undoing, and i don't want to
 		history = []
 		var retain_save_name = global.level.save_name
+		var retain_bount;
+		var retain_name;
+		if global.editing_pack_level {
+			retain_bount = global.level.bount;
+			retain_name = global.level.name;
+		}
 		ev_stop_music()
 		reset_global_level()
 		reset_editor_variables()
 		ev_claim_level(global.level)
 		global.level.save_name = retain_save_name
+		if global.editing_pack_level {
+			global.level.bount = retain_bount;
+			global.level.name = retain_name;
+		}
 		audio_play_sound(global.goes_sound, 10, false)	
 		room_goto(agi("rm_ev_after_erase"))
 	}
@@ -133,8 +143,6 @@ else if preview_transition != -1 {
 }
 else if (edit_transition != -1) {
 	edit_transition--;
-
-	
 	with (edit_transition_display) {
 		var t = (other.max_edit_transition - other.edit_transition) 
 			/ other.max_edit_transition

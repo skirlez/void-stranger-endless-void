@@ -31,8 +31,11 @@ if !transition {
 	}
 }
 else {
-	x = lerp(x, 0, 0.155)
-	y = lerp(y, 0, 0.155)
+	x = lerp(x, 0, 0.14 + increase_lerp)
+	y = lerp(y, 0, 0.14 + increase_lerp)
+	if transition_timer >= 30 {
+		increase_lerp += 0.05	
+	}
 	transition_timer++;
 	if transition_timer > 40
 		room_goto(agi("rm_ev_menu"))

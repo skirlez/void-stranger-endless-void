@@ -31,7 +31,7 @@ function switch_held_tile(tile_state) {
 
 
 function place_placeable(tile_i, tile_j, new_tile, properties = global.empty_struct, run_place_func = true) {
-	var arr = global.editor.current_placeables
+	var arr = global.editor.get_current_placeables();
 	var tile_state = arr[tile_i][tile_j]
 			
 	if (tile_state.tile != new_tile) {
@@ -59,7 +59,7 @@ function place_placeable(tile_i, tile_j, new_tile, properties = global.empty_str
 
 // This function runs first when handling a right click release (drag), or left click
 function handle_click_before(tile_i, tile_j) {
-	var tile_state = global.editor.current_placeables[tile_i][tile_j];
+	var tile_state = global.editor.get_current_placeables()[tile_i][tile_j];
 	switch (global.selected_thing) {
 		case thing_plucker:
 		case thing_picker:
@@ -106,7 +106,7 @@ function handle_click(tile_i, tile_j) {
 		case thing_picker:
 		case thing_plucker: // nearly the same, might as well lump them together and check when needed..
 			if dragging {
-				var tile_state = global.editor.current_placeables[tile_i][tile_j];
+				var tile_state = global.editor.get_current_placeables()[tile_i][tile_j];
 				if !(tile_state.tile.flags & tile_flags.unplaceable) {
 					var local_tile_i = tile_i - global.held_tile_offset[0]
 					var local_tile_j = tile_j - global.held_tile_offset[1]
