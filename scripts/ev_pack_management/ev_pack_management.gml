@@ -64,9 +64,10 @@ function convert_room_nodes_to_structs() {
 		for (var i = 0; i < array_length(node_inst.exit_instances); i++) {
 			var exit_node_state = explore_node_and_convert_to_struct(node_inst.exit_instances[i], explored_instances_map)
 			array_push(exits, exit_node_state)
+			array_push(exit_node_state.connected_to_me, node_state)
 		}
 		node_state.exits = exits;
-		if global.playtesting {
+		if global.playtesting || global.editing_pack_level {
 			ds_map_set(global.pack_editor.node_state_to_id_map, node_state, node_inst.node_id)
 		}
 		
@@ -119,7 +120,8 @@ function place_default_nodes(pack) {
 	var music_node_state = new node_with_state(global.pack_editor.music_node, 330, 2160 / 2, {
 		music : global.music_names[1]	
 	})
-	array_push(root_node_state.exits, music_node_state)
+	
+	connect_node_states(root_node_state, music_node_state)
 	
 	var level = new level_struct();
 	level.name = "Level!!"
@@ -132,11 +134,10 @@ function place_default_nodes(pack) {
 	{
 		level : level,
 	});
-
-	array_push(music_node_state.exits, level_node_state)
+	connect_node_states(music_node_state, level_node_state)
 	
 	var end_node_state = new node_with_state(global.pack_editor.end_node, 450, 2160 / 2);
-	array_push(level_node_state.exits, end_node_state)
+	connect_node_states(level_node_state, end_node_state)
 	
 	array_push(pack.starting_node_states, root_node_state)
 }
@@ -185,7 +186,9 @@ function import_pack(pack_string) {
 		for (var i = 0; i < array_length(node_state.intermediary_numbered_exits); i++) {
 			var new_index = node_state.intermediary_numbered_exits[i];
 			explore_index_and_mark_visited(all_node_states, visited, new_index);
-			array_push(node_state.exits, all_node_states[new_index])
+			var exit_state = all_node_states[new_index];
+			array_push(node_state.exits, exit_state)
+			array_push(exit_state.connected_to_me, node_state);
 		}
 		node_state.intermediary_numbered_exits = [];
 	}

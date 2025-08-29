@@ -1,5 +1,6 @@
 event_inherited();
-global.void_radio_on = !global.void_radio_on
+global.void_radio_on = !global.void_radio_on;
+global.pack_editor.boost_pack_arrow();
 if (!global.void_radio_on)
 	ev_stop_music();
 else {

@@ -16,7 +16,7 @@ if global.is_html5 {
 	http_set_request_crossorigin("use-credentials");	
 }
 // debug flag that allows you to move buttons and textboxes with middle mouse
-global.allow_moving_elements = false;
+global.allow_moving_elements = true;
 
 
 #macro agi asset_get_index 
@@ -28,6 +28,7 @@ if (!global.is_merged) {
 	global.debug = false;
 	global.pause = false;
 	global.music_inst = noone;
+	global.music_file = noone;
 	global.music_is_looping = false;
 }
 

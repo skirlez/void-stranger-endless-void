@@ -1,3 +1,14 @@
+// add argument2 which will exit early and return song tempo for us
+
+// TARGET: LINENUMBER_REPLACE
+// 1
+function scr_music_strobe_raw_value(argument0, argument1, argument2)
+
+// TARGET: LINENUMBER
+// 123
+if argument2
+    return _tempo;
+
 // Add bpms of various songs that EV adds so everything animates to their beat
 // and also msc_rytmi2 because it doesn't have one
 // TARGET: LINENUMBER

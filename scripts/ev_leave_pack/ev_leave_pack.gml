@@ -11,6 +11,7 @@ function ev_leave_pack() {
 	// may exist after tis' challenge
 	instance_destroy(agi("obj_cc_check"))
 	instance_destroy(agi("obj_cc_medal"))
+	global.cc_state = 0;
 	
 	ev_switch_to_user_palette()
 }

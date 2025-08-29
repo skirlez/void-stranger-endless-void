@@ -66,7 +66,8 @@ function ev_play_void_radio() {
 	if !audio_is_playing(static_sfx) || audio_sound_get_gain(static_sfx) == 0 {
 		// play static and fade in
 		static_sfx = audio_play_sound(agi("snd_ev_radio_static"), 0, false, 1)
-		audio_sound_gain(static_sfx, 0, 800)
+		audio_sound_gain(static_sfx, 0, 800);
+		global.pack_editor.boost_pack_arrow();
 	}
 	
 	// fade in

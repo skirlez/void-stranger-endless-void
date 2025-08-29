@@ -1,4 +1,10 @@
 event_inherited();
+function commit() {
+	node_instance.properties.level.bount = int64_safe(bount_textbox.txt, -1);
+	node_instance.properties.level.name = name_textbox.txt
+	try_level_name_and_rename(node_instance.properties.level, get_all_level_node_instances())
+}
+
 var level = node_instance.properties.level;
 
 var txt;
@@ -52,17 +58,19 @@ var edit = instance_create_layer(x + 55, y + 5, "WindowElements", agi("obj_ev_ex
 	lvl : level,
 	sprite_index : agi("spr_ev_edit_level"),
 	func : function () {
+		window.commit();
 		with (global.pack_editor) {
 			remember_zoom = zoom;
 			remember_camera_x = camera_get_view_x(view_camera[0])
 			remember_camera_y = camera_get_view_y(view_camera[0])		
 		}
 		global.level = lvl;
-		
 		// set to false again on obj_ev_pack_level_node create, once the one with the same node id is created
 		global.editing_pack_level = true;
-		
 		global.editing_pack_level_nid = window.node_instance.node_id;
+		
+		// so it remembers what the pack is
+		global.pack.starting_node_states = convert_room_nodes_to_structs()
 		room_goto(global.editor_room)
 	}
 })

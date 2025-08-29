@@ -11,7 +11,8 @@ if state == 0 {
 		var level_node_state = new node_with_state(global.pack_editor.level_node, 0, 0, {
 			level : level,
 		});
-		array_push(root_node_state.exits, level_node_state)
+		connect_node_states(root_node_state, level_node_state)
+		
 		array_push(pack.starting_node_states, root_node_state)
 
 		global.pack = pack;

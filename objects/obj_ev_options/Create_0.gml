@@ -40,7 +40,7 @@ instance_create_layer(200, 16, "Instances", agi("obj_ev_executing_button"), {
 	}
 });
 
-instance_create_layer(112 + 30, 72 + 50, "Instances", agi("obj_ev_executing_button"), {
+instance_create_layer(38, 120, "Instances", agi("obj_ev_executing_button"), {
 	base_scale_x : 1.7,
 	base_scale_y : 0.7,
 	txt : "Random",
@@ -48,12 +48,12 @@ instance_create_layer(112 + 30, 72 + 50, "Instances", agi("obj_ev_executing_butt
 		agi("obj_ev_make_brand").brand = int64(irandom_range(0, $FFFFFFFFF))
 	}
 });
-author_brand = instance_create_layer(112 + 30, 72 + 10, "Instances", agi("obj_ev_make_brand"), {
+author_brand = instance_create_layer(38, 87, "Instances", agi("obj_ev_make_brand"), {
 	brand : global.author.brand
 })
 add_child(author_brand)
 
-change_character = instance_create_layer(112 - 30, 72 + 10, "Instances", agi("obj_ev_change_character"));
+change_character = instance_create_layer(139, 78, "Instances", agi("obj_ev_change_character"));
 add_child(change_character)
 /* Maybe one day, but today ain't the day
 change_memory = instance_create_layer(112 - 46, 72 + 30, "Instances", agi("obj_ev_change_memory"));
@@ -64,7 +64,7 @@ change_blade = instance_create_layer(112 - 14, 72 + 30, "Instances", agi("obj_ev
 add_child(change_blade)
 */
 
-author_textbox = instance_create_layer(112, 72 - 20, "Textboxes", agi("obj_ev_textbox"), 
+author_textbox = instance_create_layer(39, 57, "Textboxes", agi("obj_ev_textbox"), 
 {
 	empty_text : "Username",
 	allow_newlines : false,
@@ -193,6 +193,37 @@ scroll_button_up = instance_create_layer(200, 56, "Instances", agi("obj_ev_execu
 		}
 	}
 })
+
+vanilla_options = instance_create_layer(139, 120, "Instances", agi("obj_ev_executing_button"), {
+	txt : "VS Options",
+	base_scale_x : 2.2,
+	base_scale_y : 0.7,
+	func : function () {
+		if global.is_merged {
+			with (agi("obj_pause")) {
+	            agi("obj_menu").image_speed = 0
+			    agi("obj_menu").menu_art_x = 160
+	            global.pause = true
+	            global.timer_count = false
+	            alarm[1] = 40
+	            agi("scr_loadmenu")()
+	            instance_create_layer(x, y, "Pause", agi("obj_fade_black_in"))
+	            agi("obj_music_controller").alarm[1] = 1
+			    with (agi("obj_menu"))
+		            transition = true
+		        transition = true
+		        alarm[4] = 80
+			}
+			window.in_options = true;
+			global.mouse_layer = 1;
+		}
+	}
+})
+add_child(vanilla_options)
+in_options = false;
+
+
+
 those_who_special = [scroll_button_down, scroll_button_up]
 add_child(scroll_button_down)
 add_child(scroll_button_up)

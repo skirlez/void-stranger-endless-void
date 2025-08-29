@@ -3,6 +3,7 @@ function node_with_state(node, pos_x, pos_y, properties = node.properties_genera
 	self.pos_x = pos_x;
 	self.pos_y = pos_y;
 	self.exits = [];
+	self.connected_to_me = [];
 	self.properties = properties;
 	
 	function write(node_index_map) {

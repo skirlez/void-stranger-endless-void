@@ -153,3 +153,7 @@ if global.mouse_layer == 0 {
 		}
 	}
 }
+
+if pack_arrow_boost <= pack_arrow_boost_max {
+	pack_arrow_boost = lerp(pack_arrow_boost, pack_arrow_boost_max, 0.06)
+}

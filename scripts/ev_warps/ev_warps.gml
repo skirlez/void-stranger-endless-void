@@ -13,7 +13,9 @@ function find_node_state_statisfies_condition(node_state, condition, explored_st
 	}
 	return noone;
 }
-		
+
+
+
 
 // Called from gml_Object_obj_room_warp_Alarm_1
 function ev_on_bee_warp() {
@@ -60,6 +62,9 @@ function ev_on_bee_warp() {
 		// clear locusts
 		ds_grid_set(agi("obj_inventory").ds_player_info, 1, 1, 0)
 		ev_pack_on_clear_level()
+		var track = find_music_for_node_state(state)
+		if track != noone && !global.pack_parameters.tis
+			ev_play_music(track, true, false);
 		agi("obj_ev_pack_player").move_to_node_state(state)
 	}
 	instance_destroy()
@@ -108,6 +113,9 @@ function ev_on_floor_warp() {
 			}
 		}
 		ev_pack_on_clear_level()
+		var track = find_music_for_node_state(state)
+		if track != noone && !global.pack_parameters.tis
+			ev_play_music(track, true, false);
 		agi("obj_ev_pack_player").move_to_node_state(state)
 	}
 }

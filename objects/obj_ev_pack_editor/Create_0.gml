@@ -260,14 +260,15 @@ level_node.play_evaluate = function (node_state) {
 	global.level = node_state.properties.level;
 	ev_prepare_level_visuals(global.level)
 
-	if global.pack_parameters.tis {
-		with (agi("obj_cc_check")) {
-			medal_creation_state = 1;
-			medal_creation_counter = 0;
-		}
-		global.cc_medalstate = 2		
-	}
+
 	with (agi("obj_ev_pack_player")) {
+		if global.pack_parameters.tis && !restarted_on_this_node {
+			with (agi("obj_cc_check")) {
+				medal_creation_state = 1;
+				medal_creation_counter = 0;
+			}
+			global.cc_medalstate = 2		
+		}
 		var should_create_memory = !ds_map_exists(pack_memories, global.level.name)
 		ev_place_level_instances(global.level, should_create_memory)
 		if is_first_level {
@@ -488,3 +489,10 @@ undo_repeat_frames_speed = 0
 undo_repeat_frames_max_speed = 10
 
 in_pack_editor = false;
+
+
+pack_arrow_boost_max = 2;
+pack_arrow_boost = pack_arrow_boost_max;
+function boost_pack_arrow() {
+	pack_arrow_boost = 0;
+}

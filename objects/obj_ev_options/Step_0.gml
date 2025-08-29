@@ -9,3 +9,10 @@ for (var i = 0; i < array_length(those_who_special); i++) {
 
 
 ev_window_sort_textbox_depths(textbox_depth)
+
+
+
+if in_options && !global.pause && global.mouse_layer == 1 { 
+	in_options = false;
+	global.mouse_layer = 0;
+}

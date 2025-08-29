@@ -6,3 +6,7 @@ if index < 0
 	
 ev_play_music(musics[index])
 txt = string(index)
+
+if boost_pack_arrow_progress {
+	global.pack_editor.boost_pack_arrow();
+}

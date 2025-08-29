@@ -64,7 +64,13 @@ function end_pack() {
 	ev_leave_pack()	
 }
 
+
+last_processed_node = noone;
+restarted_on_this_node = false;
 function on_room_create() {
+	if current_node_state != noone
+		restarted_on_this_node = (last_processed_node == current_node_state)
+
 	log_info("Pack player running on_room_create")
 	if brand_node_states == noone {
 		log_info($"Initializing brand nodes")
@@ -80,6 +86,7 @@ function on_room_create() {
 
 	
 	if current_node_state == noone {
+		
 		if global.pack_parameters.tis {
 			ev_play_music(agi("msc_stg_extraboss"), true, false)
 			ev_set_tis_up()
@@ -119,6 +126,7 @@ function on_room_create() {
 	else {
 		current_node_state.node.play_evaluate(current_node_state);
 	}
+	last_processed_node = current_node_state;
 }
 
 // checked and changed at level_node.play_evaluate

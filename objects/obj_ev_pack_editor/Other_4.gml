@@ -10,10 +10,11 @@ if (room == global.pack_editor_room) {
 		ev_play_void_radio()
 	else
 		ev_stop_music()
-	camera_set_view_pos(view_camera[0], remember_camera_x, remember_camera_y)
-	zoom = remember_zoom;	
+		
+	zoom = remember_zoom;
 	calculate_zoom()
-	
+	camera_set_view_pos(view_camera[0], remember_camera_x, remember_camera_y)
+
 	place_pack_into_room(global.pack)
 	ds_map_clear(node_state_to_id_map)
 	selected_thing = pack_things.nothing

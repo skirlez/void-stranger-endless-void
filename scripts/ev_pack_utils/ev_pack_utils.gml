@@ -45,7 +45,22 @@ function ev_draw_pack_line(x1, y1, x2, y2, number = 0) {
 }
 
 function get_pack_line_arrow_progress() {
-	return (global.editor_time % 200) / 200;	
+	var bpm = ev_get_track_bpm(global.music_file, audio_sound_get_track_position(global.music_inst));
+	
+	var t;
+	if ev_is_music_playing(global.music_file) {
+		var beat = 480 / bpm
+		var seconds = audio_sound_get_track_position(global.music_inst);
+		var fake_seconds = ev_get_real_track_start(seconds);
+		seconds -= fake_seconds;
+		t = (seconds % beat) / beat;
+	}
+	else {
+		t = global.editor_time % 200 / 200;
+	}
+	
+	t += global.pack_editor.pack_arrow_boost;
+	return t % 1;
 }
 function get_pack_line_number_progress() {
 	var t = get_pack_line_arrow_progress() - 0.15;
@@ -165,4 +180,27 @@ function create_pack_parameters(burdens = [false, false, false, false, false],
 		tis = false, 
 		node_id = -1) {
 	return { burdens : burdens, locust_count : locust_count, tis : tis, node_id : node_id }	
+}
+function connect_node_states(from, to) {
+	array_push(from.exits, to);
+	array_push(to.connected_to_me, from);
+}
+function find_music_for_node_state(state) {
+	while (array_length(state.connected_to_me) == 1) {
+		if state.connected_to_me[0].node == global.pack_editor.music_node {
+			var track = agi(state.connected_to_me[0].properties.music);
+			return track;
+		}
+		state = state.connected_to_me[0];	
+	}
+	if array_length(state.connected_to_me) == 0 {
+		return noone;	
+	}
+	for (var i = 0; i < array_length(state.connected_to_me); i++) {
+		if state.connected_to_me[i].node == global.pack_editor.music_node {
+			var track = agi(state.connected_to_me[i].properties.music);
+			return track;
+		}
+	}
+	return noone;
 }
