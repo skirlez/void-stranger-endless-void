@@ -59,19 +59,59 @@ var edit = instance_create_layer(x + 55, y + 5, "WindowElements", agi("obj_ev_ex
 	sprite_index : agi("spr_ev_edit_level"),
 	func : function () {
 		window.commit();
+		
 		with (global.pack_editor) {
 			remember_zoom = zoom;
 			remember_camera_x = camera_get_view_x(view_camera[0])
 			remember_camera_y = camera_get_view_y(view_camera[0])		
 		}
-		global.level = lvl;
-		// set to false again on obj_ev_pack_level_node create, once the one with the same node id is created
+		//global.level = lvl;
+		// set to false again once leaving the level editor, where global.editing_pack_level_properties is also updated
 		global.editing_pack_level = true;
-		global.editing_pack_level_nid = window.node_instance.node_id;
+		global.editing_pack_level_properties = window.node_instance.properties;
 		
 		// so it remembers what the pack is
 		global.pack.starting_node_states = convert_room_nodes_to_structs()
-		room_goto(global.editor_room)
+		
+		// make the level node not move its display around
+		window.node_instance.sync_in_step = false;
+		
+		// we must reposition and resize this display so it is in the x 0 - 224 and y 0 - 144 region
+		
+		var display = window.node_instance.display;
+		display.layer = layer_get_id("EditTransitionDisplay")
+		
+		var relative_x = display.x - camera_get_view_x(view_camera[0]);
+		var relative_y = display.y - camera_get_view_y(view_camera[0]);
+		with (global.pack_editor) {
+			var mult = power(zoom_factor, zoom)
+			relative_x /= mult;
+			relative_y /= mult;
+			display.image_xscale /= mult;
+			display.image_yscale /= mult;
+			display.scale_x_start = display.image_xscale
+			display.scale_y_start = display.image_yscale
+		}
+		display.x = relative_x;
+		display.y = relative_y;
+		display.xstart = relative_x;
+		display.ystart = relative_y;
+	
+		camera_set_view_pos(view_camera[0], 0, 0);
+		camera_set_view_size(view_camera[0], 224, 144);
+
+		// sounds cool
+		
+		if global.is_merged { 
+			global.ambience_is_playing = false;
+			global.ambience_shutdown = false;
+			agi("scr_play_ambience")(-4, true)
+		}
+		
+		global.editor.edit_level_transition(lvl, display)
+		lvl.music = global.music_names[1];
+		global.void_radio_disable_stack++;
+		//room_goto(global.editor_room)
 	}
 })
 

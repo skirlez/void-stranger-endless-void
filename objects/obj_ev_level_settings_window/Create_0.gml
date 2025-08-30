@@ -50,6 +50,9 @@ if global.editing_pack_level {
 		base_scale_y : 2,
 		func : function () {
 			strip_level_for_pack(global.level)
+			global.editing_pack_level_properties.level = global.level;
+			global.editing_pack_level = false;
+			global.void_radio_disable_stack--;
 			room_goto(global.pack_editor_room)	
 		}
 	})
@@ -111,7 +114,7 @@ add_child(name_textbox)
 add_child(description_textbox)
 	
 
-var man = instance_create_layer(112 + 43, 72 - 14, "WindowElements", agi("obj_ev_man"))
+var man = instance_create_depth(112 + 43, 72 - 14, elements_depth - 1, agi("obj_ev_man"))
 add_child(man)
 
 

@@ -1,0 +1,1 @@
+function empty_function() {}

@@ -150,8 +150,8 @@ else if (edit_transition != -1) {
 		var curve = animcurve_channel_evaluate(other.edit_curve, t)
 		image_xscale = lerp(scale_x_start, 0.7615918, curve)
 		image_yscale = lerp(scale_y_start, 0.7615918, curve)
-		x = lerp(xstart, room_width - sprite_width - 1.5, curve)
-		y = lerp(ystart, room_height - sprite_height - 1.5, curve)
+		x = lerp(xstart, 224 - sprite_width - 1.5, curve)
+		y = lerp(ystart, 144 - sprite_height - 1.5, curve)
 	}
 	
 	if (edit_transition == -1) {

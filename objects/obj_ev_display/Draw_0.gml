@@ -1,7 +1,3 @@
-if display_context == display_contexts.pack_editor {
-
-}
-
 if outside_view
 	exit;
 

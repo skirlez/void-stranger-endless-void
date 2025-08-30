@@ -16,7 +16,7 @@ if global.is_html5 {
 	http_set_request_crossorigin("use-credentials");	
 }
 // debug flag that allows you to move buttons and textboxes with middle mouse
-global.allow_moving_elements = true;
+global.allow_moving_elements = false;
 
 
 #macro agi asset_get_index 
@@ -170,8 +170,6 @@ return_noone = function() {
 	return noone;
 }
 
-empty_function = function() { };
-
 return_tile_state_function = function(tile_state) { 
 	return tile_state 
 };
@@ -260,7 +258,6 @@ function tile_state_has_edge(tile_state) {
 			return false;
 	}
 	return true;
-			
 }
 
 #macro no_obj ""
@@ -327,6 +324,8 @@ tile_default.draw_function = function(tile_state, i, j, preview, lvl, no_spoiler
 
 // it may seem like this function is drawing the floor sprite,
 // that's only because the edge graphic is the second index of that sprite
+
+// this function is a big bottleneck for drawing levels, optimization would be good
 function draw_pit(i, j, lvl, obscure_universe, no_spoilers) {
 	static pit_sprite = agi("spr_pit");
 	
@@ -1508,8 +1507,8 @@ global.music_names = ["", "msc_001", "msc_dungeon_wings", "msc_beecircle", "msc_
 
 // true when level being edited is from a pack and doesn't have a file
 global.editing_pack_level = false;
-// nid of the level node being edited
-global.editing_pack_level_nid = -1;
+// properties of the level node being edited
+global.editing_pack_level_properties = -1;
 
 function reset_global_level() {
 	global.level = new level_struct()
@@ -1682,6 +1681,7 @@ edit_transition_display = noone
 
 function edit_level_transition(lvl, display_instance) {
 	global.level = lvl;
+	switch_tile_mode(false)
 	ev_stop_music()
 	edit_transition = max_edit_transition
 	edit_transition_display = display_instance

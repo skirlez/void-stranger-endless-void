@@ -5,6 +5,8 @@ if (room == global.pack_editor_room) {
 		remember_zoom = 0;
 		in_pack_editor = true;
 	}
+	
+
 
 	if global.void_radio_on
 		ev_play_void_radio()
@@ -14,6 +16,8 @@ if (room == global.pack_editor_room) {
 	zoom = remember_zoom;
 	calculate_zoom()
 	camera_set_view_pos(view_camera[0], remember_camera_x, remember_camera_y)
+
+
 
 	place_pack_into_room(global.pack)
 	ds_map_clear(node_state_to_id_map)
@@ -27,7 +31,9 @@ if (room == global.pack_editor_room) {
 		
 	save_timestamp = current_time
 }
-if (room != global.editor_room && room != global.pack_editor_room && room != global.pack_level_room && in_pack_editor) {
+if (room != global.editor_room && room != agi("rm_ev_after_erase")
+		&& room != global.pack_editor_room && room != global.pack_level_room && in_pack_editor) {
+	// TODO check if left pack editor in a better way
 	log_info("leaving pack editor")
 	ds_map_clear(node_state_to_id_map)
 	ds_map_clear(node_id_to_instance_map)

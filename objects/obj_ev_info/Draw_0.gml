@@ -1,7 +1,8 @@
-
+/*
 draw_set_font(global.ev_font)
 draw_set_halign(fa_left)
 draw_set_valign(fa_top)
+
 var long_text = 
 @"Controls:
 Use your mouse.

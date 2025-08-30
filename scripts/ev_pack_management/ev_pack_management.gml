@@ -9,6 +9,8 @@ function pack_struct() constructor {
 	
 	password_brand = int64(0)
 	
+	thumbnail_level = "";
+	
 	// this array contains enough nodes such that any node can be traversed to
 	// by starting from at least one of these.
 	starting_node_states = []
@@ -30,10 +32,17 @@ function place_pack_into_room(pack) {
 		// if node_id is undefined this still works out. don't worry about it
 		var node_id = ds_map_find_value(global.pack_editor.node_state_to_id_map, node_state)
 		var instance = node_state.create_instance(node_id);
+		
 		ds_map_set(explored_structs_map, node_state, instance);
 		for (var i = 0; i < array_length(node_state.exits); i++) {
 			var exit_instance = place_node_and_exits(node_state.exits[i], explored_structs_map)
-			array_push(instance.exit_instances, exit_instance)
+			if node_state.node == global.pack_editor.level_node {
+				// we have to check this as it could change when editing a level from the pack editor
+				if array_length(instance.exit_instances) < level_get_exit_count(node_state.properties.level)
+					array_push(instance.exit_instances, exit_instance)
+			}
+			else
+				array_push(instance.exit_instances, exit_instance)
 		}
 		return instance;
 	}
@@ -43,6 +52,7 @@ function place_pack_into_room(pack) {
 	}
 	ds_map_destroy(map);
 }
+
 
 // returns an array of all the starting nodes as structs with all the nodes they're connected to also converted to structs and linked to each other
 function convert_room_nodes_to_structs() {
@@ -98,11 +108,34 @@ function convert_room_nodes_to_structs() {
 
 function import_pack_nodeless(pack_string) {
 	var pack = new pack_struct();
-	var arr = ev_string_split_stop(pack_string, "&", 9)
-	pack.version = int64_safe(arr[0], 1);
-	if (pack.version == 1) {
-		array_insert(arr, 8, generate_ulid())	
+	var version = get_pack_version_from_string(pack_string)
+	if version == -1 || version > global.latest_pack_format {
+		log_error($"Invalid pack version for: {pack_string}")
+		return place_default_nodes(pack);
 	}
+	var stop;
+	if version == 1 {
+		stop = 8;
+	}
+	else {
+		stop = 10;
+	}
+	var arr = ev_string_split_stop(pack_string, "&", stop)
+	if (version == 1) {
+		if array_length(arr) != 8 {
+			log_error($"Wrong amount of sections: {pack_string}")
+			return place_default_nodes(pack)	
+		}
+		array_insert(arr, 8, generate_ulid())
+		array_insert(arr, 9, get_thumbnail_level_string_from_pack_string(pack_string))
+	}
+	else {
+		if array_length(arr) != 10 {
+			log_error($"Wrong amount of sections: {pack_string}")
+			return place_default_nodes(pack)	
+		}	
+	}
+	pack.version = version;
 	pack.name = base64_decode(arr[1])
 	pack.description = base64_decode(arr[2])
 	pack.author = base64_decode(arr[3])
@@ -111,47 +144,36 @@ function import_pack_nodeless(pack_string) {
 	pack.last_edit_date = arr[6];
 	pack.password_brand = int64_safe(base64_decode(arr[7]), 0);
 	pack.save_name = arr[8];
+	pack.thumbnail_level = arr[9];
 	return pack;
-}
-
-function place_default_nodes(pack) {
-	var root_node_state = new node_with_state(global.pack_editor.root_node, 270, 2160 / 2);
-	
-	var music_node_state = new node_with_state(global.pack_editor.music_node, 330, 2160 / 2, {
-		music : global.music_names[1]	
-	})
-	
-	connect_node_states(root_node_state, music_node_state)
-	
-	var level = new level_struct();
-	level.name = "Level!!"
-	level.bount = 1;
-	place_default_tiles(level);
-	strip_level_for_pack(level)
-	var level_node_state = new node_with_state(global.pack_editor.level_node, 
-	390 - global.level_node_display_scale * 224 / 2, 
-	2160 / 2 - global.level_node_display_scale * 144 / 2,
-	{
-		level : level,
-	});
-	connect_node_states(music_node_state, level_node_state)
-	
-	var end_node_state = new node_with_state(global.pack_editor.end_node, 450, 2160 / 2);
-	connect_node_states(level_node_state, end_node_state)
-	
-	array_push(pack.starting_node_states, root_node_state)
 }
 
 
 function import_pack(pack_string) {
 	var pack = new pack_struct();
-	
-	var arr = ev_string_split_buffer(pack_string, "&", string_length(pack_string))
-	pack.version = int64_safe(arr[0], 1);
-	if (pack.version == 1) {
-		array_insert(arr, 8, generate_ulid())	
+	var version = get_pack_version_from_string(pack_string)
+	if version == -1 || version > global.latest_pack_format {
+		log_error($"Invalid pack version for: {pack_string}")
+		return place_default_nodes(pack);
+	}
+
+	var arr = ev_string_split_buffer(pack_string, "&", string_length(pack_string));
+	if (version == 1) {
+		if array_length(arr) != 9 {
+			log_error($"Wrong amount of sections: {pack_string}")
+			return place_default_nodes(pack)	
+		}
+		array_insert(arr, 8, generate_ulid())
+		array_insert(arr, 9, get_thumbnail_level_string_from_pack_string(pack_string))
+	}
+	else {
+		if array_length(arr) != 11 {
+			log_error($"Wrong amount of sections: {pack_string}")
+			return place_default_nodes(pack)	
+		}	
 	}
 	
+	pack.version = version;
 	pack.name = base64_decode(arr[1])
 	pack.description = base64_decode(arr[2])
 	pack.author = base64_decode(arr[3])
@@ -160,7 +182,8 @@ function import_pack(pack_string) {
 	pack.last_edit_date = arr[6];
 	pack.password_brand = int64_safe(base64_decode(arr[7]), 0);
 	pack.save_name = arr[8];
-	var node_string = arr[9];
+	pack.thumbnail_level = arr[9];
+	var node_string = arr[10];
 	
 	var all_node_states = [];
 	
@@ -202,8 +225,7 @@ function import_pack(pack_string) {
 	
 	if array_length(pack.starting_node_states) == 0 {
 		log_error($"Trying to import invalid pack with no starting nodes: {pack_string}")
-		place_default_nodes(pack);
-		return pack;
+		return place_default_nodes(pack);
 	}
 	
 	// Find root node and put it in the first index
@@ -220,9 +242,40 @@ function import_pack(pack_string) {
 	if pack.starting_node_states[0].node != global.pack_editor.root_node {
 		log_error($"Tried to import invalid pack with no root node: {pack_string}")
 		pack.starting_node_states = []
-		place_default_nodes(pack);
+		return place_default_nodes(pack);
 	}
 	
+	return pack;
+}
+
+
+function place_default_nodes(pack) {
+	var root_node_state = new node_with_state(global.pack_editor.root_node, 270, 2160 / 2);
+	
+	var music_node_state = new node_with_state(global.pack_editor.music_node, 330, 2160 / 2, {
+		music : global.music_names[1]	
+	})
+	
+	connect_node_states(root_node_state, music_node_state)
+	
+	var level = new level_struct();
+	level.name = "Level!!"
+	level.bount = 1;
+	place_default_tiles(level);
+	strip_level_for_pack(level)
+	var level_node_state = new node_with_state(global.pack_editor.level_node, 
+	390 - global.level_node_display_scale * 224 / 2, 
+	2160 / 2 - global.level_node_display_scale * 144 / 2,
+	{
+		level : level,
+	});
+	connect_node_states(music_node_state, level_node_state)
+	
+	var end_node_state = new node_with_state(global.pack_editor.end_node, 450, 2160 / 2);
+	connect_node_states(level_node_state, end_node_state)
+	
+	array_push(pack.starting_node_states, root_node_state)
+	pack.thumbnail_level = export_level(level);
 	return pack;
 }
 
@@ -296,6 +349,7 @@ function export_pack_arr(pack) {
 	var last_edit_date_string = "";
 	var password_brand_string = base64_encode(string(pack.password_brand))
 	var ulid_string = pack.save_name;
+	var thumbnail_level_string = pack.thumbnail_level;
 	var node_string = ""
 	
 	
@@ -331,7 +385,7 @@ function export_pack_arr(pack) {
 	
 	return [version_string, name_string, description_string, author_string, 
 			author_brand_string, upload_date_string, last_edit_date_string, 
-			password_brand_string, ulid_string, node_string]
+			password_brand_string, ulid_string, thumbnail_level_string, node_string]
 	
 }
 
@@ -380,12 +434,106 @@ function get_thumbnail_level_string_from_pack_string(pack_string) {
 	// fuck
 	return noone;
 }
+function get_thumbnail_level_from_nodes(starting_node_states) {
+	var is_level = function (node_state) {
+		return node_state.node == global.pack_editor.level_node
+	}
+	var map = ds_map_create();
+	
+	// try thumbnail node first
+	for (var i = 1; i < array_length(starting_node_states); i++) {
+		if starting_node_states[i].node == global.pack_editor.thumbnail_node {
+			maybe = find_node_state_statisfies_condition(starting_node_states[i], is_level, map)
+			if maybe != noone {
+				ds_map_destroy(map)
+				return maybe.properties.level;
+			}
+			break;
+		}
+	}
+	
+	// then root
+	var root = starting_node_states[0];
+	var maybe = find_node_state_statisfies_condition(root, is_level, map)
+	if maybe != noone {
+		ds_map_destroy(map)
+		return maybe.properties.level;
+	}
+	
+	
+	// freak the fuck out and panic sell everything RIGHT NOW. it's fucking OVER.
+	for (var i = 0; i < array_length(starting_node_states); i++) {
+		maybe = find_node_state_statisfies_condition(starting_node_states[i], is_level, map)
+		if maybe != noone {
+			ds_map_destroy(map)
+			return maybe.properties.level;
+		}
+	}
+	ds_map_destroy(map)
+	
+	// should be impossible
+	return place_default_tiles(new level_struct());
+	
+}
 
-function read_pack_string_from_file(save_name) {
+
+function get_pack_version_from_string(pack_string) {
+	return int64_safe(read_string_until(pack_string, 1, "|").substr, -1)
+}
+
+function read_pack_string_from_file_unbuffered(save_name) {
 	var file = file_text_open_read(global.packs_directory + save_name + "." + pack_extension)
 	if file == -1
 		return file;
 	var pack_string = file_text_read_string(file)
 	file_text_close(file)
-	return pack_string;
+	return pack_string
+}
+
+function read_pack_string_from_file(save_name, skip_nodes_section = false) {
+	if skip_nodes_section {
+		var load_amount = 150;
+		var size = load_amount;
+		// one more for null byte
+		var buffer = buffer_create(size + 1, buffer_fixed, buffer_u8)
+		try {
+			buffer_load_partial(buffer, global.packs_directory + save_name + "." + pack_extension,
+				0, load_amount, 0)
+			var separators_seen = 0;
+			var version = buffer_read(buffer, buffer_u8) - ord("0")
+			if version == 1 {
+				// we can't, thumbnail level isn't stored in a section in this version
+				buffer_delete(buffer);
+				return read_pack_string_from_file_unbuffered(save_name)
+			}
+			var separators_amount = 10;
+			
+			while (separators_seen < separators_amount) {
+				if buffer_tell(buffer) >= size {
+					buffer_resize(buffer, size + load_amount + 1)	
+					buffer_load_partial(buffer, global.packs_directory + save_name + "." + pack_extension,
+						size, load_amount, size)
+					size += load_amount;
+				}
+				var char = buffer_read(buffer, buffer_u8)
+				if char == 0 {
+					// incomplete pack?
+					break;
+				}
+				if char == ord("&")
+					separators_seen++;
+			}
+			buffer_write(buffer, buffer_u8, 0);
+			buffer_seek(buffer, buffer_seek_start, 0);
+			var pack_string = buffer_read(buffer, buffer_string)
+			buffer_delete(buffer)
+			return pack_string;
+		}
+		catch (e) {
+			log_info("errored " + e)
+			buffer_delete(buffer)
+			return read_pack_string_from_file_unbuffered(save_name);
+		}
+	}
+	return read_pack_string_from_file_unbuffered(save_name);
 }

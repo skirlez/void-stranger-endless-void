@@ -7,12 +7,18 @@
     {"resourceType":"GMEvent","resourceVersion":"1.0","name":"","collisionObjectId":null,"eventNum":0,"eventType":0,"isDnD":false,},
   ],
   "managed": true,
-  "overriddenProperties": [],
+  "overriddenProperties": [
+    {"resourceType":"GMOverriddenProperty","resourceVersion":"1.0","name":"","objectId":{"name":"obj_ev_window","path":"objects/obj_ev_window/obj_ev_window.yy",},"propertyId":{"name":"add_x","path":"objects/obj_ev_window/obj_ev_window.yy",},"value":"False",},
+    {"resourceType":"GMOverriddenProperty","resourceVersion":"1.0","name":"","objectId":{"name":"obj_ev_window","path":"objects/obj_ev_window/obj_ev_window.yy",},"propertyId":{"name":"layer_num","path":"objects/obj_ev_window/obj_ev_window.yy",},"value":"0",},
+  ],
   "parent": {
     "name": "Objects",
     "path": "folders/Objects.yy",
   },
-  "parentObjectId": null,
+  "parentObjectId": {
+    "name": "obj_ev_window",
+    "path": "objects/obj_ev_window/obj_ev_window.yy",
+  },
   "persistent": false,
   "physicsAngularDamping": 0.1,
   "physicsDensity": 0.5,

@@ -38,7 +38,7 @@ This does not apply to animation curves, as Void Stranger never uses them, and s
 
 ## License
 The code, with some exceptions, is licensed under the terms of the AGPLv3.
-Exceptions being `gml_Object_obj_chest_small_Step_0.gml`, `gml_Object_obj_chest_small_Draw_0.gm`, `gml_Object_obj_floor_memory1_Create_0.gml`, `gml_Object_obj_floor_memory2_Create_0.gml`, `gml_Object_obj_floor_memory3_Create_0.gml`, `gml_Object_obj_player_Step_0.gml`, and `gml_Object_obj_inventory_Create_0.gml`
+Exceptions being `gml_Object_obj_chest_small_Step_0.gml`, `gml_Object_obj_chest_small_Draw_0.gm`, `gml_Object_obj_floor_memory1_Create_0.gml`, `gml_Object_obj_floor_memory2_Create_0.gml`, `gml_Object_obj_floor_memory3_Create_0.gml`, `gml_Object_obj_player_Step_0.gml`, `gml_Object_obj_menu_Draw_0` and `gml_Object_obj_inventory_Create_0.gml`
 all in the patches folder, since they are mostly copied decompiled code.
 
 ## Contributing

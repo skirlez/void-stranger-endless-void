@@ -13,10 +13,22 @@ save_button = instance_create_layer(30, 20, "WindowElements", agi("obj_ev_execut
 			commit()
 		if (global.pack.name == "") {
 			ev_notify("Cannot save a pack\nwithout a name.")
-			exit;
+			return;
+		}
+		var nodes = get_all_node_instances();
+		var has_level = false;
+		for (var i = 0; i < array_length(nodes); i++) {
+			if nodes[i].node_type == global.pack_editor.level_node
+				has_level = true;
+		}
+		if !has_level {
+			ev_notify("Cannot save a pack\nwithout any levels.")
+			return;
 		}
 		var starting_nodes = convert_room_nodes_to_structs()
 		global.pack.starting_node_states = starting_nodes;
+		var thumbnail = get_thumbnail_level_from_nodes(starting_nodes);
+		global.pack.thumbnail_level = export_level(thumbnail);
 		if save_pack(global.pack) {
 			ev_notify("Pack saved!")
 			global.pack_editor.save_timestamp = current_time;	

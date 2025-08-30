@@ -234,6 +234,8 @@ function import_process_tiles(tile_string, level, height, failsafe_tile, version
 	var tile_pointer = 1
 	var i = 0;
 	var j = 0;
+	var arr = failsafe_tile.editor_type == editor_types.tile ? 
+		level.tiles : level.objects;
 	while (tile_pointer < string_length(tile_string)) {
 		var tile_id = string_copy(tile_string, tile_pointer, 2)
 		tile_pointer += 2
@@ -248,16 +250,19 @@ function import_process_tiles(tile_string, level, height, failsafe_tile, version
 		tile_pointer += offset;
 			
 		var result = get_multiplier(tile_string, tile_pointer);
-		
 		var mult = result.mult;
 		tile_pointer += result.offset;
 		
-		repeat (mult) {
-			if (tile.editor_type == editor_types.tile)
-				level.tiles[@ i][j] = new tile_with_state(state.tile, struct_copy(state.properties))
-			else
-				level.objects[@ i][j] = new tile_with_state(state.tile, struct_copy(state.properties))
-			
+		arr[@ i][j] = new tile_with_state(state.tile, state.properties)
+		j++;
+		if (j >= 14) {
+			j = 0;
+			i++;
+			if (i > height)
+				return;
+		}
+		repeat (mult - 1) {
+			arr[@ i][j] = new tile_with_state(state.tile, struct_copy(state.properties))
 			j++;
 			if (j >= 14) {
 				j = 0;
@@ -270,8 +275,9 @@ function import_process_tiles(tile_string, level, height, failsafe_tile, version
 }
 
 function get_multiplier(str, pointer) {
+	static no_multiplier = { mult : 1, offset : 0 };
 	if string_copy(str, pointer, 1) != MULTIPLIER_CHAR
-		return { mult : 1, offset : 0};
+		return no_multiplier;
 	var num_string = "";
 	var count = 1;
 	while (true) {

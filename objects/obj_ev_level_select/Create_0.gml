@@ -255,7 +255,7 @@ function read_offline_levels() {
 		nodeless_packs = array_create(array_length(files));
 		var offline_levels = array_create(array_length(files));
 		for (var i = 0; i < array_length(files); i++) {
-			var pack_string = read_pack_string_from_file(files[i])
+			var pack_string = read_pack_string_from_file(files[i], true)
 			if !is_string(pack_string) {
 				array_delete(nodeless_packs, i, 1)
 				array_delete(files, i, 1)
@@ -267,9 +267,8 @@ function read_offline_levels() {
 			pack.save_name = files[i];
 			
 			nodeless_packs[i] = pack;
-			
-			lvl_string = get_thumbnail_level_string_from_pack_string(pack_string);
-			offline_levels[i] = lvl_string
+		
+			offline_levels[i] = pack.thumbnail_level
 		}
 		return offline_levels
 	}

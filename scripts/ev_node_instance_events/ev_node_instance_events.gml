@@ -1,3 +1,8 @@
+/*
+Most of the logic for all nodes is in node_instance functions, but it could be taken out into this object's events
+(it's only like this because previously the level node couldn't inherit from the node object
+so this should probably be done now)
+*/
 function node_instance_setup(max_exits = 999, can_connect_to_me = true, center_x_offset = 0, center_y_offset = 0, animate = false) {
 	id.max_exits = max_exits;
 	id.can_connect_to_me = can_connect_to_me;
@@ -30,6 +35,11 @@ function node_instance_setup(max_exits = 999, can_connect_to_me = true, center_x
 	center_x_offset_start = center_x_offset;
 	center_y_offset_start = center_y_offset;
 	
+	no_culling = false;
+	cull_left = 20;
+	cull_right = 20;
+	cull_top = 20;
+	cull_bottom = 20;
 	
 	x_when_started_moving = x;
 	y_when_started_moving = y;
@@ -434,6 +444,11 @@ function node_instance_step() {
 		shake_seconds -= 1/60;
 		shake_x_offset = sin(16 * shake_seconds * pi) * 3;
 	}
+	visible = no_culling || !(x < camera_get_view_x(view_camera[0]) - cull_left
+		|| x > camera_get_view_x(view_camera[0]) + camera_get_view_width(view_camera[0]) + cull_right
+		|| y < camera_get_view_y(view_camera[0]) - cull_top
+		|| y > camera_get_view_y(view_camera[0]) + camera_get_view_height(view_camera[0]) + cull_bottom)
+
 }
 
 function node_instance_destroy() {

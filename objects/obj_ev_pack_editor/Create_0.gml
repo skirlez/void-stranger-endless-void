@@ -166,7 +166,7 @@ function node_struct(node_id, object_name, flags = 0, layer_name = "Nodes") cons
 
 	// called when wrench is used
 	// params: (node_instance)
-	self.on_config = global.editor.empty_function;
+	self.on_config = empty_function;
 	
 	self.on_death = function (node_instance) {
 		audio_play_sound(agi("snd_ev_node_destroy"), 10, false, global.pack_zoom_gain, 0, random_range(0.9, 1.1))
@@ -184,7 +184,7 @@ function node_struct(node_id, object_name, flags = 0, layer_name = "Nodes") cons
 	// used by nodes that can't immediately tell you where to go in the pack,
 	// like levels, since they have to wait for you to complete the level
 	// doesn't return anything
-	self.play_evaluate = global.editor.empty_function;
+	self.play_evaluate = empty_function;
 	
 	self.flags = flags;
 }

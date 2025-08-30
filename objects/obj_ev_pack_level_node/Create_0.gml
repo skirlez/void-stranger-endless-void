@@ -1,12 +1,10 @@
 image_xscale = global.level_node_display_scale
 image_yscale = global.level_node_display_scale
 
-if global.editing_pack_level && global.editing_pack_level_nid == node_id {
-	properties.level = global.level;
-	global.editing_pack_level = false;
-}
-
 node_instance_setup(level_get_exit_count(properties.level), true, 112 * image_xscale, 72 * image_yscale)
+// no need
+no_culling = false;
+
 
 display = instance_create_layer(x, y, "PackLevels", global.display_object, 
 { 
@@ -30,6 +28,7 @@ function sync_display_with_me() {
 	
 }
 sync_display_with_me()
+sync_in_step = true;
 
 function sync_display_level() {
 	display.lvl = properties.level;

@@ -200,6 +200,8 @@ vanilla_options = instance_create_layer(139, 120, "Instances", agi("obj_ev_execu
 	base_scale_y : 0.7,
 	func : function () {
 		if global.is_merged {
+			// makes burdens menu hidden
+			ev_prepare_level_burdens()
 			with (agi("obj_pause")) {
 	            agi("obj_menu").image_speed = 0
 			    agi("obj_menu").menu_art_x = 160
@@ -214,9 +216,13 @@ vanilla_options = instance_create_layer(139, 120, "Instances", agi("obj_ev_execu
 		        transition = true
 		        alarm[4] = 80
 			}
+			
+			// used in step to restore mouse_layer once options menu is gone
 			window.in_options = true;
 			global.mouse_layer = 1;
 		}
+		else
+			audio_play_sound(snd_reveal, 10, false)
 	}
 })
 add_child(vanilla_options)

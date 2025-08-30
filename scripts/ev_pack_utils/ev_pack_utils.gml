@@ -23,6 +23,8 @@ function ev_draw_pack_line(x1, y1, x2, y2, number = 0) {
 	// t is between 0-1 so we multiply by pi
 	var scale = power(sin(t * pi), 1/3)
 	
+	
+	
 	draw_sprite_ext(arrow_sprite, 0, pos_x + 0.5, pos_y + 0.5, scale, scale, angle, c_white, 1)
 	if number > 0 {
 		draw_set_halign(fa_center)
@@ -30,21 +32,24 @@ function ev_draw_pack_line(x1, y1, x2, y2, number = 0) {
 		draw_set_font(global.ev_font)
 		draw_set_color(c_white)
 		var number_t = get_pack_line_number_progress()
+		var number_scale = power(sin(number_t * pi), 1/3)
 		var number_pos_x = lerp(x1, x2, number_t)
 		var number_pos_y = lerp(y1, y2, number_t)
-		draw_text_shadow(number_pos_x, number_pos_y, string(number), c_black);
+		draw_shadow_generic(number_pos_x, number_pos_y, function (pos_x, pos_y, params) {
+			draw_text_transformed(pos_x, pos_y, string(params.number), params.scale, params.scale, 0);
+		}, {
+			number : number,
+			scale : number_scale,
+		}, c_black, number_scale)
 	}
-	/*
-	draw_set_halign(fa_center)
-	draw_set_valign(fa_middle)
-	draw_set_color(c_white)
-	draw_text_ext_transformed(
-		pos_x + 9 * dcos(angle_target + 90), 
-		pos_y - 9 * dsin(angle_target + 90) - 4, "1", 0, 300, scale * 0.5, scale * 0.5, 0)
-	*/
+
 }
 
 function get_pack_line_arrow_progress() {
+	static cache = 0;
+	static last_requested = global.editor_time - 1;
+	if last_requested == global.editor_time
+		return cache;
 	var bpm = ev_get_track_bpm(global.music_file, audio_sound_get_track_position(global.music_inst));
 	
 	var t;
@@ -60,7 +65,9 @@ function get_pack_line_arrow_progress() {
 	}
 	
 	t += global.pack_editor.pack_arrow_boost;
-	return t % 1;
+	cache = t % 1;
+	last_requested = global.editor_time;
+	return cache;
 }
 function get_pack_line_number_progress() {
 	var t = get_pack_line_arrow_progress() - 0.15;
