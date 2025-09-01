@@ -20,7 +20,7 @@ function ev_get_elysium_music_gameplay() {
 		if (ds_grid_get(ds_equipment, 0, 0) == 1)
 			index++
 	}
-	return index;
+	return global.elysium_tracks[index];
 }
 
 
@@ -30,15 +30,7 @@ function ev_is_music_elysium(track) {
 function ev_is_elysium_music_playing() {
 	for (var i = 0; i < 4; i++) {
 		if audio_is_playing(global.elysium_tracks[i])
-			return true
+			return true;
 	}
-	return false
-}
-// called from gml_Object_obj_chest_small_Alarm_0
-function after_chest_opened() {
-	if ev_is_elysium_music_playing() && contents == 2 || contents == 3 or contents == 4 {
-		var pos = audio_sound_get_track_position(global.music_inst)
-		ev_play_music(ev_get_elysium_music_gameplay(), true, true)
-		audio_sound_set_track_position(global.music_inst, pos);
-	}
+	return false;
 }

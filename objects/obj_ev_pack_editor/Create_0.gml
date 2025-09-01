@@ -329,7 +329,6 @@ music_node.on_config = function (node_instance) {
 }
 music_node.play_evaluate_immediate = function (node_state) {
 	if !global.pack_parameters.tis && !ev_is_music_playing(agi(node_state.properties.music)) {
-		ev_get_elysium_music()
 		ev_play_music(agi(node_state.properties.music), true, false)
 	}
 	return first_or_error(node_state.exits);

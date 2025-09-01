@@ -1,7 +1,7 @@
 {
   "resourceType": "GMScript",
   "resourceVersion": "1.0",
-  "name": "ev_on_chest_collected",
+  "name": "ev_after_chest_opened",
   "isCompatibility": false,
   "isDnD": false,
   "parent": {
