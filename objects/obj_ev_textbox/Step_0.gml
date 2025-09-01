@@ -190,7 +190,6 @@ pos_y = lerp(start_y, opened_y, t)
 offset_y = lerp(0, offset_y_opened, t)
 update_position()
 
-// TODO REMOVE THIS
 if global.allow_moving_elements && mouse_check_button(mb_middle) && ev_is_mouse_on_me() {
 	start_x = mouse_x
 	start_y = mouse_y

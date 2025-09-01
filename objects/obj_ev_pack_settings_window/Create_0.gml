@@ -82,5 +82,16 @@ password_brand = instance_create_layer(32, 110, "WindowElements", agi("obj_ev_ma
 })
 add_child(password_brand)
 
+password_brand_explanation = instance_create_layer(80, 110, "WindowElements", agi("obj_ev_textbox"), 
+{
+	txt : "The brand on the left will be used as the pack's password. If filled, players will have to enter this brand in order to edit the pack.",
+	char_limit : 0,
+	allow_deletion : false,
+	base_scale_x : 2,
+	opened_x : 112,
+	opened_y : 72,
+})
+add_child(password_brand_explanation)
+
 
 elements_depth = layer_get_depth("WindowElements")

@@ -1749,7 +1749,8 @@ function on_server_validate_startup(valid_str) {
 	for (var i = 1; i <= string_length(valid_str); i++) {
 		var char = string_char_at(valid_str, i)
 		if (char == "0") {
-			file_delete(global.levels_directory + uploaded_levels[arr_ind] + ".key")
+			// really no need to do that
+			//file_delete(global.levels_directory + uploaded_levels[arr_ind] + ".key")
 			array_delete(uploaded_keys, arr_ind, 1)
 			array_delete(uploaded_levels, arr_ind, 1)
 		}
@@ -1759,8 +1760,6 @@ function on_server_validate_startup(valid_str) {
 	for (var i = 0; i < array_length(uploaded_keys); i++) {
 		add_level_key(uploaded_keys[i], uploaded_levels[i])	
 	}
-		
-
 }
 
 has_been_to_pretitle = false

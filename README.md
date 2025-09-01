@@ -3,6 +3,8 @@ Endless Void is a fully functional level builder for Void Stranger.
 
 You can create your own levels with it, and upload them to a server (a [Voyager](https://github.com/hexfae/voyager) instance).
 
+You can also build non-linear level packs.
+
 This repository contains:
 - Its GameMaker project file
 - batch/shell/UndertaleModTool scripts necessary for development and merging (in `/projectscripts/`)

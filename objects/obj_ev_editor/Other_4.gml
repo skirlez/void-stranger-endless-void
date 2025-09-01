@@ -19,6 +19,12 @@ if room == agi("rm_ev_editor") {
 	if (!ev_is_music_playing(agi(global.level.music))) {
 		ev_play_music(agi(global.level.music))
 	}
+	else if ev_is_elysium_music_playing() 
+			&& global.music_file != ev_get_elysium_music(global.level) {
+		var pos = audio_sound_get_track_position(global.music_inst)
+		ev_play_music(ev_get_elysium_music(global.level), true, true)
+		audio_sound_set_track_position(global.music_inst, pos);
+	}
 }
 else {
 	var quill = agi("obj_quill")

@@ -32,6 +32,13 @@ enum pack_things {
 }
 
 node_instance_changing_places = noone;
+placechanger_copying_sound = noone;
+placechanger_copying_timer = 0;
+placechanger_animation_instance = noone;
+placechanger_copying_max = 41;
+
+frames_since_drag = 0;
+distance_travelled_drag = 0;
 
 select_tool_happening = new ev_happening();
 function select(thing) {
@@ -128,8 +135,12 @@ default_reader = function (properties_str /*, version */) {
 	return { value : global.empty_struct, offset : 0 };
 }
 // write node properties to string
-default_writer = function (node_state, node_index_map) {
+default_writer = function (properties) {
 	return "";
+}
+// copy node properties
+default_copier = function (properties) {
+	return struct_copy(properties);	
 }
 
 
@@ -162,6 +173,7 @@ function node_struct(node_id, object_name, flags = 0, layer_name = "Nodes") cons
 	
 	self.read_function = global.pack_editor.default_reader;
 	self.write_function = global.pack_editor.default_writer;
+	self.copy_function = global.pack_editor.default_copier;
 
 
 	// called when wrench is used
@@ -201,7 +213,7 @@ enum node_return_status {
 }
 
 
-root_node = new node_struct("ro", "obj_ev_pack_root", node_flags.unremovable);
+root_node = new node_struct("ro", "obj_ev_pack_root", node_flags.unremovable|node_flags.only_one);
 root_node.play_evaluate_immediate = function (node_state) {
 	global.ev_fall_down_next_level = node_state.properties.fall;
 	return first_or_error(node_state.exits);
@@ -256,6 +268,10 @@ level_node.read_function = function (properties_str /*, version */) {
 level_node.write_function = function (properties) {
 	return export_level(properties.level)
 }
+level_node.copy_function = function (properties) {
+	// silly, could probably be done properly
+	return { level : import_level(export_level(properties.level)) }	
+}
 level_node.play_evaluate = function (node_state) {
 	global.level = node_state.properties.level;
 	ev_prepare_level_visuals(global.level)
@@ -270,6 +286,7 @@ level_node.play_evaluate = function (node_state) {
 			global.cc_medalstate = 2		
 		}
 		var should_create_memory = !ds_map_exists(pack_memories, global.level.name)
+			&& !global.pack_parameters.tis
 		ev_place_level_instances(global.level, should_create_memory)
 		if is_first_level {
 			instance_create_layer(x, y, "Effects", agi("obj_darkness_begins"))
@@ -311,8 +328,10 @@ music_node.on_config = function (node_instance) {
 	});
 }
 music_node.play_evaluate_immediate = function (node_state) {
-	if !global.pack_parameters.tis
+	if !global.pack_parameters.tis && !ev_is_music_playing(agi(node_state.properties.music)) {
+		ev_get_elysium_music()
 		ev_play_music(agi(node_state.properties.music), true, false)
+	}
 	return first_or_error(node_state.exits);
 }
 
@@ -496,3 +515,5 @@ pack_arrow_boost = pack_arrow_boost_max;
 function boost_pack_arrow() {
 	pack_arrow_boost = 0;
 }
+
+global.pack_level_preferred_music = global.music_names[1];

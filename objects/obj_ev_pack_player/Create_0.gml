@@ -30,6 +30,7 @@ function move_to_root_state() {
 
 function move_to_node_state(state) {
 	var failsafe = 200;
+	var time_failsafe = current_time;
 	var potential_next_state = state;
 	do {
 		current_node_state = potential_next_state;
@@ -37,6 +38,11 @@ function move_to_node_state(state) {
 		failsafe--;
 		if failsafe <= 0 {
 			ev_notify("Loop detected! Exiting pack")	
+			ev_leave_pack()
+			return;
+		}
+		if current_time - time_failsafe > 3000 {
+			ev_notify("Node evaluation took too long")	
 			ev_leave_pack()
 			return;
 		}

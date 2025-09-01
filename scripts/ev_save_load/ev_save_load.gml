@@ -267,7 +267,7 @@ function apply_pack_save(save) {
 	global.branefuck_persistent_memory = save.persistent_memory;
 	var track = agi(save.music);
 	if track != -1 {
-		ev_play_music(agi(save.music), true, false)
+		ev_play_music(agi(save.music), true, true)
 	}
 	// TODO: remove these, temporary
 	if !variable_struct_exists(save, "total_locusts_collected")

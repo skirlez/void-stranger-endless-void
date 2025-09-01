@@ -36,10 +36,10 @@ function node_instance_setup(max_exits = 999, can_connect_to_me = true, center_x
 	center_y_offset_start = center_y_offset;
 	
 	no_culling = false;
-	cull_left = 20;
-	cull_right = 20;
-	cull_top = 20;
-	cull_bottom = 20;
+	cull_left = 35;
+	cull_right = 35;
+	cull_top = 25;
+	cull_bottom = 25;
 	
 	x_when_started_moving = x;
 	y_when_started_moving = y;
@@ -200,6 +200,7 @@ function node_instance_step() {
 				static wrench_sound = agi("snd_ev_use_wrench");
 				node_type.on_config(id);	
 				
+				// TODO: use copy_function?
 				var properties_string = node_type.write_function(properties)
 				
 				audio_play_sound(wrench_sound, 10, false, global.pack_zoom_gain, 0, random_range(0.9, 1.1))
@@ -288,34 +289,13 @@ function node_instance_step() {
 							if do_effects {
 								audio_play_sound(agi("snd_ev_use_placechanger"), 10, false, global.pack_zoom_gain)
 
-								function do_particles(from, to) {
-									static particle = agi("obj_ev_placechanger_particle")
-									var offset = random_range(-5, 5)
-									repeat (irandom_range(8, 10)) {
-										var angle = point_direction(from.center_x, from.center_y, to.center_x, to.center_y) + random_range(-40, 40) + offset
-										instance_create_layer(to.center_x, to.center_y, "Effects", particle, {
-											hspeed : random_range(3, 6) * dcos(angle),
-											vspeed : -random_range(3, 6) * dsin(angle)
-										})
-									}	
-								}
-								do_particles(one, two)
-								do_particles(two, one)
+								do_placechanger_explosion_particles(one, two)
+								do_placechanger_explosion_particles(two, one)
 								
 								
-								var current_x = one.center_x
-								var current_y = one.center_y
-								var step_x = (two.center_x - one.center_x) / 15
-								var step_y = (two.center_y - one.center_y) / 15
-								repeat (15) {
-									var angle = random_range(0, 360)
-									instance_create_layer(current_x, current_y, "Effects", agi("obj_ev_placechanger_particle"), {
-										hspeed : 2 * dcos(angle),
-										vspeed : -2 * dsin(angle)
-									})
-									current_x += step_x;
-									current_y += step_y;
-								}
+
+								do_placechanger_line_particles(one, two)
+			
 							}
 						}
 						try_change_node_places(id, global.pack_editor.node_instance_changing_places, true)
@@ -352,6 +332,7 @@ function node_instance_step() {
 			}
 		}
 	}
+
 	
 	if being_judged && global.pack_editor.selected_thing != pack_things.hammer
 		being_judged = false;

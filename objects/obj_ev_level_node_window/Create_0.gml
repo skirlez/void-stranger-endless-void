@@ -109,7 +109,7 @@ var edit = instance_create_layer(x + 55, y + 5, "WindowElements", agi("obj_ev_ex
 		}
 		
 		global.editor.edit_level_transition(lvl, display)
-		lvl.music = global.music_names[1];
+		lvl.music = global.pack_level_preferred_music;
 		global.void_radio_disable_stack++;
 		//room_goto(global.editor_room)
 	}

@@ -7,6 +7,7 @@ function ev_on_pack_cif_reset(){
 	pack_player.move_to_root_state();
 	if global.pack_parameters.tis {
 		ev_play_music(agi("msc_stg_extraboss"), true, false)
+		instance_destroy(agi("obj_cc_medal"))
 		ev_set_tis_up()
 	}
 }

@@ -6,7 +6,14 @@ function commit() {
 			global.level.name = name_textbox.txt
 			global.level.description = description_textbox.txt
 		}
+		else {
+			global.pack_level_preferred_music = global.music_names[music_select.index];
+		}
+		
+		// this is stripped once we leave the level anyway if we're editing a pack level, it is just done because
+		// the editor expects it
 		global.level.music = global.music_names[music_select.index]
+		
 		for (var i = 0; i < 5; i++) {
 			global.level.burdens[i] = burdens[i].image_index
 		}
@@ -42,7 +49,15 @@ music_select = instance_create_layer(112 + 48, 72 + 4, "WindowElements", agi("ob
 })
 add_child(music_select)
 
+elements_depth = layer_get_depth("WindowElements")
+
+
+
 if global.editing_pack_level {
+	var man1 = instance_create_depth(112 + 39, 72 - 14, elements_depth - 1, agi("obj_ev_man"))
+	add_child(man1)
+	var man2 = instance_create_depth(112 + 48, 72 - 14, elements_depth - 1, agi("obj_ev_man"))
+	add_child(man2)
 	leave_button = instance_create_layer(112 - 35, 72 - 20, "WindowElements", agi("obj_ev_executing_button"), 
 	{
 		txt : "LEAVE",
@@ -53,6 +68,7 @@ if global.editing_pack_level {
 			global.editing_pack_level_properties.level = global.level;
 			global.editing_pack_level = false;
 			global.void_radio_disable_stack--;
+			global.pack_level_preferred_music = global.music_names[window.music_select.index];
 			room_goto(global.pack_editor_room)	
 		}
 	})
@@ -60,9 +76,12 @@ if global.editing_pack_level {
 	exit;
 }
 
+var man = instance_create_depth(112 + 43, 72 - 14, elements_depth - 1, agi("obj_ev_man"))
+add_child(man)
 
 
-elements_depth = layer_get_depth("WindowElements")
+
+
 save_button = instance_create_layer(112 - 65, 72 - 34, "WindowElements", agi("obj_ev_save_button"), 
 {
 	txt : "Save",
@@ -114,8 +133,6 @@ add_child(name_textbox)
 add_child(description_textbox)
 	
 
-var man = instance_create_depth(112 + 43, 72 - 14, elements_depth - 1, agi("obj_ev_man"))
-add_child(man)
 
 
 var claim_button = instance_create_layer(112 + 46, 72 + 40, "WindowElements", agi("obj_ev_executing_button"), {

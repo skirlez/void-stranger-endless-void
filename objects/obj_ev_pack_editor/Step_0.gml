@@ -13,26 +13,34 @@ if global.void_radio_on {
 		ev_play_void_radio()
 	}
 }
-if	((ev_mouse_pressed() && global.instance_touching_mouse == noone) || mouse_check_button_pressed(mb_middle)) 
+if ((ev_mouse_pressed() && global.instance_touching_mouse == noone) || mouse_check_button_pressed(mb_middle)) 
 		&& (global.mouse_layer == 0 || selected_thing == pack_things.wrench) {
 	dragging_camera = true;
+	frames_since_drag = -1;
+	distance_travelled_drag = 0;
 }
-else if ev_mouse_released() || mouse_check_button_released(mb_middle)
+else if ev_mouse_released() || mouse_check_button_released(mb_middle) {
 	dragging_camera = false;
+}
 
 if dragging_camera {
+	frames_since_drag++;
+	distance_travelled_drag += sqrt((previous_mouse_x - mouse_x) * (previous_mouse_x - mouse_x)
+		+ (previous_mouse_y - mouse_y) * (previous_mouse_y - mouse_y));
+	
 	var cam_x = camera_get_view_x(view_camera[0])
 	var cam_y = camera_get_view_y(view_camera[0])
 	
 	var cam_width = camera_get_view_width(view_camera[0])
 	var cam_height = camera_get_view_height(view_camera[0])
 	
-	
 	var target_x = clamp(cam_x + previous_mouse_x - mouse_x, 0, room_width - cam_width)
 	var target_y = clamp(cam_y + previous_mouse_y - mouse_y, 0, room_height - cam_height)
 	
 	camera_set_view_pos(view_camera[0], target_x, target_y)
+	
 }
+
 
 previous_mouse_x = mouse_x;
 previous_mouse_y = mouse_y;
@@ -150,6 +158,62 @@ if global.mouse_layer == 0 {
 		else {
 			undo_repeat = -1	
 			undo_repeat_frames_speed = 0
+		}
+	}
+	var not_moving = frames_since_drag == 5 && distance_travelled_drag <= 2
+	var valid_copy = instance_exists(node_instance_changing_places) && 
+		node_instance_changing_places.node_type.flags & node_flags.only_one == 0
+	if selected_thing == pack_things.placechanger && !instance_exists(global.instance_touching_mouse) 
+			&& instance_exists(node_instance_changing_places) 
+			&& dragging_camera && not_moving
+			&& placechanger_copying_timer == 0 {
+		if valid_copy {
+			placechanger_copying_timer = placechanger_copying_max;
+			placechanger_copying_sound = audio_play_sound(agi("snd_ev_copy_placechanger"), 10, false, global.pack_zoom_gain)
+			placechanger_animation_instance = instance_create_layer(mouse_x, mouse_y, "Effects", agi("obj_ev_placechanger_copy_animation"))
+		}
+		else if instance_exists(node_instance_changing_places) {
+			node_instance_changing_places.shake_seconds = 0.5;
+			audio_play_sound(agi("snd_lorddamage"), 10, false, global.pack_zoom_gain);	
+		}
+	}
+}
+
+
+
+if placechanger_copying_timer > 0 {
+	if !ev_mouse_held() 
+			|| global.mouse_layer != 0 
+			|| selected_thing != pack_things.placechanger
+			|| !instance_exists(node_instance_changing_places) {
+		placechanger_copying_timer = 0;
+		audio_stop_sound(placechanger_copying_sound)
+		instance_destroy(placechanger_animation_instance)
+	}
+	else {
+		placechanger_copying_timer--;
+		if placechanger_copying_timer == 0 {
+			var node_state = get_node_state_from_instance(node_instance_changing_places);
+			node_state.pos_x = mouse_x - node_instance_changing_places.center_x_offset;
+			node_state.pos_y = mouse_y - node_instance_changing_places.center_y_offset;
+			// funny line. proper way to do this would be implementing copy for every property,
+			// but i don't feel like it
+			node_state.properties = node_state.node.copy_function(node_state.properties)
+			if node_state.node == global.pack_editor.level_node {
+				try_level_name_and_rename(node_state.properties.level, get_all_level_node_instances())	
+			}
+			var copy = node_state.create_instance()
+			
+			do_placechanger_explosion_particles(node_instance_changing_places, copy);
+			do_placechanger_line_particles(node_instance_changing_places, copy);
+			
+			node_instance_changing_places = noone;
+			add_undo_action(function (args) {
+				var copy = ds_map_find_value(node_id_to_instance_map, args.node_id)
+				instance_destroy(copy)
+			}, {
+				node_id : copy.node_id,
+			})
 		}
 	}
 }

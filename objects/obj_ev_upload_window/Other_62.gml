@@ -1,7 +1,10 @@
 if ds_map_find_value(async_load, "id") == post_level_id
 {
 	var http_status = ds_map_find_value(async_load, "http_status");
-	if ds_map_find_value(async_load, "status") == 0
+	if ds_map_find_value(async_load, "status") == 1 {
+		log_info("Got status 1 for POSTing a level, assuming there will be another response, I HOPE")	
+	}
+	else if ds_map_find_value(async_load, "status") == 0
 	{
 		if (http_status == 201) {
 			var key = ds_map_find_value(async_load, "result");

@@ -211,3 +211,30 @@ function find_music_for_node_state(state) {
 	}
 	return noone;
 }
+
+function do_placechanger_explosion_particles(from, to) {
+	static particle = agi("obj_ev_placechanger_particle")
+	var offset = random_range(-5, 5)
+	repeat (irandom_range(8, 10)) {
+		var angle = point_direction(from.center_x, from.center_y, to.center_x, to.center_y) + random_range(-40, 40) + offset
+		instance_create_layer(to.center_x, to.center_y, "Effects", particle, {
+			hspeed : random_range(3, 6) * dcos(angle),
+			vspeed : -random_range(3, 6) * dsin(angle)
+		})
+	}	
+}
+function do_placechanger_line_particles(one, two) {
+	var current_x = one.center_x
+	var current_y = one.center_y
+	var step_x = (two.center_x - one.center_x) / 15
+	var step_y = (two.center_y - one.center_y) / 15
+	repeat (15) {
+		var angle = random_range(0, 360)
+		instance_create_layer(current_x, current_y, "Effects", agi("obj_ev_placechanger_particle"), {
+			hspeed : 2 * dcos(angle),
+			vspeed : -2 * dsin(angle)
+		})
+		current_x += step_x;
+		current_y += step_y;
+	}
+}

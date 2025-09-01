@@ -2,8 +2,8 @@ draw_self()
 draw_set_valign(fa_top)
 draw_set_halign(fa_center)
 draw_set_color(c_white)
-var times_string = "Times"
-var scores_string = "Scores"
+var times_string = "L. Times"
+var scores_string = "H. Scores"
 for (var i = 0; i < min(array_length(times), 5); i++) {
 	times_string += "\n" + string(times[i]) + "s"
 }

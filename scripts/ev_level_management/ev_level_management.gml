@@ -248,10 +248,15 @@ function import_process_tiles(tile_string, level, height, failsafe_tile, version
 		var state = result.value;
 		var offset = result.offset;
 		tile_pointer += offset;
-			
-		var result = get_multiplier(tile_string, tile_pointer);
-		var mult = result.mult;
-		tile_pointer += result.offset;
+		
+		var mult;
+		if string_copy(tile_string, tile_pointer, 1) == MULTIPLIER_CHAR {
+			var result = get_multiplier(tile_string, tile_pointer);
+			var mult = result.mult;
+			tile_pointer += result.offset;
+		}
+		else
+			mult = 1;
 		
 		arr[@ i][j] = new tile_with_state(state.tile, state.properties)
 		j++;
@@ -275,9 +280,6 @@ function import_process_tiles(tile_string, level, height, failsafe_tile, version
 }
 
 function get_multiplier(str, pointer) {
-	static no_multiplier = { mult : 1, offset : 0 };
-	if string_copy(str, pointer, 1) != MULTIPLIER_CHAR
-		return no_multiplier;
 	var num_string = "";
 	var count = 1;
 	while (true) {

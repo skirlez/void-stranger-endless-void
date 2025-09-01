@@ -17,21 +17,19 @@ function struct_copy(SS) {
 }
 
 function struct_deep_copy(struct) {
-    var arr = variable_struct_get_names(struct);
-    
-    var new_struct = {};
-    for (var i = 0; i < array_length(arr); i++) {
-        var field = arr[i];
-        var value = struct[$ field];
-        if is_struct(value)
-            new_struct[$ field] = struct_deep_copy(value);
-        else if is_array(value)
-            new_struct[$ field] = copy_array(value)
-        else {
-			
-			
-            new_struct[$ field] = value
+	var arr = variable_struct_get_names(struct);
+	
+	var new_struct = {};
+	for (var i = 0; i < array_length(arr); i++) {
+		var field = arr[i];
+		var value = struct[$ field];
+		if is_struct(value)
+			new_struct[$ field] = struct_deep_copy(value);
+		else if is_array(value)
+			new_struct[$ field] = copy_array(value)
+		else {
+			new_struct[$ field] = value
 		}
-    }
-    return new_struct;
+	}
+	return new_struct;
 }

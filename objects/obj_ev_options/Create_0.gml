@@ -203,18 +203,18 @@ vanilla_options = instance_create_layer(139, 120, "Instances", agi("obj_ev_execu
 			// makes burdens menu hidden
 			ev_prepare_level_burdens()
 			with (agi("obj_pause")) {
-	            agi("obj_menu").image_speed = 0
-			    agi("obj_menu").menu_art_x = 160
-	            global.pause = true
-	            global.timer_count = false
-	            alarm[1] = 40
-	            agi("scr_loadmenu")()
-	            instance_create_layer(x, y, "Pause", agi("obj_fade_black_in"))
-	            agi("obj_music_controller").alarm[1] = 1
-			    with (agi("obj_menu"))
-		            transition = true
-		        transition = true
-		        alarm[4] = 80
+				agi("obj_menu").image_speed = 0
+				agi("obj_menu").menu_art_x = 160
+				global.pause = true
+				global.timer_count = false
+				alarm[1] = 40
+				agi("scr_loadmenu")()
+				instance_create_layer(x, y, "Pause", agi("obj_fade_black_in"))
+				agi("obj_music_controller").alarm[1] = 1
+				with (agi("obj_menu"))
+					transition = true
+				transition = true
+				alarm[4] = 80
 			}
 			
 			// used in step to restore mouse_layer once options menu is gone

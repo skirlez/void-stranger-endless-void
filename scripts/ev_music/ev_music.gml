@@ -1,13 +1,13 @@
 
-// for_menu parameter controls whether or not the music is meant to be played in an EV menu
-// if true, it will not substitute the EX track with a different one by trying to read the amount of burdens
-function ev_play_music(track, looping = true, for_menu = false) {
+
+// if dont_subt_ex_track is true, it will not substitute the EX track with a different one by trying to read the amount of burdens
+function ev_play_music(track, looping = true, dont_subt_ex_track = false) {
 	ev_stop_music()
 	if (track == -1) {
 		return;
 	}
 	if global.is_merged {
-		if (!for_menu && audio_get_name(track) == "msc_test2") {
+		if (!dont_subt_ex_track && audio_get_name(track) == "msc_test2") {
 			if room == global.editor_room || room == global.level_room || room == global.pack_level_room
 				track = ev_get_elysium_music(global.level)
 			agi("scr_play_music")(track, looping, 1)
