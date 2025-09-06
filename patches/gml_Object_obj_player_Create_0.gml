@@ -65,7 +65,9 @@ switch global.wings_style
         spr_wings = spr_ev_void_wings_lev
         break
     case 1:
-        spr_wings = spr_void_wings_cif
+        // don't worry about it
+        spr_wings = spr_void_wings_cif - 1
+        spr_wings++
         break
     default:
         spr_wings = spr_void_wings
@@ -83,7 +85,9 @@ switch global.blade_style
         spr_blade = spr_ev_void_sword_lev
         break
     case 1:
-        spr_blade = spr_void_sword_cif
+        // don't worry about it
+        spr_blade = spr_void_sword_cif - 1
+        spr_blade++
         break
     default:
         spr_blade = spr_void_sword

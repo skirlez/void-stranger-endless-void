@@ -22,7 +22,7 @@ global.allow_moving_elements = false;
 #macro agi asset_get_index 
 global.is_merged = (agi("obj_game") != -1)
 if (!global.is_merged) {
-	var ratio = display_get_height() / 144	
+	var ratio = display_get_height() / 144
 	surface_resize(application_surface, 224 * ratio, 144 * ratio)
 	audio_group_load(audiogroup_void_stranger)
 	global.debug = false;
@@ -588,7 +588,7 @@ tile_chest.zed_function = function(tile_state) {
 	global.mouse_layer = 1
 }
 
-tile_chest.draw_function = function (tile_state, i, j) {
+tile_chest.draw_function = function (tile_state, i, j, preview, lvl) {
 	static spr_burden_chest = agi("spr_chest_small");
 	var itm = tile_state.properties.itm;
 	
@@ -596,8 +596,13 @@ tile_chest.draw_function = function (tile_state, i, j) {
 			? tile_state.tile.spr_ind
 			: spr_burden_chest;
 	
-	var ind = (itm == chest_items.opened) ? 1 : 0;
-	
+	var ind = (itm == chest_items.opened)
+		|| (itm == chest_items.memory && lvl.burdens[burden_memory])
+		|| (itm == chest_items.wings && lvl.burdens[burden_wings])
+		|| (itm == chest_items.sword && lvl.burdens[burden_sword])
+		|| (itm == chest_items.endless && lvl.burdens[burden_stackrod])
+		|| (itm == chest_items.swapper && lvl.burdens[burden_swapper]);
+
 	draw_sprite(spr, ind, j * 16 + 8, i * 16 + 8)	
 }
 
