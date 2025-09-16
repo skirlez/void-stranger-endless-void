@@ -259,6 +259,7 @@
     {"id":{"name":"ac_preview_curve","path":"animcurves/ac_preview_curve/ac_preview_curve.yy",},},
     {"id":{"name":"spr_ev_orb_thing_alt_left","path":"sprites/spr_ev_orb_thing_alt_left/spr_ev_orb_thing_alt_left.yy",},},
     {"id":{"name":"obj_ev_level_select","path":"objects/obj_ev_level_select/obj_ev_level_select.yy",},},
+    {"id":{"name":"ev_return_noone","path":"scripts/ev_return_noone/ev_return_noone.yy",},},
     {"id":{"name":"spr_ev_lily_attack_l","path":"sprites/spr_ev_lily_attack_l/spr_ev_lily_attack_l.yy",},},
     {"id":{"name":"obj_ev_toggle","path":"objects/obj_ev_toggle/obj_ev_toggle.yy",},},
     {"id":{"name":"spr_fam_u","path":"sprites/spr_fam_u/spr_fam_u.yy",},},

@@ -60,7 +60,7 @@ if global.erasing != -1 {
 	if global.erasing == -1 {
 		// previously i actually added an additional add_undo() here so you could 
 		// undo erasing the level, but now i'd have to implement metadata undoing, and i don't want to
-		history = []
+		reset_editor_history();
 		var retain_save_name = global.level.save_name
 		var retain_bount;
 		var retain_name;
@@ -76,7 +76,12 @@ if global.erasing != -1 {
 		if global.editing_pack_level {
 			global.level.bount = retain_bount;
 			global.level.name = retain_name;
+			
+			// i'm imagining if someone doesn't understand that the music in levels edited from a pack is
+			// *supposed* to persist, and just be a preferernce, they would be very confused if it doesn't reset here
+			global.pack_level_preferred_music = global.music_names[1];
 		}
+		
 		audio_play_sound(global.goes_sound, 10, false)	
 		room_goto(agi("rm_ev_after_erase"))
 	}
@@ -156,7 +161,8 @@ else if (edit_transition != -1) {
 	
 	if (edit_transition == -1) {
 		global.mouse_layer = 0;
-		room_goto(agi("rm_ev_editor"));
+		global.editor.reset_editor_history();
+		room_goto(global.editor_room);
 	}
 }
 else if (edit_pack_transition != -1) {

@@ -6,8 +6,6 @@ if (room == global.pack_editor_room) {
 		in_pack_editor = true;
 	}
 	
-
-
 	if global.void_radio_on
 		ev_play_void_radio()
 	else
@@ -26,9 +24,7 @@ if (room == global.pack_editor_room) {
 	// exit creates this when you use it and it does persist so we Kill It
 	if global.is_merged
 		instance_destroy(agi("obj_darkness"))
-	
-
-		
+			
 	save_timestamp = current_time
 }
 if (room != global.editor_room && room != agi("rm_ev_after_erase")

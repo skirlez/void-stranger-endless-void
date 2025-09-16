@@ -70,9 +70,9 @@ function draw() {
 			draw_digit(14 * 16 - 4, 9 * 16 - 8, units_digit)
 		}
 
-		var rodsprite = (lvl.burdens[burden_stackrod]) ? stackrod_sprite : voidrod_sprite
+		var rodsprite = (lvl.burdens[burden_types.stackrod]) ? stackrod_sprite : voidrod_sprite
 		draw_sprite(rodsprite, 1, 16 * 6, 8 * 16)
-		if (lvl.burdens[burden_swapper]) 
+		if (lvl.burdens[burden_types.swapper]) 
 			draw_sprite(agi("spr_ev_swapper"), 0, 16 * 6 + 16, 8 * 16) //I'm bad at math.
 		for (var i = 0; i < array_length(lvl.burdens) - 1; i++) {
 			if lvl.burdens[i] {

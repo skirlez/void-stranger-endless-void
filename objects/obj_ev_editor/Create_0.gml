@@ -9,7 +9,7 @@ global.is_html5 = (os_browser != browser_not_a_browser)
 surface_depth_disable(false)
 global.latest_lvl_format = 3;
 global.latest_pack_format = 2;
-global.ev_version = "0.99";
+global.ev_version = "0.995";
 global.ev_fall_down_next_level = false;
 
 if global.is_html5 {
@@ -137,11 +137,13 @@ enum tile_flags {
 	unplaceable = 4
 }
 
-#macro burden_memory 0
-#macro burden_wings 1
-#macro burden_sword 2 
-#macro burden_stackrod 3
-#macro burden_swapper 4
+enum burden_types {
+	memory,
+	wings,
+	sword,
+	stackrod,
+	swapper
+}
 
 global.editor_room = agi("rm_ev_editor");
 global.pack_editor_room = agi("rm_ev_pack_editor");
@@ -166,9 +168,6 @@ global.select_sound = agi("snd_ev_select")
 
 global.ev_font = agi("fnt_text_12")
 
-return_noone = function() {
-	return noone;
-}
 
 return_tile_state_function = function(tile_state) { 
 	return tile_state 
@@ -224,7 +223,7 @@ function editor_tile(display_name, spr_ind, tile_id, obj_name, obj_layer = "Floo
 	self.place_function = global.editor.return_tile_state_function
 	self.zed_function = noone
 	self.tile_id = tile_id;
-	self.properties_generator = global.editor.return_noone
+	self.properties_generator = return_noone;
 	self.editor_type = editor_types.tile;
 	self.iostruct = global.editor.default_tile_io;
 	self.cube_type = cube_types.uniform;
@@ -597,11 +596,11 @@ tile_chest.draw_function = function (tile_state, i, j, preview, lvl) {
 			: spr_burden_chest;
 	
 	var ind = (itm == chest_items.opened)
-		|| (itm == chest_items.memory && lvl.burdens[burden_memory])
-		|| (itm == chest_items.wings && lvl.burdens[burden_wings])
-		|| (itm == chest_items.sword && lvl.burdens[burden_sword])
-		|| (itm == chest_items.endless && lvl.burdens[burden_stackrod])
-		|| (itm == chest_items.swapper && lvl.burdens[burden_swapper]);
+		|| (itm == chest_items.memory && lvl.burdens[burden_types.memory])
+		|| (itm == chest_items.wings && lvl.burdens[burden_types.wings])
+		|| (itm == chest_items.sword && lvl.burdens[burden_types.sword])
+		|| (itm == chest_items.endless && lvl.burdens[burden_types.stackrod])
+		|| (itm == chest_items.swapper && lvl.burdens[burden_types.swapper]);
 
 	draw_sprite(spr, ind, j * 16 + 8, i * 16 + 8)	
 }
@@ -1531,6 +1530,43 @@ function reset_editor_variables() {
 reset_editor_variables()
 
 
+function reset_editor_history() {
+	history = [];	
+}
+reset_editor_history();
+
+function copy_tile_data(tiles) {
+	for (var i = 0; i < array_length(tiles); i++) {
+		tiles[i] = copy_array(tiles[i])
+		for (var j = 0; j < array_length(tiles[i]); j++) {
+			var tile_state = tiles[i][j]
+			tiles[i][j] = new tile_with_state(tile_state.tile, struct_copy(tile_state.properties))
+		}
+	}
+	return tiles;
+}
+
+// computers have infinite memory.
+function add_undo() {
+	array_push(history, copy_tile_data(global.level.tiles), copy_tile_data(global.level.objects))
+	if array_length(history) > 500 // will remember 250 changes before removing
+		array_delete(history, 0, 2)
+}
+
+function undo() {
+	static undo_sound = agi("snd_voidrod_place")
+	if array_length(history) != 0 {
+		array_copy(global.level.objects, 0, array_pop(history), 0, array_length(global.level.objects))
+		array_copy(global.level.tiles, 0, array_pop(history), 0, array_length(global.level.tiles))
+		audio_play_sound(undo_sound, 10, false)
+	}
+}
+
+undo_repeat = -1
+undo_repeat_frames_start = 18
+undo_repeat_frames_speed = 0
+undo_repeat_frames_max_speed = 10
+
 function switch_tile_mode(new_tile_mode) {
 	global.tile_mode = new_tile_mode;
 	if (global.tile_mode) {
@@ -1559,41 +1595,6 @@ global.goes_sound = agi("snd_ex_vacuumgoes")
 
 
 
-history = []
-
-
-function copy_tile_data(tiles) {
-	for (var i = 0; i < array_length(tiles); i++) {
-		tiles[i] = copy_array(tiles[i])
-		for (var j = 0; j < array_length(tiles[i]); j++) {
-			var tile_state = tiles[i][j]
-			tiles[i][j] = new tile_with_state(tile_state.tile, struct_copy(tile_state.properties))
-		}
-	}
-	
-	return tiles;
-}
-
-// computers have infinite memory.
-function add_undo() {
-	array_push(history, copy_tile_data(global.level.tiles), copy_tile_data(global.level.objects))
-	if array_length(history) > 500 // will remember 250 changes before removing
-		array_delete(history, 0, 2)
-}
-
-function undo() {
-	static undo_sound = agi("snd_voidrod_place")
-	if array_length(history) != 0 {
-		array_copy(global.level.objects, 0, array_pop(history), 0, array_length(global.level.objects))
-		array_copy(global.level.tiles, 0, array_pop(history), 0, array_length(global.level.tiles))
-		audio_play_sound(undo_sound, 10, false)
-	}
-}
-
-undo_repeat = -1
-undo_repeat_frames_start = 18
-undo_repeat_frames_speed = 0
-undo_repeat_frames_max_speed = 10
 function get_menu_music_name() {
 	switch (current_weekday) {
 		case 0: return "snd_ev_music_astra_jam"
@@ -1686,7 +1687,6 @@ edit_transition_display = noone
 
 function edit_level_transition(lvl, display_instance) {
 	global.level = lvl;
-	switch_tile_mode(false)
 	ev_stop_music()
 	edit_transition = max_edit_transition
 	edit_transition_display = display_instance
@@ -1854,7 +1854,6 @@ spin_time_v = 0;
 global.death_count = 0
 global.turn_frames = 0
 global.death_frames = -1
-global.pack_death_count = 0
 
 global.instance_touching_mouse = noone;
 global.happenings = ds_map_create();

@@ -229,6 +229,7 @@
     {"name":"ac_preview_curve","order":4,"path":"animcurves/ac_preview_curve/ac_preview_curve.yy",},
     {"name":"spr_ev_orb_thing_alt_left","order":4,"path":"sprites/spr_ev_orb_thing_alt_left/spr_ev_orb_thing_alt_left.yy",},
     {"name":"obj_ev_level_select","order":32,"path":"objects/obj_ev_level_select/obj_ev_level_select.yy",},
+    {"name":"ev_return_noone","order":56,"path":"scripts/ev_return_noone/ev_return_noone.yy",},
     {"name":"obj_ev_toggle","order":85,"path":"objects/obj_ev_toggle/obj_ev_toggle.yy",},
     {"name":"spr_fam_u","order":43,"path":"sprites/spr_fam_u/spr_fam_u.yy",},
     {"name":"spr_cl_right","order":6,"path":"sprites/spr_cl_right/spr_cl_right.yy",},

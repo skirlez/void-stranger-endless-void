@@ -168,7 +168,7 @@ function node_struct(node_id, object_name, flags = 0, layer_name = "Nodes") cons
 	
 	self.layer_name = "Nodes";
 
-	self.properties_generator = global.editor.return_noone;
+	self.properties_generator = return_noone;
 	self.properties = {};
 	
 	self.read_function = global.pack_editor.default_reader;
@@ -178,7 +178,10 @@ function node_struct(node_id, object_name, flags = 0, layer_name = "Nodes") cons
 
 	// called when wrench is used
 	// params: (node_instance)
-	self.on_config = empty_function;
+	// returns true if node is configurable
+	self.on_config = function () {
+		return false;	
+	};
 	
 	self.on_death = function (node_instance) {
 		audio_play_sound(agi("snd_ev_node_destroy"), 10, false, global.pack_zoom_gain, 0, random_range(0.9, 1.1))
@@ -233,6 +236,7 @@ root_node.on_config = function (node_instance) {
 	new_window_with_pos(node_instance.x, node_instance.y, 8, 4, agi("obj_ev_root_node_window"), {
 		node_instance : node_instance
 	});
+	return true;
 }
 
 brand_node = new node_struct("br", "obj_ev_pack_brand_node");
@@ -251,6 +255,7 @@ brand_node.on_config = function (node_instance) {
 	new_window_with_pos(node_instance.x, node_instance.y, 5, 5, agi("obj_ev_brand_node_window"), {
 		node_instance : node_instance
 	});
+	return true;
 }
 brand_node.play_evaluate_immediate = function (node_state) {
 	return first_or_error(node_state.exits);
@@ -300,6 +305,7 @@ level_node.on_config = function (node_instance) {
 	new_window_with_pos(node_instance.x, node_instance.y, 10, 7, agi("obj_ev_level_node_window"), {
 		node_instance : node_instance
 	});
+	return true;
 }
 level_node.on_death = function(node_instance) {
 	node_instance.display.destroy();	
@@ -326,6 +332,7 @@ music_node.on_config = function (node_instance) {
 	new_window_with_pos(node_instance.x, node_instance.y, 6, 6, agi("obj_ev_music_node_window"), {
 		node_instance : node_instance
 	});
+	return true;
 }
 music_node.play_evaluate_immediate = function (node_state) {
 	if !global.pack_parameters.tis && !ev_is_music_playing(agi(node_state.properties.music)) {
@@ -349,6 +356,7 @@ branefuck_node.on_config = function (node_instance) {
 	new_window_with_pos(node_instance.x, node_instance.y, 10, 6, agi("obj_ev_branefuck_node_window"), {
 		node_instance : node_instance
 	});
+	return true;
 }
 branefuck_node.play_evaluate_immediate = function(node_state) {
 	if array_length(node_state.exits) == 0
@@ -407,6 +415,7 @@ comment_node.on_config = function (node_instance) {
 	new_window_with_pos(node_instance.x, node_instance.y, 10, 6, agi("obj_ev_comment_node_window"), {
 		node_instance : node_instance
 	});
+	return true;
 }
 
 oob_node = new node_struct("ob", "obj_ev_pack_oob_node", node_flags.only_one);
@@ -414,7 +423,7 @@ oob_node.play_evaluate_immediate = function (node_state) {
 	return first_or_error(node_state.exits);
 }
 
-global.palette_node_palettes = ["GRAY", "R***", "O***", "Y***", "G***", "B***", "I***", "V***", "Custom"]
+global.palette_node_palettes = ["GRAY", "R***", "O***", "Y***", "G***", "B***", "I***", "V***"]
 palette_node = new node_struct("pl", "obj_ev_pack_palette_node");
 palette_node.properties_generator = function () {
 	return { palette_number : 0 }	
@@ -437,6 +446,7 @@ palette_node.on_config = function (node_instance) {
 	new_window_with_pos(node_instance.x, node_instance.y, 8, 8, agi("obj_ev_palette_node_window"), {
 		node_instance : node_instance
 	});
+	return true;
 }
 
 end_node = new node_struct("en", "obj_ev_pack_end_node");

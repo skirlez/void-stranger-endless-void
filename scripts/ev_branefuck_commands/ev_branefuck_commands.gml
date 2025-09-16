@@ -239,7 +239,6 @@ global.branefuck_command_functions[? "log"] = function(memory, pointer){
 global.branefuck_command_functions[? "abs"] = function(memory, pointer){
 	command_return(memory, pointer, abs(memory[pointer]))
 }
-
 global.branefuck_command_functions[? "mul"] = function(memory, pointer) {
 	var params = get_command_parameters(memory, pointer, 2)
 	command_return(memory, pointer, params[0] * params[1])
@@ -279,7 +278,7 @@ global.branefuck_command_functions[? "instance_position"] = function(memory, poi
 	command_return(memory, pointer, arr)
 }
 global.branefuck_command_functions[? "instance_exists"] = function(memory, pointer) {
-	var params = get_command_parameters(memory, pointer, 0)
+	var params = get_command_parameters(memory, pointer, 1)
 	var object = params[0];
 	command_return(memory, pointer, instance_exists(object) ? int64(1) : int64(0))
 }
@@ -448,7 +447,7 @@ global.branefuck_command_functions[? "set_tile"] = function(memory, pointer){
 	
 	//tile_index not found
 	if !ds_map_exists(global.branefuck_command_tiles, tile_index) {
-		return
+		return;	
 	}
 	
 	var tile_x = cell_x * 16 + 8
@@ -520,8 +519,31 @@ global.branefuck_command_functions[? "set_tile"] = function(memory, pointer){
 	}
 }
 
-
-
+global.branefuck_command_functions[? "set_palette"] = function(memory, pointer) {
+	var params = get_command_parameters(memory, pointer, 4)
+	var colarray = array_create(5);
+	colarray[0] = params[0];
+	colarray[1] = params[1];
+	colarray[2] = params[2];
+	// compatible with both 1.1.1 and 1.1.3! now i won't have to change it later
+	colarray[3] = params[3];
+	colarray[4] = params[3];
+	var i = 0
+	repeat (5) {
+		global.palette_array[(i * 3 + 0)] = colour_get_blue(colarray[i]) / 255
+		global.palette_array[(i * 3 + 1)] = colour_get_green(colarray[i]) / 255
+		global.palette_array[(i * 3 + 2)] = colour_get_red(colarray[i]) / 255
+		i++
+	}
+}
+global.branefuck_command_functions[? "irandom"] = function(memory, pointer) {
+	var params = get_command_parameters(memory, pointer, 1)
+	command_return(memory, pointer, int64(irandom(params[0])))
+}
+/*global.branefuck_command_functions[? "irandom_range"] = function(memory, pointer) {
+	var params = get_command_parameters(memory, pointer, 2)
+	command_return(memory, pointer, int64(irandom_range(params[0], params[1])))
+}*/
 
 
 function get_command_parameters(memory, pointer, param_count){
@@ -529,7 +551,7 @@ function get_command_parameters(memory, pointer, param_count){
 	
 	var p = pointer
 	for(var i = 0; i < param_count; i++){
-		params[@ i] = memory[p]
+		params[i] = memory[p]
 		p -= 1
 		if (p < 0) {
 			p += array_length(memory)

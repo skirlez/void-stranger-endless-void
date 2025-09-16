@@ -145,7 +145,15 @@ function node_instance_step() {
 				expand_node_instance(id)
 			}
 			if ev_mouse_right_pressed() {
-				if max_exits == 0 {
+				if mouse_moving {
+					mouse_moving = false;
+					if !spawn_picked_up
+						add_undo_position_action(node_id, x_when_started_moving, y_when_started_moving)
+					spawn_picked_up = false;
+					contract_node_instance(id)
+					node_config();
+				}
+				else if max_exits == 0 {
 					shake_seconds = 0.5;
 					audio_play_sound(not_possible_sound, 10, false, global.pack_zoom_gain);	
 				}
@@ -175,14 +183,13 @@ function node_instance_step() {
 					for (var i = 0; i < array_length(exit_instances); i++) {
 						var exit_instance = exit_instances[i];
 						instance_create_layer(center_x, center_y, "NodeJudgments", judgment_object, {
-								node_inst : id,
-								judgment_type : judgment_types.close_connection,
-								connection_to_destroy : exit_instances[i],
-								silent : true,
-								target_x : lerp(center_x, exit_instance.center_x, 0.5),
-								target_y : lerp(center_y, exit_instance.center_y, 0.5)
-							}
-						)
+							node_inst : id,
+							judgment_type : judgment_types.close_connection,
+							connection_to_destroy : exit_instances[i],
+							silent : true,
+							target_x : lerp(center_x, exit_instance.center_x, 0.5),
+							target_y : lerp(center_y, exit_instance.center_y, 0.5)
+						})
 					}
 					if (instance_exists(judgment_object)) // root node might not have anything to judge for example
 						global.pack_editor.judging_node = id;
@@ -197,21 +204,7 @@ function node_instance_step() {
 		}
 		else if global.pack_editor.selected_thing == pack_things.wrench {
 			if ev_mouse_pressed() {
-				static wrench_sound = agi("snd_ev_use_wrench");
-				node_type.on_config(id);	
-				
-				// TODO: use copy_function?
-				var properties_string = node_type.write_function(properties)
-				
-				audio_play_sound(wrench_sound, 10, false, global.pack_zoom_gain, 0, random_range(0.9, 1.1))
-				
-				global.pack_editor.add_undo_action(function (args) {
-					var instance = ds_map_find_value(global.pack_editor.node_id_to_instance_map, args.node_id)
-					instance.properties = instance.node_type.read_function(args.old_properties)
-				}, {
-					node_id : node_id,
-					old_properties : properties_string
-				})
+				node_config()
 			}
 		}
 		else if global.pack_editor.selected_thing == pack_things.placechanger {
@@ -342,16 +335,9 @@ function node_instance_step() {
 		play_pickup_sound(0.8)
 		contract_node_instance(id)
 		if !spawn_picked_up {
-			global.pack_editor.add_undo_action(function (args) {
-				var instance = ds_map_find_value(global.pack_editor.node_id_to_instance_map, args.node_id)
-				move_node_to_position(instance, args.old_x, args.old_y)
-			}, {
-				node_id : node_id,
-				old_x : x_when_started_moving,
-				old_y : y_when_started_moving
-			})
-			spawn_picked_up = false;
+			add_undo_position_action(node_id, x_when_started_moving, y_when_started_moving)
 		}
+		spawn_picked_up = false;
 	}
 	if connecting_exit {
 		if ev_mouse_held() || global.pack_editor.selected_thing != pack_things.nothing
@@ -420,7 +406,8 @@ function node_instance_step() {
 	if (mouse_moving) {
 		move_node_to_position(id, mouse_x - center_x_offset, mouse_y - center_y_offset)
 	}
-	
+
+
 	if (shake_seconds > 0) {
 		shake_seconds -= 1/60;
 		shake_x_offset = sin(16 * shake_seconds * pi) * 3;
@@ -429,7 +416,6 @@ function node_instance_step() {
 		|| x > camera_get_view_x(view_camera[0]) + camera_get_view_width(view_camera[0]) + cull_right
 		|| y < camera_get_view_y(view_camera[0]) - cull_top
 		|| y > camera_get_view_y(view_camera[0]) + camera_get_view_height(view_camera[0]) + cull_bottom)
-
 }
 
 function node_instance_destroy() {
@@ -485,3 +471,34 @@ function create_node_shards(node_inst) {
 		})	
 	}	
 }
+function node_config() {
+	static not_possible_sound = agi("snd_lorddamage")
+	if (!node_type.on_config(id)) {
+		audio_play_sound(not_possible_sound, 10, false, global.pack_zoom_gain);
+		shake_seconds = 0.5;
+		return;
+	}
+	
+	static wrench_sound = agi("snd_ev_use_wrench");
+	// TODO: use copy_function?
+	var properties_string = node_type.write_function(properties)
+	audio_play_sound(wrench_sound, 10, false, global.pack_zoom_gain, 0, random_range(0.9, 1.1))
+	global.pack_editor.add_undo_action(function (args) {
+		var instance = ds_map_find_value(global.pack_editor.node_id_to_instance_map, args.node_id)
+		instance.properties = instance.node_type.read_function(args.old_properties)
+	}, {
+		node_id : node_id,
+		old_properties : properties_string
+	})
+}
+function add_undo_position_action(node_id, old_x, old_y) {
+	global.pack_editor.add_undo_action(function (args) {
+		var instance = ds_map_find_value(global.pack_editor.node_id_to_instance_map, args.node_id)
+		move_node_to_position(instance, args.old_x, args.old_y)
+	}, {
+		node_id : node_id,
+		old_x : old_x,
+		old_y : old_y
+	})
+}
+

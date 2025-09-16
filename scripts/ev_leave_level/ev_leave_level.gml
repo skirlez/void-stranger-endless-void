@@ -5,6 +5,7 @@ function ev_leave_level() {
 	else
 		room_goto(agi("rm_ev_level_select"))
 	global.playtesting = false;
+	ev_switch_to_user_palette()
 	global.editor.reset_branefuck_persistent_memory()
 	ds_map_clear(global.locusts_collected_this_level)
 }

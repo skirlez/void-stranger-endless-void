@@ -201,28 +201,29 @@ function execute_branefuck(instructions) {
 		executer : id,
 	}
 	with (state) {
-		var count = 0;
-		while (instruction_pointer < array_length(instructions)) {
-			count++;
-			if count > 100000 {
-				return { 
-					status: branefuck_execution_status.error,
-					summary : "BF code ran for too long!",
-					log : "BF code ran for too long!",
-				};
-			}
-			try {
+		try {
+			var count = 0;
+			while (instruction_pointer < array_length(instructions)) {
+				count++;
+				if count > 100000 {
+					return { 
+						status: branefuck_execution_status.error,
+						summary : "BF code ran for too long!",
+						log : "BF code ran for too long!",
+					};
+				}
+			
 				var func = instructions[instruction_pointer].operation
 				func(instructions[instruction_pointer]);
 				instruction_pointer++;
 			}
-			catch (e) {
-				return { 
-					status: branefuck_execution_status.error,
-					summary : "BF execution error!",
-					log : "Branefuck execution error: " + string(e)
-				};
-			}
+		}
+		catch (e) {
+			return { 
+				status: branefuck_execution_status.error,
+				summary : "BF execution error!",
+				log : "Branefuck execution error: " + string(e)
+			};
 		}
 	}
 	return { 

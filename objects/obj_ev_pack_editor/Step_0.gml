@@ -2,7 +2,7 @@ if room != global.pack_editor_room
 	exit;
 
 	
-var gain = (1 - (global.pack_editor.zoom + 10) / (global.pack_editor.last_possible_zoom + 10)) * 2
+var gain = (1 - (zoom + 10) / (last_possible_zoom + 10)) * 2
 global.pack_zoom_gain = clamp(gain, 0.2, 1.6)
 
 if global.void_radio_on {
@@ -70,7 +70,7 @@ if (global.mouse_layer == 0 || selected_thing == pack_things.wrench) {
 			strip_level_for_pack(level);
 			var level_nodes = get_all_level_node_instances()
 			try_level_name_and_rename(level, level_nodes)
-			var level_node_state = new node_with_state(global.pack_editor.level_node, 
+			var level_node_state = new node_with_state(level_node, 
 				mouse_x - global.level_node_display_scale * 224 / 2, 
 				mouse_y - global.level_node_display_scale * 144 / 2, 
 				{
@@ -79,8 +79,8 @@ if (global.mouse_layer == 0 || selected_thing == pack_things.wrench) {
 			
 			var node_instance = level_node_state.create_instance();
 			
-			global.pack_editor.add_undo_action(function (args) {
-				var instance = ds_map_find_value(global.pack_editor.node_id_to_instance_map, args.node_id)
+			add_undo_action(function (args) {
+				var instance = ds_map_find_value(node_id_to_instance_map, args.node_id)
 				instance_destroy(instance)
 			}, {
 				node_id : node_instance.node_id,
@@ -199,7 +199,7 @@ if placechanger_copying_timer > 0 {
 			// funny line. proper way to do this would be implementing copy for every property,
 			// but i don't feel like it
 			node_state.properties = node_state.node.copy_function(node_state.properties)
-			if node_state.node == global.pack_editor.level_node {
+			if node_state.node == level_node {
 				try_level_name_and_rename(node_state.properties.level, get_all_level_node_instances())	
 			}
 			var copy = node_state.create_instance()
