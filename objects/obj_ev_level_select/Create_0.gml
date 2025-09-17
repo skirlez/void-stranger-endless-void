@@ -130,34 +130,52 @@ function destroy_displays(except = noone) {
 	}
 }
 
+function get_filtered_levels() {
+	/* Return levels filtered with the search box */
+	var filtered_levels = [];
+	var search_text = string_lower(search_box.txt);
+	
+	for (var i = 0; i < array_length(levels); i++) {
+		var lvl_string = levels[i];
+		var lvl_name = get_level_name_from_string(lvl_string);
+		var lvl_version = get_level_version_from_string(lvl_string);
+		
+		if (lvl_version == -1 || lvl_version > global.latest_lvl_format)
+			continue;
+			
+		if (search_text != "" && string_pos(search_text, string_lower(lvl_name)) == 0)
+			continue;
+
+		// You can add other filters here...
+
+		array_push(filtered_levels, lvl_string);
+	}
+
+	return filtered_levels
+}
+
 function create_displays() {
 	destroy_displays()
 	var line = 0;
 	var pos = 0
 
 	var count = 0;
-	if array_length(levels) == 0 {
+	
+	filtered_levels = get_filtered_levels()
+	
+	if array_length(filtered_levels) == 0 {
 		global.level_start = 0
 		return;
 	}
 
 	if (global.level_start <= -1)
-		global.level_start = (array_length(levels) - 1) div 6;
-	else if (global.level_start * 6 >= array_length(levels))
-		global.level_start = 0;	
-
-	var search_text = string_lower(search_box.txt);
+		global.level_start = (array_length(filtered_levels) - 1) div 6;
+	else if (global.level_start * 6 >= array_length(filtered_levels))
+		global.level_start = 0;
 	
-	var start = (search_box.txt == "" ? global.level_start * 6 : 0)
-	for (var i = start; i < array_length(levels) && count < 6; i++) {
-		var lvl_string = levels[i];
-		var lvl_version = get_level_version_from_string(lvl_string)
-		if (lvl_version == -1 || lvl_version > global.latest_lvl_format)
-			continue;
-		var lvl_name = get_level_name_from_string(lvl_string);
-		if (search_text != "" && string_pos(search_text, string_lower(lvl_name)) == 0)
-			continue;
-		
+	var start = global.level_start * 6
+	for (var i = start; i < array_length(filtered_levels) && count < 6; i++) {
+		var lvl_string = filtered_levels[i];
 		var lvl_struct = import_level(lvl_string)
 		
 		if mode == level_selector_modes.packs {
@@ -238,7 +256,7 @@ function switch_internet_mode(new_mode) {
 	if (new_mode == 0)
 		levels = offline_levels 
 	else
-		levels = online_levels 
+		levels = online_levels
 	create_displays();
 }
 
@@ -306,6 +324,7 @@ if mode != level_selector_modes.selecting_level_for_pack {
 else {
 	levels = offline_levels
 }
+filtered_levels = levels
 
 function on_level_update() {
 	if (global.online_mode) {
