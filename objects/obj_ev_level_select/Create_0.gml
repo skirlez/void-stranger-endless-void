@@ -9,9 +9,6 @@ enum level_selector_modes {
 	selecting_level_for_pack
 }
 
-
-
-
 if mode != level_selector_modes.selecting_level_for_pack {
 	var back_button = instance_create_layer(200, 16, buttons_layer, agi("obj_ev_main_menu_button"), {
 		base_scale_x : 1,
@@ -130,14 +127,20 @@ function destroy_displays(except = noone) {
 	}
 }
 
-function get_filtered_levels() {
+function get_filtered_level_indices() {
 	/* Return levels filtered with the search box */
-	var filtered_levels = [];
+	
+	if search_box.txt == "" {
+		return no_filter;
+	}
+	
+	// could be optimized (probably fine to allocate an array the same size as the levels array)
+	var filtered_level_indices = [];
 	var search_text = string_lower(search_box.txt);
 	
 	for (var i = 0; i < array_length(levels); i++) {
 		var lvl_string = levels[i];
-		var lvl_name = get_level_name_from_string(lvl_string);
+		var lvl_name = level_names[i]
 		var lvl_version = get_level_version_from_string(lvl_string);
 		
 		if (lvl_version == -1 || lvl_version > global.latest_lvl_format)
@@ -147,11 +150,13 @@ function get_filtered_levels() {
 			continue;
 
 		// You can add other filters here...
-
-		array_push(filtered_levels, lvl_string);
+		
+		
+		
+		array_push(filtered_level_indices, i);
 	}
 
-	return filtered_levels
+	return filtered_level_indices
 }
 
 function create_displays() {
@@ -161,26 +166,26 @@ function create_displays() {
 
 	var count = 0;
 	
-	filtered_levels = get_filtered_levels()
+	filtered_level_indices = get_filtered_level_indices();
 	
-	if array_length(filtered_levels) == 0 {
+	if array_length(filtered_level_indices) == 0 {
 		global.level_start = 0
 		return;
 	}
 
 	if (global.level_start <= -1)
-		global.level_start = (array_length(filtered_levels) - 1) div 6;
-	else if (global.level_start * 6 >= array_length(filtered_levels))
+		global.level_start = (array_length(filtered_level_indices) - 1) div 6;
+	else if (global.level_start * 6 >= array_length(filtered_level_indices))
 		global.level_start = 0;
 	
 	var start = global.level_start * 6
-	for (var i = start; i < array_length(filtered_levels) && count < 6; i++) {
-		var lvl_string = filtered_levels[i];
+	for (var i = start; i < array_length(filtered_level_indices) && count < 6; i++) {
+		var level_index = filtered_level_indices[i];
+		var lvl_string = levels[level_index];
 		var lvl_struct = import_level(lvl_string)
 		
 		if mode == level_selector_modes.packs {
-			var nodeless_pack = nodeless_packs[i];
-			
+			var nodeless_pack = nodeless_packs[level_index];
 			var display = instance_create_layer(20 + pos * 50, 40 + line * 50, "Levels", global.display_object, {
 				lvl : lvl_struct,
 				name : nodeless_pack.name,
@@ -196,7 +201,7 @@ function create_displays() {
 		}
 		else {
 			if (!global.online_mode)
-				lvl_struct.save_name = files[i]
+				lvl_struct.save_name = files[level_index]
 		
 			var sha = level_string_content_sha1(lvl_string)
 			var beat_value;
@@ -219,15 +224,11 @@ function create_displays() {
 			});
 			add_child(display);
 		}
-
-	
 		pos++;
 		if pos > 2 {
 			pos = 0
 			line++;
 		}
-	
-	
 		count++;
 	}	
 }
@@ -250,106 +251,6 @@ search_box = instance_create_layer(112 - 30, 12, buttons_layer, agi("obj_ev_text
 search_box.depth--;
 add_child(search_box)
 
-
-function switch_internet_mode(new_mode) {
-	global.level_start = 0
-	if (new_mode == 0)
-		levels = offline_levels 
-	else
-		levels = online_levels
-	create_displays();
-}
-
-// TODO
-if (mode == level_selector_modes.packs)
-	global.online_mode = false;
-
-
-
-files = []
-nodeless_packs = [];
-function read_offline_levels() {
-	if (mode == level_selector_modes.packs) { 
-		files = get_all_files(global.packs_directory, pack_extension)
-		nodeless_packs = array_create(array_length(files));
-		var offline_levels = array_create(array_length(files));
-		for (var i = 0; i < array_length(files); i++) {
-			var pack_string = read_pack_string_from_file(files[i], true)
-			if !is_string(pack_string) {
-				array_delete(nodeless_packs, i, 1)
-				array_delete(files, i, 1)
-				array_delete(offline_levels, i, 1)
-				i--;
-				continue;
-			}
-			var pack = import_pack_nodeless(pack_string);
-			pack.save_name = files[i];
-			
-			nodeless_packs[i] = pack;
-		
-			offline_levels[i] = pack.thumbnail_level
-		}
-		return offline_levels
-	}
-	files = get_all_files(global.levels_directory, level_extension)
-	var offline_levels = array_create(array_length(files));
-	for (var i = 0; i < array_length(files); i++) {
-		var file = file_text_open_read(global.levels_directory + files[i] + "." + level_extension)
-		var lvl_string = file_text_read_string(file)
-		offline_levels[i] = lvl_string
-		file_text_close(file)
-	}
-	return offline_levels
-}
-function sort_online_levels() {	
-	array_sort(online_levels, function (lvl_str_1, lvl_str_2) {
-		var date_1 = int64_safe(get_level_date_from_string(lvl_str_1), 0)
-		var date_2 = int64_safe(get_level_date_from_string(lvl_str_2), 0)
-		if (date_1 < date_2)
-			return 1
-		else if (date_1 > date_2)
-			return -1;
-		return 0;
-	})	
-}
-
-
-offline_levels = read_offline_levels();
-if mode != level_selector_modes.selecting_level_for_pack { 
-	online_levels = copy_array(global.online_levels)
-	sort_online_levels()
-	
-	levels = global.online_mode ? online_levels : offline_levels;
-}
-else {
-	levels = offline_levels
-}
-filtered_levels = levels
-
-function on_level_update() {
-	if (global.online_mode) {
-		online_levels = copy_array(global.online_levels)
-		sort_online_levels()
-		levels = online_levels
-	}
-	else {
-		offline_levels = read_offline_levels()
-		levels = offline_levels
-	}
-	if (!instance_exists(agi("obj_ev_level_highlight")))
-		create_displays();
-
-}
-
-
-
-
-
-create_displays()
-
-var scrolling_function = function () {
-
-}
 var scroll_up = instance_create_layer(194, 61, buttons_layer, agi("obj_ev_executing_scroll_button"), {
 	image_index : 1,
 	func : function () {
@@ -369,3 +270,91 @@ var scroll_down = instance_create_layer(194, 95, buttons_layer, agi("obj_ev_exec
 });
 add_child(scroll_up)
 add_child(scroll_down)
+
+
+function switch_internet_mode(new_mode) {
+	global.level_start = 0
+	if (new_mode == false) {
+		levels = offline_levels 
+		level_names = offline_level_names
+	}
+	else {
+		levels = online_levels
+		level_names = online_level_names	
+	}
+	no_filter = ev_array_create_ext(array_length(levels), function (i) {
+		return i;
+	})
+	create_displays();
+}
+
+
+files = []
+nodeless_packs = [];
+function read_online_levels() {
+	online_levels = copy_array(global.online_levels)
+	online_level_names = array_create(array_length(online_levels))
+	for (var i = 0; i < array_length(online_levels); i++)
+		online_level_names[i] = get_level_name_from_string(online_levels[i])
+}
+
+function read_offline_levels() {
+	if (mode == level_selector_modes.packs) { 
+		files = get_all_files(global.packs_directory, pack_extension)
+		nodeless_packs = array_create(array_length(files));
+		offline_levels = array_create(array_length(files));
+		offline_level_names = array_create(array_length(files));
+		for (var i = 0; i < array_length(files); i++) {
+			var pack_string = read_pack_string_from_file(files[i], true)
+			if !is_string(pack_string) {
+				array_delete(files, i, 1)
+				array_delete(nodeless_packs, i, 1)
+				array_delete(offline_levels, i, 1)
+				array_delete(offline_level_names, i, 1)
+				i--;
+				continue;
+			}
+			var pack = import_pack_nodeless(pack_string);
+			pack.save_name = files[i];
+			
+			nodeless_packs[i] = pack;
+			offline_level_names[i] = pack.name;
+			offline_levels[i] = pack.thumbnail_level
+		}
+		return;
+	}
+	files = get_all_files(global.levels_directory, level_extension)
+	offline_levels = array_create(array_length(files));
+	offline_level_names = array_create(array_length(files));
+	for (var i = 0; i < array_length(files); i++) {
+		var file = file_text_open_read(global.levels_directory + files[i] + "." + level_extension)
+		var lvl_string = file_text_read_string(file)
+		offline_levels[i] = lvl_string
+		offline_level_names[i] = get_level_name_from_string(lvl_string);
+		file_text_close(file)
+	}
+}
+
+// called when refreshing, or when pasting a level
+function on_level_update() {
+	if (global.online_mode) {
+		read_online_levels()
+	}
+	else {
+		read_offline_levels()
+	}
+	switch_internet_mode(global.online_mode)
+	if (!instance_exists(agi("obj_ev_level_highlight")))
+		create_displays();
+}
+
+
+if (mode == level_selector_modes.packs || mode == level_selector_modes.selecting_level_for_pack)
+	global.online_mode = false;
+
+read_offline_levels()
+if mode != level_selector_modes.selecting_level_for_pack && mode != level_selector_modes.packs
+	read_online_levels()
+switch_internet_mode(global.online_mode)
+create_displays()
+

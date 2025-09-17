@@ -6,6 +6,16 @@ if ds_map_find_value(async_load, "id") == get_levels
 			global.online_levels = ev_string_split_buffer(online_levels_str, ",", 512)
 		else
 			global.online_levels = []
+			
+		array_sort(global.online_levels, function (lvl_str_1, lvl_str_2) {
+			var date_1 = int64_safe(get_level_date_from_string(lvl_str_1), 0)
+			var date_2 = int64_safe(get_level_date_from_string(lvl_str_2), 0)
+			if (date_1 < date_2)
+				return 1
+			else if (date_1 > date_2)
+				return -1;
+			return 0;
+		})	
 
 		with (agi("obj_ev_level_select"))
 			on_level_update();

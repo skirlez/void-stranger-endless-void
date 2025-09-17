@@ -8,7 +8,7 @@ draw_clear(c_gray)
 draw_sprite(agi("spr_ev_ls_border"), 0, 0, 0)
 
 var page_string;
-var page_max = (array_length(filtered_levels) - 1) div 6;
+var page_max = (array_length(filtered_level_indices) - 1) div 6;
 var page = global.level_start;
 page_string = string(page + 1) + "/" + string(page_max + 1);
 		

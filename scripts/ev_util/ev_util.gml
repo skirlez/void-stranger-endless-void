@@ -82,8 +82,13 @@ function ev_array_remove(arr, value) {
 		}
 	}
 }
-
-
+function ev_array_create_ext(size, func) {
+	var arr = array_create(size)
+	for (var i = 0; i < size; i++) {
+		arr[i] = func(i);	
+	}
+	return arr;
+}
 
 function ev_string_split(str, delimiter) {
 	var arr = []
