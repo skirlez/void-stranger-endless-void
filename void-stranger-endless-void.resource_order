@@ -357,6 +357,7 @@
     {"name":"obj_ev_pack_highlight","order":82,"path":"objects/obj_ev_pack_highlight/obj_ev_pack_highlight.yy",},
     {"name":"obj_ev_display","order":8,"path":"objects/obj_ev_display/obj_ev_display.yy",},
     {"name":"spr_ev_claim","order":30,"path":"sprites/spr_ev_claim/spr_ev_claim.yy",},
+    {"name":"spr_ev_level_border","order":121,"path":"sprites/spr_ev_level_border/spr_ev_level_border.yy",},
     {"name":"spr_ev_dpad","order":62,"path":"sprites/spr_ev_dpad/spr_ev_dpad.yy",},
     {"name":"rm_ev_info","order":9,"path":"rooms/rm_ev_info/rm_ev_info.yy",},
     {"name":"spr_smiler","order":34,"path":"sprites/spr_smiler/spr_smiler.yy",},

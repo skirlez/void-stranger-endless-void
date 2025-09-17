@@ -393,6 +393,7 @@
     {"id":{"name":"obj_ev_pack_highlight","path":"objects/obj_ev_pack_highlight/obj_ev_pack_highlight.yy",},},
     {"id":{"name":"obj_ev_display","path":"objects/obj_ev_display/obj_ev_display.yy",},},
     {"id":{"name":"spr_ev_claim","path":"sprites/spr_ev_claim/spr_ev_claim.yy",},},
+    {"id":{"name":"spr_ev_level_border","path":"sprites/spr_ev_level_border/spr_ev_level_border.yy",},},
     {"id":{"name":"spr_ev_dpad","path":"sprites/spr_ev_dpad/spr_ev_dpad.yy",},},
     {"id":{"name":"rm_ev_info","path":"rooms/rm_ev_info/rm_ev_info.yy",},},
     {"id":{"name":"spr_smiler","path":"sprites/spr_smiler/spr_smiler.yy",},},
