@@ -1,3 +1,9 @@
+function ev_reset_locusts() {
+	static inv = agi("obj_inventory");
+	ds_grid_set(inv.ds_player_info, 0, 1, 1) // display locusts
+	ds_grid_set(inv.ds_player_info, 1, 1, 0) // Locust count
+}
+
 function ev_set_play_variables() {
 	static inv = agi("obj_inventory");
 	
@@ -7,18 +13,16 @@ function ev_set_play_variables() {
 	global.blade_backup = 0	
     global.swapper_backup = 0
 
-	// Some flags related to if you've collected a thing before?
+	// Flags dictating if you got the Add version of each burden
 	ds_grid_set(inv.ds_player_info, 15, 0, 0) 
 	ds_grid_set(inv.ds_player_info, 15, 1, 0)
 	ds_grid_set(inv.ds_player_info, 15, 2, 0)
 	ds_grid_set(inv.ds_player_info, 15, 3, 0)
 	
-	ds_grid_set(inv.ds_player_info, 0, 1, 1) // display locusts
-	ds_grid_set(inv.ds_player_info, 1, 1, 0) // Locust count
+	ev_reset_locusts()
 	
 	// stops the player from doing the blink animation when starting level
 	global.player_blink = 0
-	
 	global.death_count = 0
 }
 

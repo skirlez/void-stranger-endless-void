@@ -66,9 +66,6 @@ function move_to_node_state(state) {
 		ev_leave_pack()
 	}
 }
-function end_pack() {
-	ev_leave_pack()	
-}
 
 
 last_processed_node = noone;
