@@ -37,6 +37,9 @@ case snd_ev_music_stealie_feelies:
 case snd_ev_music_judgment_jingle:
     _tempo = 93
     break
+case snd_ev_music_determined_descent:
+    _tempo = 85
+    break
 case msc_rytmi2:
     _tempo = 142
     break

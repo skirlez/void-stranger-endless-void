@@ -202,6 +202,7 @@
     {"name":"spr_killer","order":31,"path":"sprites/spr_killer/spr_killer.yy",},
     {"name":"rm_ev_level","order":6,"path":"rooms/rm_ev_level/rm_ev_level.yy",},
     {"name":"obj_ev_pack_branefuck_node","order":62,"path":"objects/obj_ev_pack_branefuck_node/obj_ev_pack_branefuck_node.yy",},
+    {"name":"snd_ev_music_determined_descent","order":8,"path":"sounds/snd_ev_music_determined_descent/snd_ev_music_determined_descent.yy",},
     {"name":"msc_levcircle","order":6,"path":"sounds/msc_levcircle/msc_levcircle.yy",},
     {"name":"spr_ev_checkmark","order":35,"path":"sprites/spr_ev_checkmark/spr_ev_checkmark.yy",},
     {"name":"spr_items_cif","order":49,"path":"sprites/spr_items_cif/spr_items_cif.yy",},

@@ -231,6 +231,7 @@
     {"id":{"name":"spr_killer","path":"sprites/spr_killer/spr_killer.yy",},},
     {"id":{"name":"rm_ev_level","path":"rooms/rm_ev_level/rm_ev_level.yy",},},
     {"id":{"name":"obj_ev_pack_branefuck_node","path":"objects/obj_ev_pack_branefuck_node/obj_ev_pack_branefuck_node.yy",},},
+    {"id":{"name":"snd_ev_music_determined_descent","path":"sounds/snd_ev_music_determined_descent/snd_ev_music_determined_descent.yy",},},
     {"id":{"name":"msc_levcircle","path":"sounds/msc_levcircle/msc_levcircle.yy",},},
     {"id":{"name":"spr_ev_checkmark","path":"sprites/spr_ev_checkmark/spr_ev_checkmark.yy",},},
     {"id":{"name":"spr_items_cif","path":"sprites/spr_items_cif/spr_items_cif.yy",},},
