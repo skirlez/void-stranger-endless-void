@@ -1,0 +1,38 @@
+meta:
+target=gml_Object_obj_game_Draw_77
+critical=true
+patch:
+// TODO: maybe redo how this is done
+
+find_line_with('surface_final = surface_create')
+write_replace('surface_final = surface_create(sx, sy)')
+find_line_with('surface_set_target(surface_final)')
+write_after('
+if (global.clear_black != -1)
+{
+    global.clear_black--
+    draw_clear(c_black)
+}
+')
+
+// TODO: maybe take a look at why this is done at all later
+find_line_with('if (global.fullscreen_scaling == 0)')
+write_after('&& false')
+
+/*
+WARNING! SHITTY FORMAT BELOW.
+
+// TARGET: LINENUMBER_REPLACE
+// 42
+surface_final = surface_create(sx, sy)
+// TARGET: LINENUMBER
+// 46
+if (global.clear_black != -1)
+{
+    global.clear_black--
+    draw_clear(c_black)
+}
+// TARGET: LINENUMBER_REPLACE
+// 4
+if (false)
+*/

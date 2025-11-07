@@ -1,0 +1,24 @@
+meta:
+target=gml_Object_obj_enemy_cm_Alarm_1
+critical=true
+patch:
+
+find_line_with('if (y != player_y)')
+find_line_with('else')
+move(2) enter_scope() move_to_end() exit_scope() move(1)
+write_after('
+if variable_instance_exists(id, "editor_type") {
+	if editor_type == 0 {
+		x_rotation = 0
+		y_rotation = 0
+	}
+	else if editor_type == 1 {
+		x_rotation = 1
+		y_rotation = 1
+	}
+	else {
+		x_rotation = 0
+		y_rotation = 1
+	}
+}
+')

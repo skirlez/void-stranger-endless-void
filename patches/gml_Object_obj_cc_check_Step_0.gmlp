@@ -1,0 +1,15 @@
+meta:
+target=gml_Object_obj_cc_check_Step_0
+critical=true
+patch:
+
+/*
+WARNING! SHITTY FORMAT BELOW.
+
+// TARGET: LINENUMBER
+// 440
+ev_tis_pack_check_highscore()
+
+
+
+*/

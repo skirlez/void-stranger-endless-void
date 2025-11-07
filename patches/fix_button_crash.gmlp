@@ -1,0 +1,9 @@
+meta:
+target=gml_Object_obj_floorswitch_Step_0
+critical=true
+patch:
+// Fix crash (button expects player to always exist, not the case when falling into a level!)
+write_before('
+if !instance_exists(obj_player)
+	exit;
+')

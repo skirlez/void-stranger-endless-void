@@ -1,0 +1,48 @@
+meta:
+target=gml_Object_obj_errormessages_Create_0
+critical=true
+patch:
+
+find_line_with('if (global.stranger == 0)')
+write('
+|| global.stranger == 5
+')
+
+move_to_end()
+write('
+
+// we don't actually need this check. we're playing endless void (and it wasn't checking for levels with a brane count anyway)
+//if ((ds_grid_get(obj_inventory.ds_player_info, 0, 2) == "V???"))
+//{
+    str_error15 = ">FATAL ERROR: VAISHALI BREACHED\n"
+    str_error16 = ">ERR: INVALID/MISSING VA VALUE\n"
+    str_error17 = ">ERR: MISPLACED VA VALUE\n"
+    str_error18 = ">VA VALUE RESTORED\n"
+    str_error21 = ">FATAL ERROR: VOLATILE VA VALUE COLLAPSE\n"
+//}
+str_error495 = ">ERR: ??? REMOVED\n"
+str_error496 = ">??? RESTORED\n"
+
+dummy_swapper = 0
+')
+
+
+meta:
+target=gml_Object_obj_errormessages_Other_11
+critical=true
+patch:
+
+find_line_with('
+switch (e_message)
+')
+move(2)
+enter_scope()
+move_to_end()
+write('
+    case 495:
+        esubstr = str_error495
+        break
+    case 496:
+        esubstr = str_error496
+        break
+')

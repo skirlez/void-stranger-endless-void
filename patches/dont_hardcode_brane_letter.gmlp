@@ -1,0 +1,13 @@
+meta:
+target=gml_Object_obj_floor_hpn4_Draw_0, gml_Object_obj_floor_hpn4_Destroy_0,
+gml_Object_obj_floor_hpn3_Draw_0, gml_Object_obj_floor_hpn3_Destroy_0,
+gml_Object_obj_floor_hpn2_Draw_0, gml_Object_obj_floor_hpn2_Destroy_0, 
+gml_Object_obj_floor_hpn_Draw_0, gml_Object_obj_floor_hpn_Destroy_0,
+gml_Object_obj_floor_branex_Draw_0, gml_Object_obj_floor_brane_Draw_0
+critical=true
+patch:
+
+find_line_with('if (ds_grid_get(info_grid, 0, 2) == "B"')
+write_after('
+|| string_length(ds_grid_get(info_grid, 0, 2)) == 1
+')

@@ -1,0 +1,71 @@
+meta:
+target=gml_Object_obj_enemy_cv_Create_0
+critical=true
+patch:
+
+find_line_with('
+player_x = obj_player.x
+player_y = obj_player.y
+')
+write_before('if instance_exists(obj_player)')
+open_brace_before()
+move(1)
+close_brace_after()
+
+move_to_end()
+write_after('
+playerhitme = 0
+enemy_score = 6 // cc score
+')
+
+meta:
+target=gml_Object_obj_enemy_cv_Step_0
+critical=true
+patch:
+
+// Fix crash (this doesn't check for the player's existence)
+find_line_with('
+player_x = obj_player.x
+player_y = obj_player.y
+')
+write_before('if instance_exists(obj_player)')
+open_brace_before()
+move(1)
+close_brace_after()
+
+
+// Use custom sprites
+find_line_with('switch (set_e_direction)')
+move(2) enter_scope() move_to_end() exit_scope() move(1)
+write_after('
+switch set_e_direction
+{
+    case 0:
+        sprite_index = spr_ev_orb_thing_left
+        break
+    case 1:
+        sprite_index = spr_cv
+        break
+    case 2:
+        sprite_index = spr_ev_orb_thing_right
+        break
+    case 3:
+        sprite_index = spr_ev_orb_thing_up
+        break
+}
+')
+
+
+
+meta:
+target=gml_Object_obj_enemy_cv_Draw_0
+critical=true
+patch:
+// draw using maggot's draw event, since the one in the game
+// doesn't animate to the music
+write_before('
+event_perform_object(obj_enemy_cc, ev_draw, 0)
+exit
+')
+
+

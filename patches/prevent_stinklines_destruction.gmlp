@@ -1,0 +1,17 @@
+meta:
+target=gml_Object_obj_stinklines_Create_0
+critical=true
+patch:
+// prevent this object from destroying itself due to story conditions
+find_line_with('instance_destroy()')
+reverse_find_line_with('if (')
+write_before('exit')
+
+/*
+WARNING! SHITTY FORMAT BELOW.
+
+// TARGET: LINENUMBER
+// 5
+// Don't destroy yourself please.
+exit;
+*/

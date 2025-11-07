@@ -1,0 +1,330 @@
+
+meta:
+target=gml_Object_obj_player_Create_0
+critical=true
+patch:
+
+// set custom sprites
+find_line_with('else if (global.stranger == 4)')
+move(2)
+enter_scope() move_to_end() exit_scope()
+move(1)
+write_else_if('(global.stranger == 5) {
+    spr_m_right = spr_prin_wed_r
+    spr_m_up = spr_prin_wed_u
+    spr_m_left = spr_prin_wed_l
+    spr_m_down = spr_ev_lily_down
+    spr_blink = spr_ev_lily_blink
+    spr_hurt = spr_ev_lily_hit
+    spr_sleep = 53
+    spr_wakey = 54
+    spr_enter = 45
+    spr_item = spr_ev_lily_item_get
+    spr_a_right = spr_ev_lily_attack_r
+    spr_a_up = spr_ev_lily_attack_u
+    spr_a_left = spr_ev_lily_attack_l
+    spr_a_down = spr_ev_lily_attack_d
+	voice = snd_princess
+    wake_speed = 6
+}
+else if (global.stranger == 6) {
+    spr_m_right = spr_ev_ninnie
+    spr_m_up = spr_ev_ninnie
+    spr_m_left = spr_ev_ninnie
+    spr_m_down = spr_ev_ninnie
+    spr_blink = spr_ev_ninnie
+    spr_hurt = spr_ev_ninnie
+    spr_sleep = 53
+    spr_wakey = 54
+    spr_enter = 45
+    spr_item = spr_ev_ninnie
+    spr_a_right = spr_ev_ninnie
+    spr_a_up = spr_ev_ninnie
+    spr_a_left = spr_ev_ninnie
+    spr_a_down = spr_ev_ninnie
+    wake_speed = 6
+}
+else if (global.stranger == 7) {
+    spr_m_right = spr_ev_bee_right
+    spr_m_up = spr_ev_bee_up
+    spr_m_left = spr_ev_bee_left
+    spr_m_down = spr_ev_bee_down
+    spr_blink = spr_baal_flicker
+    spr_hurt = spr_baal_shaken
+    spr_sleep = 53
+    spr_wakey = 54
+    spr_enter = 45
+    spr_item = spr_ev_bee_item_get
+    spr_a_right = spr_ev_bee_attack_r
+    spr_a_up = spr_ev_bee_attack_u
+    spr_a_left = spr_ev_bee_attack_l
+    spr_a_down = spr_ev_bee_attack_d
+	voice = snd_baal
+    wake_speed = 6
+}')
+
+write_after('
+switch global.wings_style
+{
+    case 4:
+        spr_wings = spr_ev_void_wings_two
+        break
+    case 3:
+        spr_wings = spr_ev_void_wings_one
+        break
+    case 2:
+        spr_wings = spr_ev_void_wings_lev
+        break
+    case 1:
+        spr_wings = spr_void_wings_cif
+        break
+    default:
+        spr_wings = spr_void_wings
+        break
+}
+switch global.blade_style
+{
+    case 4:
+        spr_blade = spr_ev_void_sword_two
+        break
+    case 3:
+        spr_blade = spr_ev_void_sword_one
+        break
+    case 2:
+        spr_blade = spr_ev_void_sword_lev
+        break
+    case 1:
+        spr_blade = spr_void_sword_cif
+        break
+    default:
+        spr_blade = spr_void_sword
+        break
+}
+')
+
+
+meta:
+target=gml_Object_obj_player_wings_dissipate_Create_0
+critical=true
+patch:
+
+// set wing sprites to abide by global.wings_style
+find_line_with('wing_frames = sprite_get_number(')
+
+write_before('
+
+switch global.wings_style
+{
+    case 4:
+        sprite_index = spr_ev_void_wings_dissipate_two
+        break
+    case 3:
+        sprite_index = spr_ev_void_wings_dissipate_one
+        break
+    case 2:
+        sprite_index = spr_ev_void_wings_dissipate_lev
+        break
+    case 1:
+        sprite_index = spr_void_wings_dissipate_cif
+        break
+    default:
+        sprite_index = spr_void_wings_dissipate
+        break
+}
+
+')
+
+meta:
+target=gml_Object_obj_player_golden_Create_0
+critical=true
+patch:
+// set golden sprites for custom strangers (after dying to a mon statue)
+
+find_line_with('switch (golden_dir)')
+reverse_find_line_with('
+else
+{
+')
+write_before('
+else if (global.stranger == 5) {
+	golden_right = spr_ev_lily_gblink_r
+	golden_left = spr_ev_lily_gblink_l
+	golden_up = spr_ev_lily_gblink_u
+	golden_down = spr_ev_lily_gblink_d
+}
+else if (global.stranger == 6) {
+	golden_right = spr_ev_ninnie
+	golden_left = spr_ev_ninnie
+	golden_up = spr_ev_ninnie
+	golden_down = spr_ev_ninnie
+}
+else if (global.stranger == 7) {
+	golden_right = spr_ev_bee_gblink_r
+	golden_left = spr_ev_bee_gblink_l
+	golden_up = spr_ev_bee_gblink_u
+	golden_down = spr_ev_bee_gblink_d
+}
+')
+
+
+meta:
+target=gml_Object_obj_player_fall_Create_0
+critical=true
+patch:
+// set custom fall sprites
+move_to_end()
+write_after('
+else if (global.stranger == 5)
+	sprite_index = spr_ev_lily_fall
+else if (global.stranger == 6)
+	sprite_index = spr_ev_ninnie
+else if (global.stranger == 7)
+	sprite_index = spr_baal_fall2
+')
+
+
+meta:
+target=gml_Object_obj_enter_the_secret_Create_0
+critical=true
+patch:
+// secret exit entrance sprites
+find_line_with('else if (global.stranger == 2)')
+move(2) enter_scope() move_to_end() exit_scope() move(1)
+write_after_else('
+spr_enter_hurt = ev_get_stranger_down_sprite(global.stranger)
+spr_enter = ev_get_stranger_down_sprite(global.stranger)
+spr_drop = ev_get_stranger_down_sprite(global.stranger)
+drop_speed = 8
+alarm[1] = 60;
+')
+
+meta:
+target=gml_Object_obj_enter_the_secret_Draw_0
+critical=true
+patch:
+// make falling down a secret work for all strangers
+find_line_with('else if (global.stranger == 2)')
+write_after('
+|| (global.stranger > 2)
+')
+
+// the following 3 patches set the memory/wing/ui tiles to use the right sprites
+// memory
+meta:
+target=gml_Object_obj_floor_memory1_Create_0
+critical=true
+patch:
+find_line_with('spr_inv_items_columns =')
+write_before('
+switch global.memory_style
+{
+    case 4:
+        spr_inv_items = spr_ev_items_two
+        break
+    case 3:
+        spr_inv_items = spr_ev_items_one
+        break
+    case 2:
+        spr_inv_items = spr_items_special
+        break
+    case 1:
+        spr_inv_items = spr_items_cif
+        break
+    default:
+        spr_inv_items = spr_items
+        break
+}
+')
+
+// wings
+meta:
+target=gml_Object_obj_floor_memory2_Create_0
+critical=true
+patch:
+find_line_with('spr_inv_items_columns =')
+write_before('
+switch global.wings_style
+{
+    case 4:
+        spr_inv_items = spr_ev_items_two
+        break
+    case 3:
+        spr_inv_items = spr_ev_items_one
+        break
+    case 2:
+        spr_inv_items = spr_items_special
+        break
+    case 1:
+        spr_inv_items = spr_items_cif
+        break
+    default:
+        spr_inv_items = spr_items
+        break
+}
+')
+
+// sword
+
+meta:
+target=gml_Object_obj_floor_memory3_Create_0
+critical=true
+patch:
+find_line_with('spr_inv_items_columns =')
+write_before('
+
+switch global.blade_style
+{
+    case 4:
+        swordflash_index = spr_ev_void_sword_flash_two
+        break
+    case 3:
+        swordflash_index = spr_ev_void_sword_flash_one
+        break
+    case 2:
+        swordflash_index = spr_ev_void_sword_flash_lev
+        break
+    case 1:
+        swordflash_index = 2463
+        break
+    default:
+        swordflash_index = 2244
+        break
+}
+
+switch global.blade_style
+{
+    case 4:
+        spr_inv_items = spr_ev_items_two
+        break
+    case 3:
+        spr_inv_items = spr_ev_items_one
+        break
+    case 2:
+        spr_inv_items = spr_ev_items_lev
+        break
+    case 1:
+        spr_inv_items = spr_items_cif
+        break
+    default:
+        spr_inv_items = spr_items
+        break
+}
+')
+
+
+meta:
+target=gml_GlobalScript_scr_menueyecatch
+critical=true
+patch:
+// custom pause menu art
+
+find_line_with('if (global.stranger == 2)')
+move(2) enter_scope() move_to_end() exit_scope()
+move(1)
+write_after_else_if('(global.stranger == 5)
+	ds_grid_set(obj_menu.ds_menu_main, 3, 0, spr_ev_menu_continue_lily)
+else if ((global.stranger == 6))
+	ds_grid_set(obj_menu.ds_menu_main, 3, 0, spr_ev_menu_continue_egg)
+else if ((global.stranger == 7))
+	ds_grid_set(obj_menu.ds_menu_main, 3, 0, spr_ev_menu_continue_bee)	
+')

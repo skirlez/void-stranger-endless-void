@@ -1,0 +1,15 @@
+meta:
+target=gml_GlobalScript_scr_ambience_check
+critical=true
+patch:
+
+// This patch adds a case for the pack editor room, so the ambience doesn't play there if music isn't playing.
+find_line_with('switch (room)')
+move(2)
+write_before('
+case rm_ev_pack_editor:
+    scr_stop_ambience(true, 0)
+    global.ambience_shutdown = true
+    exceptions = true
+    break;
+')

@@ -1,0 +1,9 @@
+meta:
+target=gml_Object_obj_room_warp_Alarm_1
+critical=true
+patch:
+// Make bee statues clear the EV level instead of vanilla behavior
+write_before('
+ev_on_bee_warp()
+exit
+')
