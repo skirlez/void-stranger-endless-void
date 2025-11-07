@@ -4,9 +4,9 @@ critical=true
 patch:
 // prevent collpase mechanic
 find_line_with('if (collapse_timer > 25200)')
-write_after('&& false')
+write('&& false')
 
 // actually destroy object instead of moving it off screen
 find_line_with('else if (o_state == UnknownEnum.Value_13)')
-move(2)
-write_before('instance_destroy(id)')
+move(1)
+write('instance_destroy(id)')

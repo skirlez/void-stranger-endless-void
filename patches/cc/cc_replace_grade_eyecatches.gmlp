@@ -1,0 +1,18 @@
+meta:
+target=gml_Object_obj_cc_check_Draw_0
+critical=true
+patch:
+
+// Replace Cif's challenge grade sprite with our own Bullshit
+
+find_line_with('draw_sprite(grade_eyecatch_index, grade, ge_x, ge_y)')
+
+write_replace('
+ev_draw_tis_eyecatch(grade, ge_x, ge_y)
+')
+
+find_line_with('draw_sprite(grade_eyecatch_index, grade, (ge_x + ie * 32 - 96), ge_y)')
+
+write_replace('
+ev_draw_tis_eyecatch(grade, (ge_x + ie * 32 - 96), ge_y)
+')

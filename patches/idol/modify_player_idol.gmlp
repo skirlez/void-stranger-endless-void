@@ -3,7 +3,7 @@ target=gml_Object_obj_player_Create_0
 critical=true
 patch:
 move_to_end()
-write_after('
+write('
 swap_stage = 0
 swapper_flash_counter = 0
 ')
@@ -19,7 +19,7 @@ patch:
 find_line_with('if (state != UnknownEnum.Value_27)')
 find_all_lines_with('swordflash_counter = 0')
 consolidate_into_top(5)
-write_after('swapper_flash_counter = 0')
+write('swapper_flash_counter = 0')
 
 move_to_start()
 
@@ -143,7 +143,7 @@ move_to_start()
 
 find_line_with('switch (string(l_tile))')
 move(1)
-write_after('
+write('
 case "N":
 	var ms_floor = instance_create_layer((x + p_move_x), (y + p_move_y), "Floor", obj_ev_floor_memory_swapper)
 	with (ms_floor)
@@ -163,12 +163,12 @@ find_line_with('if (waiting_counter >= waiting_limit)')
 move(2)
 enter_scope()
 	find_line_with('enemyturn_countdown = 2')
-	move(-1) write('        
+	write_before('        
 		if (swap_stage == 2)
 			swap_stage = 0
 		else {
 	')
-	move(1) write('}')
+	write_last('}')
 exit_scope()
 
 
@@ -178,8 +178,8 @@ reverse_find_line_with('else if (state == UnknownEnum.Value_14))
 move(2)
 enter_scope()
 	find_line_with('if (counter >= 20)')
-	write_replace('else if (counter >= 20)')
-	move(-1) write('
+	// TODO
+	write_before_last('
 	if (swap_stage == 1 && counter >= 15)
     {
         with (obj_ev_swapper_laser)
@@ -203,7 +203,7 @@ enter_scope()
 
         swap_stage = 2
     }
-	')
+	else')
 exit_scope()
 
 move_to_end()
@@ -211,9 +211,7 @@ reverse_find_line_with('else if (state == UnknownEnum.Value_1)')
 move(2)
 enter_scope() move_to_end() exit_scope()
 move(1)
-write('
-else if (state == 495)
-{
+write_else_if('if (state == 495) {
     if (global.swapper_used == 0)
         global.swapper_used = 1
     float_attack = 1

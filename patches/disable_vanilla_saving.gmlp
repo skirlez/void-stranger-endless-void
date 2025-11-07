@@ -3,8 +3,8 @@ target=gml_GlobalScript_any_save_file_exists
 critical=true
 patch:
 find_line_with('function any_save_file_exists')
-move(2)
-write_before('
+move(1)
+write('
 return true;
 ')
 

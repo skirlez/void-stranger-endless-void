@@ -3,7 +3,8 @@ target=gml_GlobalScript_scr_loadgame
 critical=true
 patch:
 find_line_with('function scr_loadgame')
-write_after('
+move(1)
+write('
 // I don't know why these are being set here
 global.justice = 0
 global.voider = true

@@ -3,12 +3,8 @@ target=gml_GlobalScript_scr_savetoken
 critical=true
 patch:
 
-/*
-WARNING! SHITTY FORMAT BELOW.
-
-// TARGET: LINENUMBER
-// 5
-
+find_line_with('var iy = arg1')
+write('
 // We do not want to save the memory crystal. Just display the thing, and leave.
 var itoken = instance_create_depth(ix, (iy + 1), -150, obj_memories_token)
 with (obj_floor_blank_b)
@@ -19,4 +15,4 @@ with (obj_floor_blank_b)
 	flicker = 0
 }
 return;
-*/
+')

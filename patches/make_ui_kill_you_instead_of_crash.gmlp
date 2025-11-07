@@ -7,8 +7,8 @@ patch:
 find_line_with('
 function scr_errorcrash()
 ')
-move(2)
-write_before(''
+move(1)
+write(''
 with (obj_player)
 {
 	lev_count = 1
@@ -33,9 +33,9 @@ patch:
 find_line_with('
 function scr_brane_error()
 ')
-move(2)
+move(1)
 
-write_before('
+write('
 scr_errorcrash()
 exit
 ')

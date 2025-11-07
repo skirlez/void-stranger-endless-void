@@ -5,7 +5,7 @@ patch:
 find_line_with('
 var cif_flicker = instance_place(x, y - 16, obj_boulder)
 ')
-write_after('
+write('
 
 // kill player if cif statue is ontop of exit instead of reseting the playthrough
 var cif_flicker = noone
@@ -115,7 +115,7 @@ patch:
 // remove part of the code that makes cif above exit remain on screen for the cif reset graphics.
 // in EV the statue doesn't have to be above our exit and we handle this instead in the patch above.
 
-write_after('
+write('
 cif_atoner = noone;
 with (obj_boulder) {
 	if (b_form == 4 && !variable_instance_exists(id, "editor_lamp") && place_meeting(x, y + 16, obj_exit)) {

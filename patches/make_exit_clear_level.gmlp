@@ -11,7 +11,7 @@ else
 ')
 
 move(3)
-write_after_else_if('
+write_else_if('
 (room == rm_ev_level) {
 	ev_clear_level()
 }

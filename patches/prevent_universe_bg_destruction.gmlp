@@ -6,7 +6,7 @@ patch:
 // remove checks that create/destroy the universe object (not needed)
 find_line_with('if (global.hpdead == 1)')
 find_line_with('if (global.stranger == 0)')
-write_after('&& false')
+write('&& false')
 move(2)
 enter_scope() move_to_end() exit_scope()
 find_line_with('else')
@@ -15,7 +15,7 @@ write_replace('if false')
 
 // remove check that places collision where there are walls. EV calls gml_Object_obj_game_Alarm_5 to do this.
 find_line_with('if (ds_grid_get(obj_inventory.ds_player_info, 7, 0) == 0 && room != rm_0029 && room != rm_0260_void && room != rm_dis_gate)')
-write_after('&& false')
+write('&& false')
 
 /*
 WARNING! SHITTY FORMAT BELOW.

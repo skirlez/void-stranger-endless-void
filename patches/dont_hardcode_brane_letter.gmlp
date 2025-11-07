@@ -8,6 +8,6 @@ critical=true
 patch:
 
 find_line_with('if (ds_grid_get(info_grid, 0, 2) == "B"')
-write_after('
+write('
 || string_length(ds_grid_get(info_grid, 0, 2)) == 1
 ')

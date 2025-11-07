@@ -3,24 +3,16 @@ target=gml_GlobalScript_scr_music_strobe_scripts
 critical=true
 patch:
 
-/*
-WARNING! SHITTY FORMAT BELOW.
+// add arg2 which will exit early and return song tempo for us
+find_line_with('function scr_music_strobe_raw_value(arg0, arg1)')
+write_replace('function scr_music_strobe_raw_value(arg0, arg1, arg2)')
 
-// add argument2 which will exit early and return song tempo for us
 
-// TARGET: LINENUMBER_REPLACE
-// 1
-function scr_music_strobe_raw_value(argument0, argument1, argument2)
-
-// TARGET: LINENUMBER
-// 123
-if argument2
-    return _tempo;
-
+find_line_with('switch (arg0)')
+move(1) 
 // Add bpms of various songs that EV adds so everything animates to their beat
 // and also msc_rytmi2 because it doesn't have one
-// TARGET: LINENUMBER
-// 6
+write('
 case snd_ev_music_astra_jam:
     _tempo = 81.815
     break;
@@ -51,5 +43,16 @@ case snd_ev_music_determined_descent:
 case msc_rytmi2:
     _tempo = 142
     break
+')
 
-*/
+enter_scope() move_to_end() exit_scope() move(1)
+write('
+if arg2
+    return _tempo;
+')
+
+
+
+
+
+

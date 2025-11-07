@@ -1,0 +1,7 @@
+meta:
+target=gml_GlobalScript_scr_play_music
+critical=true
+patch:
+find_line_with('function scr_play_music(arg0, arg1, arg2 = 0)')
+find_line_with('if (global.voider == true)')
+write('&& false')

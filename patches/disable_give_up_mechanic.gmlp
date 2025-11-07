@@ -4,4 +4,4 @@ critical=true
 patch:
 find_line_with('function scr_ketuttaa')
 move(1)
-write_after('return;')
+write('return;')

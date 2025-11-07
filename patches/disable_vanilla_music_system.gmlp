@@ -4,7 +4,7 @@ critical=true
 patch:
 find_line_with('function scr_music_check')
 move(1)
-write_after('
+write('
 return;
 ')
 

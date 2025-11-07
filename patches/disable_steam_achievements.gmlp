@@ -4,4 +4,5 @@ critical=true
 patch:
 
 find_all_lines_with('scr_steam_achievement_')
-write_before('if false')
+write_before('if false {')
+write_last('}')

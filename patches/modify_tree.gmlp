@@ -16,7 +16,7 @@ target=gml_Object_obj_rest_Alarm_9
 critical=true
 patch:
 // Don't destroy the tree (I don't know how this alarm gets called but it destroys the tree. Save the trees)
-write_before('exit')
+write('exit')
 
 meta:
 target=gml_Object_obj_rest_Alarm_0
@@ -30,7 +30,7 @@ Instead we don't do that and we set player's state to 0
 i think it's because you're in the talking state.)
 */
 
-write_before('
+write('
 if instance_exists(obj_player)
     obj_player.state = (0 << 0)
 exit

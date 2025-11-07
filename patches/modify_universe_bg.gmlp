@@ -3,15 +3,7 @@ target=gml_Object_obj_universe_Other_4
 critical=true
 patch:
 // Prevent universe object from destroying itself
-write_before('exit')
-
-/*
-WARNING! SHITTY FORMAT BELOW.
-
-// TARGET: HEAD
-// Prevent universe object from destroying itself
-exit
-*/
+write('exit')
 
 meta:
 target=gml_Object_obj_universe_Draw_0
@@ -19,7 +11,7 @@ critical=true
 patch:
 
 // Prevent universe object from drawing itself if not in a level, or if the level's theme isn't universe
-write_before('
+write('
 	if !ev_is_room_gameplay(room)
 		exit
 	if !ev_level_is_universe_theme(global.level)

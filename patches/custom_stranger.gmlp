@@ -1,3 +1,4 @@
+// general patch for More Strangers
 
 meta:
 target=gml_Object_obj_player_Create_0
@@ -63,7 +64,7 @@ else if (global.stranger == 7) {
     wake_speed = 6
 }')
 
-write_after('
+write('
 switch global.wings_style
 {
     case 4:
@@ -173,7 +174,7 @@ critical=true
 patch:
 // set custom fall sprites
 move_to_end()
-write_after('
+write('
 else if (global.stranger == 5)
 	sprite_index = spr_ev_lily_fall
 else if (global.stranger == 6)
@@ -190,7 +191,7 @@ patch:
 // secret exit entrance sprites
 find_line_with('else if (global.stranger == 2)')
 move(2) enter_scope() move_to_end() exit_scope() move(1)
-write_after_else('
+write_else('
 spr_enter_hurt = ev_get_stranger_down_sprite(global.stranger)
 spr_enter = ev_get_stranger_down_sprite(global.stranger)
 spr_drop = ev_get_stranger_down_sprite(global.stranger)
@@ -204,7 +205,7 @@ critical=true
 patch:
 // make falling down a secret work for all strangers
 find_line_with('else if (global.stranger == 2)')
-write_after('
+write('
 || (global.stranger > 2)
 ')
 
@@ -321,10 +322,28 @@ patch:
 find_line_with('if (global.stranger == 2)')
 move(2) enter_scope() move_to_end() exit_scope()
 move(1)
-write_after_else_if('(global.stranger == 5)
+write_else_if('(global.stranger == 5)
 	ds_grid_set(obj_menu.ds_menu_main, 3, 0, spr_ev_menu_continue_lily)
 else if ((global.stranger == 6))
 	ds_grid_set(obj_menu.ds_menu_main, 3, 0, spr_ev_menu_continue_egg)
 else if ((global.stranger == 7))
 	ds_grid_set(obj_menu.ds_menu_main, 3, 0, spr_ev_menu_continue_bee)	
 ')
+
+
+
+
+meta:
+target=gml_Object_obj_boulder_Create_0
+critical=true
+patch:
+find_line_with('
+else if (global.stranger == 2)
+')
+find_line_with('}')
+write_else_if('(global.stranger == 5)
+    b_voice = 175
+else if (global.stranger == 6)
+    b_voice = 195
+else if (global.stranger == 7)
+    b_voice = snd_baal

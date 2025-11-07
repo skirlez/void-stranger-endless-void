@@ -13,7 +13,7 @@ move(1)
 close_brace_after()
 
 move_to_end()
-write_after('
+write('
 playerhitme = 0
 enemy_score = 6 // cc score
 ')
@@ -37,7 +37,7 @@ close_brace_after()
 // Use custom sprites
 find_line_with('switch (set_e_direction)')
 move(2) enter_scope() move_to_end() exit_scope() move(1)
-write_after('
+write('
 switch set_e_direction
 {
     case 0:
@@ -63,7 +63,7 @@ critical=true
 patch:
 // draw using maggot's draw event, since the one in the game
 // doesn't animate to the music
-write_before('
+write('
 event_perform_object(obj_enemy_cc, ev_draw, 0)
 exit
 ')

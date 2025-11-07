@@ -6,7 +6,7 @@ patch:
 // this is the check if it should draw the user brand.
 find_line_with('else if (name == "wallmural3")')
 // we don't want it to do that
-write_after('&& false')
+write('&& false')
 
 // instead, draw the mural configured by the mural object.
 write_before('
@@ -53,7 +53,7 @@ if (inscription == 19) {
 // have textbox copy mural brand and mural text. ev_mural_brand and ev_mural_text are given
 // to this object by EV in its place function
 find_line_with('active_textbox = tbox')
-write_after('
+write('
 active_textbox.ev_mural_brand = ev_mural_brand
 active_textbox.ev_mural_text = ev_mural_text
 ')
