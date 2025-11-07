@@ -1,0 +1,20 @@
+meta:
+targets=gml_Object_obj_bg_Step_0
+critical=true
+patch:
+write('
+if (no_edge) {
+    sprite_index = spr_pit
+    exit;
+}
+')
+
+
+meta:
+targets=gml_Object_obj_bg_Create_0
+critical=true
+patch:
+move_to_end()
+write('
+no_edge = false;
+')

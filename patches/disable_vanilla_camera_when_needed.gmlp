@@ -1,9 +1,0 @@
-meta:
-target=gml_Object_obj_camera_Step_0
-critical=true
-patch:
-// Please don't do this camera stuff in rooms where we manipulate the camera because it breaks everything!!!
-write('
-if (room == rm_ev_credits || room == rm_ev_pack_editor || room == rm_ev_options)
-	exit;
-')

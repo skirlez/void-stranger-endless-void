@@ -1,0 +1,16 @@
+meta:
+targets=gml_Object_obj_exit_Alarm_0
+critical=true
+patch:
+// Make exits clear the EV level
+move_to_end()
+reverse_find_line_with('else')
+move(-1)
+write_else_if('
+(room == rm_ev_level) {
+	ev_clear_level()
+}
+else if (room == rm_ev_pack_level) {
+	ev_clear_pack_level(ev_exit_number)
+}
+')

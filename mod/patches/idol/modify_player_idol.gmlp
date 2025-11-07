@@ -1,0 +1,289 @@
+meta:
+targets=gml_Object_obj_player_Create_0
+critical=true
+patch:
+move_to_end()
+write('
+swap_stage = 0
+swapper_flash_counter = 0
+')
+
+
+meta:
+targets=gml_Object_obj_player_Step_0
+critical=true
+patch:
+// Can't really comment about what's being done here cause I didn't write the patch or the code, I'm just porting it to this format.
+// Your guess is as good as mine, except maybe I'm better at guessing than you
+
+find_line_with('if (state != UnknownEnum.Value_27)')
+find_all_lines_with('swordflash_counter = 0')
+consolidate_into_top(5)
+write('swapper_flash_counter = 0')
+
+move_to_start()
+
+find_line_with('if (state == UnknownEnum.Value_0)')
+find_line_with('image_speed += 0.04')
+
+write_before('
+if (swap_stage == 0 && ds_grid_get(obj_inventory.ds_equipment, 0, 4) == 1)
+{
+	swapper_flash_counter++
+	if (swapper_flash_counter >= 3)
+	{
+		var swapper_target = noone
+		var test_i = 1
+		var test_x = x
+		var test_y = y
+		while (test_i < 14)
+		{
+			test_x += p_move_x
+			test_y += p_move_y
+			if (place_meeting(test_x, test_y, obj_fakewall) || place_meeting(test_x, test_y, obj_text_parent) || place_meeting(test_x, test_y, obj_chest_parent) || place_meeting(test_x, test_y, obj_sealchest))
+				break
+			else if (place_meeting(test_x, test_y, obj_obstacle_parent) && (!(place_meeting(test_x, test_y, obj_boulder))) && (!(place_meeting(test_x, test_y, obj_npc_talk))))
+				break
+			else if (place_meeting(test_x, test_y, obj_enemy_parent) || place_meeting(test_x, test_y, obj_boulder) || place_meeting(test_x, test_y, obj_npc_talk))
+			{
+				if (test_i >= 2)
+				{
+					with (instance_place(test_x, test_y, obj_enemy_parent))
+						swapper_target = id
+					with (instance_place(test_x, test_y, obj_boulder))
+						swapper_target = id
+					with (instance_place(test_x, test_y, obj_npc_talk))
+						swapper_target = id
+				}
+				break
+			}
+			else
+			{
+				test_i++
+				continue
+			}
+		}
+		if instance_exists(swapper_target)
+		{
+			var previous_target = -4
+			with (obj_ev_swapper_target)
+			{
+				if (!fade_away)
+				{
+					previous_target = target_object
+					if (target_object != swapper_target)
+						fade_away = true
+				}
+			}
+			if (previous_target != swapper_target)
+			{
+				with (instance_create_depth(swapper_target.x, swapper_target.y, 80, obj_ev_swapper_target))
+					target_object = swapper_target
+			}
+			with (obj_ev_floor_memory_swapper)
+				draw_flash = 1
+		}
+		else
+		{
+			with (obj_ev_swapper_target)
+			{
+				if (!fade_away)
+					fade_away = true
+			}
+			with (obj_ev_floor_memory_swapper)
+				draw_flash = 0
+		}
+	}
+}
+')
+
+
+find_line_with('else if (state == UnknownEnum.Value_13)')
+move(2)
+enter_scope()
+	write_before('
+	var using_swapper = false
+	if (ds_grid_get(obj_inventory.ds_equipment, 0, 4) == 1 && global.swapper_toggle == 1)
+	{
+		test_i = 1
+		test_x = x
+		test_y = y
+		while (test_i < 14)
+		{
+			test_x += p_move_x
+			test_y += p_move_y
+			if (place_meeting(test_x, test_y, obj_fakewall) || place_meeting(test_x, test_y, obj_text_parent) || place_meeting(test_x, test_y, obj_chest_parent) || place_meeting(test_x, test_y, obj_sealchest))
+				break
+			else if (place_meeting(test_x, test_y, obj_obstacle_parent) && (!(place_meeting(test_x, test_y, obj_boulder))) && (!(place_meeting(test_x, test_y, obj_npc_talk))))
+				break
+			else if (place_meeting(test_x, test_y, obj_enemy_parent) || place_meeting(test_x, test_y, obj_boulder) || place_meeting(test_x, test_y, obj_npc_talk))
+			{
+				if (test_i >= 2)
+				{
+					state = (495 << 0)
+					using_swapper = true
+				}
+				break
+			}
+			else
+			{
+				test_i++
+				continue
+			}
+		}
+	}
+
+	if (!using_swapper)') 
+	write_before('{')
+	move_to_end()
+	write('}')
+exit_scope()
+
+move_to_start()
+
+find_line_with('switch (string(l_tile))')
+move(1)
+write('
+case "N":
+	var ms_floor = instance_create_layer((x + p_move_x), (y + p_move_y), "Floor", obj_ev_floor_memory_swapper)
+	with (ms_floor)
+	{
+		ds_grid_set(obj_inventory.ds_equipment, 0, 4, obj_errormessages.dummy_swapper)
+		if (obj_errormessages.dummy_swapper != 0)
+		{
+			scr_errormessage(496)
+			obj_errormessages.dummy_swapper = 0
+		}
+	}
+	break
+')
+
+move_to_start()
+find_line_with('if (waiting_counter >= waiting_limit)')
+move(2)
+enter_scope()
+	find_line_with('enemyturn_countdown = 2')
+	write_before('        
+		if (swap_stage == 2)
+			swap_stage = 0
+		else {
+	')
+	write_last('}')
+exit_scope()
+
+
+move_to_end()
+
+reverse_find_line_with('else if (state == UnknownEnum.Value_14)')
+move(2)
+enter_scope()
+	find_line_with('if (counter >= 20)')
+	// TODO
+	write_before_last('
+	if (swap_stage == 1 && counter >= 15)
+    {
+        with (obj_ev_swapper_laser)
+            event_perform(ev_other, ev_user0)
+        image_speed = 0
+        switch set_p_direction
+        {
+            case 0:
+                sprite_index = spr_m_right
+                break
+            case 1:
+                sprite_index = spr_m_up
+                break
+            case 2:
+                sprite_index = spr_m_left
+                break
+            case 3:
+                sprite_index = spr_m_down
+                break
+        }
+
+        swap_stage = 2
+    }
+	else')
+exit_scope()
+
+move_to_end()
+reverse_find_line_with('else if (state == UnknownEnum.Value_1)')
+move(2)
+enter_scope() move_to_end() exit_scope()
+move(1)
+write_else_if('(state == 495) {
+    if (global.swapper_used == 0)
+        global.swapper_used = 1
+    float_attack = 1
+    swipe_state = 1
+    test_i = 1
+    test_x = x
+    test_y = y
+    while (test_i < 14)
+    {
+        test_x += p_move_x
+        test_y += p_move_y
+        if (place_meeting(test_x, test_y, obj_fakewall) || place_meeting(test_x, test_y, obj_text_parent) || place_meeting(test_x, test_y, obj_chest_parent) || place_meeting(test_x, test_y, obj_sealchest))
+            break
+        else if (place_meeting(test_x, test_y, obj_obstacle_parent) && (!(place_meeting(test_x, test_y, obj_boulder))) && (!(place_meeting(test_x, test_y, obj_npc_talk))))
+            break
+        else if (place_meeting(test_x, test_y, obj_enemy_parent) || place_meeting(test_x, test_y, obj_boulder) || place_meeting(test_x, test_y, obj_npc_talk))
+        {
+            if (test_i >= 2)
+            {
+                var swap_obj = -4
+                with (instance_place(test_x, test_y, obj_enemy_parent))
+                    swap_obj = id
+                with (instance_place(test_x, test_y, obj_boulder))
+                    swap_obj = id
+                with (instance_place(test_x, test_y, obj_npc_talk))
+                    swap_obj = id
+                var swapper_laser = instance_create_depth(x, y, 150, obj_ev_swapper_laser)
+                with (swapper_laser)
+                {
+                    if (test_x > x)
+                        laser_direction = 0
+                    else if (test_x < x)
+                        laser_direction = 180
+                    else if (test_y > y)
+                        laser_direction = 270
+                    else if (test_y < y)
+                        laser_direction = 90
+                    laser_length = test_i
+                    swap_object = swap_obj
+                }
+                swap_stage = 1
+            }
+            break
+        }
+        else
+        {
+            test_i++
+            continue
+        }
+    }
+    with (obj_enemy_cm)
+        player_moved = 0
+    switch set_p_direction
+    {
+        case 0:
+            sprite_index = spr_a_right
+            break
+        case 1:
+            sprite_index = spr_a_up
+            break
+        case 2:
+            sprite_index = spr_a_left
+            break
+        case 3:
+            sprite_index = spr_a_down
+            break
+    }
+
+    if audio_is_playing(snd_laser)
+        audio_stop_sound(snd_laser)
+    isfx = audio_play_sound(snd_laser, 1, 0)
+    audio_sound_pitch(isfx, 1.2)
+    state = (14 << 0)
+}
+')

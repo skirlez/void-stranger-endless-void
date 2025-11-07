@@ -1,0 +1,17 @@
+meta:
+targets=gml_GlobalScript_scr_music_check
+critical=true
+patch:
+find_line_with('function scr_music_check')
+move(1)
+write('
+return;
+')
+
+/*
+WARNING! SHITTY FORMAT BELOW.
+
+// TARGET: LINENUMBER
+// 3
+return;
+*/

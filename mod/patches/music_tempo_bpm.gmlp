@@ -1,0 +1,58 @@
+meta:
+targets=gml_GlobalScript_scr_music_strobe_scripts
+critical=true
+patch:
+
+// add arg2 which will exit early and return song tempo for us
+find_line_with('function scr_music_strobe_raw_value(arg0, arg1)')
+write_replace('function scr_music_strobe_raw_value(arg0, arg1, arg2)')
+
+
+find_line_with('switch (arg0)')
+move(1) 
+// Add bpms of various songs that EV adds so everything animates to their beat
+// and also msc_rytmi2 because it doesn't have one
+write('
+case snd_ev_music_astra_jam:
+    _tempo = 81.815
+    break;
+case snd_ev_music_monsday:
+    _tempo = 115
+    break;
+case snd_ev_music_teusday:
+    _tempo = 73.5
+    break
+case snd_ev_music_blossom:
+    _tempo = 140
+    break
+case snd_ev_music_ex_smooth:
+    _tempo = 100
+    break
+case snd_ev_music_endless_void:
+    _tempo = 80
+    break
+case snd_ev_music_stealie_feelies:
+    _tempo = 90
+    break;
+case snd_ev_music_judgment_jingle:
+    _tempo = 93
+    break
+case snd_ev_music_determined_descent:
+    _tempo = 85
+    break
+case msc_rytmi2:
+    _tempo = 142
+    break
+')
+
+enter_scope() move_to_end() exit_scope() move(1)
+write('
+if arg2
+    return _tempo;
+')
+
+
+
+
+
+
