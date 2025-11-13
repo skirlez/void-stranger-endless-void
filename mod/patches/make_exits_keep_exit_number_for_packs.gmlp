@@ -23,6 +23,7 @@ if (object_index == obj_exit) {
 // restore exit numbers when putting down exits
 move_to_start()
 find_line_with('instance_create_layer(x + p_move_x, y + p_move_y, "Floor", obj_exit)')
+write_replace('inst = instance_create_layer(x + p_move_x, y + p_move_y, "Floor", obj_exit)')
 write('      
 if (array_length(ev_exit_numbers) != 0) {
 	var number = array_pop(ev_exit_numbers);

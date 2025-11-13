@@ -79,4 +79,5 @@ write_last('}')
 
 // wrap around behavior
 find_line_with('else if (o_state == UnknownEnum.Value_10)')
+move(1)
 write('ev_tis_wraparound()')

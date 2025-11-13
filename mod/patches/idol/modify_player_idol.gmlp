@@ -180,28 +180,39 @@ enter_scope()
 	find_line_with('if (counter >= 20)')
 	// TODO
 	write_before_last('
-	if (swap_stage == 1 && counter >= 15)
-    {
-        with (obj_ev_swapper_laser)
-            event_perform(ev_other, ev_user0)
-        image_speed = 0
-        switch set_p_direction
-        {
-            case 0:
-                sprite_index = spr_m_right
-                break
-            case 1:
-                sprite_index = spr_m_up
-                break
-            case 2:
-                sprite_index = spr_m_left
-                break
-            case 3:
-                sprite_index = spr_m_down
-                break
-        }
 
-        swap_stage = 2
+	if (swap_stage == 1)
+    {
+		if (counter >= 15) {
+			with (obj_ev_swapper_laser)
+				event_perform(ev_other, ev_user0)
+			image_speed = 0
+			switch set_p_direction
+			{
+				case 0:
+					sprite_index = spr_m_right
+					break
+				case 1:
+					sprite_index = spr_m_up
+					break
+				case 2:
+					sprite_index = spr_m_left
+					break
+				case 3:
+					sprite_index = spr_m_down
+					break
+			}
+
+			swap_stage = 2
+		}
+		// cancel if not holding action key
+		else if !scr_input_check(4) && counter >= 5 {
+			state = 0
+			swap_stage = 0
+			counter = 0
+			instance_destroy(obj_ev_swapper_laser)
+			audio_play_sound(snd_ex_diestar, 0, false, 1, 0, 0.5)
+		}
     }
 	else')
 exit_scope()
