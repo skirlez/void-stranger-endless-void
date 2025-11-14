@@ -197,6 +197,7 @@ credits = [
 		new ev_credits_text("by Emidemi"),
 		
 		new ev_credits_text("Tamarind,"),
+		new ev_credits_text("Outer Tamarind,"),
 		new ev_credits_text("Darkroom"),
 		new ev_credits_text("Hadean,"),
 		new ev_credits_text("by B. Spaghettini"),

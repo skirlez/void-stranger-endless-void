@@ -475,6 +475,7 @@
     {"id":{"name":"spr_deathfloor","path":"sprites/spr_deathfloor/spr_deathfloor.yy",},},
     {"id":{"name":"spr_ev_toggle","path":"sprites/spr_ev_toggle/spr_ev_toggle.yy",},},
     {"id":{"name":"spr_ev_delete_level","path":"sprites/spr_ev_delete_level/spr_ev_delete_level.yy",},},
+    {"id":{"name":"snd_ev_music_outer_tamarind","path":"sounds/snd_ev_music_outer_tamarind/snd_ev_music_outer_tamarind.yy",},},
     {"id":{"name":"spr_ev_secret_exit_arrow","path":"sprites/spr_ev_secret_exit_arrow/spr_ev_secret_exit_arrow.yy",},},
     {"id":{"name":"msc_test2","path":"sounds/msc_test2/msc_test2.yy",},},
     {"id":{"name":"snd_ev_music_endless_void","path":"sounds/snd_ev_music_endless_void/snd_ev_music_endless_void.yy",},},

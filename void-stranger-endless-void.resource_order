@@ -436,6 +436,7 @@
     {"name":"spr_deathfloor","order":26,"path":"sprites/spr_deathfloor/spr_deathfloor.yy",},
     {"name":"spr_ev_toggle","order":20,"path":"sprites/spr_ev_toggle/spr_ev_toggle.yy",},
     {"name":"spr_ev_delete_level","order":33,"path":"sprites/spr_ev_delete_level/spr_ev_delete_level.yy",},
+    {"name":"snd_ev_music_outer_tamarind","order":12,"path":"sounds/snd_ev_music_outer_tamarind/snd_ev_music_outer_tamarind.yy",},
     {"name":"spr_ev_secret_exit_arrow","order":44,"path":"sprites/spr_ev_secret_exit_arrow/spr_ev_secret_exit_arrow.yy",},
     {"name":"msc_test2","order":20,"path":"sounds/msc_test2/msc_test2.yy",},
     {"name":"snd_ev_music_endless_void","order":2,"path":"sounds/snd_ev_music_endless_void/snd_ev_music_endless_void.yy",},
