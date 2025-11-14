@@ -195,7 +195,9 @@ credits = [
 		new ev_credits_text("by gooeyPhantasm"),
 		new ev_credits_text("Determined Descent"),
 		new ev_credits_text("by Emidemi"),
-		
+	],
+	[
+		new ev_credits_header("Music"),
 		new ev_credits_text("Tamarind,"),
 		new ev_credits_text("Outer Tamarind,"),
 		new ev_credits_text("Darkroom"),
