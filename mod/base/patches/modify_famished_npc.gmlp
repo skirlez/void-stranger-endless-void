@@ -1,0 +1,12 @@
+meta:
+targets=gml_Object_obj_npc_famished_Step_0
+critical=true
+patch:
+// prevent collpase mechanic
+find_line_with('if (collapse_timer > 25200)')
+write('&& false')
+
+// actually destroy object instead of moving it off screen
+find_line_with('else if (o_state == UnknownEnum.Value_13)')
+move(1)
+write('instance_destroy(id)')

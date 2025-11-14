@@ -1,9 +1,0 @@
-meta:
-targets=gml_Object_obj_floor_brane_Alarm_3
-critical=true
-patch:
-// Make placing a new number in bottom right take you to next level in a pack
-write('
-ev_on_floor_warp()
-exit
-')

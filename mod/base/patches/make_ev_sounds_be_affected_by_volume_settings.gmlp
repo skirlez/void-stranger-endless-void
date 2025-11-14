@@ -1,0 +1,11 @@
+meta:
+targets=gml_GlobalScript_scr_audio_group_set_gain_vs
+critical=true
+patch:
+find_line_with('function scr_audio_group_set_gain_vs')
+move(1)
+
+// set the new volume for EV sounds too
+write('
+ev_set_audio_group_volume(argument0, argument1, argument2)
+')

@@ -17,3 +17,8 @@ projectscripts/variables.sh
 projectscripts/variables.bat
 projectscripts/*.plist
 projectscripts/*.zip
+
+mod/igor
+mod/out
+mod/variables.sh
+mod/variables.bat

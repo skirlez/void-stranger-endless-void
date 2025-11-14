@@ -1,0 +1,59 @@
+meta:
+targets=gml_Object_obj_textbox_Draw_0
+critical=true
+patch:
+
+// this is the check if it should draw the user brand.
+find_line_with('else if (name == "wallmural3")')
+// we don't want it to do that
+write('&& false')
+
+// instead, draw the mural configured by the mural object.
+write_before('
+else if (name == "wallmural3") {
+	ev_draw_mural_brand(88, 24, ev_mural_brand, ev_mural_text)
+}')
+
+
+
+meta:
+targets=gml_Object_obj_mural_Step_0
+critical=true
+patch:
+
+
+// set up dialog for interacting with the mural
+find_line_with('if (active_textbox == -4)')
+write_before('
+if (inscription == 19) {
+	if ev_mural_brand == 0 {
+		text[0] = scrScript(1245)
+		moods = [neutral]
+		speakers = [id]
+	}
+	else {
+		if (ds_grid_get(obj_inventory.ds_equipment, 0, 0) == 0 || global.memory_toggle == false) {
+			text[0] = scrScript(1200)
+			moods = [neutral]
+			speakers = [id]
+		}
+		else {
+			text[0] = scrScript(1200)
+			text[1] = scrScript(180)
+			text[2] = string_upper(ev_mural_text)
+			if text[2] == ""
+				text[2] = " "
+			moods = [neutral, neutral, neutral]
+			speakers = [id, id, id]
+		}
+	}
+}
+')
+
+// have textbox copy mural brand and mural text. ev_mural_brand and ev_mural_text are given
+// to this object by EV in its place function
+find_line_with('active_textbox = tbox')
+write('
+active_textbox.ev_mural_brand = ev_mural_brand
+active_textbox.ev_mural_text = ev_mural_text
+')
