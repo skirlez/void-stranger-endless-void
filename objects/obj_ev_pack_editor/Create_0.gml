@@ -346,10 +346,10 @@ branefuck_node.properties_generator = function () {
 	return { program : "" }	
 }
 branefuck_node.read_function = function (properties_str /*, version */) {
-	return { program : properties_str }; 
+	return { program : base64_decode(properties_str) }; 
 }
 branefuck_node.write_function = function (properties) {
-	return string(properties.program)
+	return base64_encode(string(properties.program))
 }
 branefuck_node.on_config = function (node_instance) {
 	global.mouse_layer = 1;
