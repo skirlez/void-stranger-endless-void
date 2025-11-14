@@ -194,6 +194,13 @@ function import_pack(pack_string) {
 	for (var i = 0; i < array_length(node_state_strings); i++) {
 		var node_state = read_node_state(node_state_strings[i])
 		array_push(all_node_states, node_state)
+		for (var j = 0; j < array_length(node_state.intermediary_numbered_exits); j++) {
+			var index = node_state.intermediary_numbered_exits[j];
+			if index < 0 || index >= array_length(node_state_strings) {
+				log_error($"Tried to import pack with numbered exits that are too high: {pack_string}")
+				return place_default_nodes(pack);
+			}
+		}
 	}
 		
 	// this list is the same size as `all_node_states`, and keeps track of if the node at that index has been visited
