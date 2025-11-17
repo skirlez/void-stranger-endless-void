@@ -2,6 +2,8 @@
 
 # Shell script to build a mod's GameMaker project and merge it with the game using g3man
 
+# TODO: hash build inputs, skip if already built
+
 if [ ! -f "variables.sh" ]; then
   cp .variables.structure.shell variables.sh
   echo "variables.sh created. Please fill in all of the empty variables, then rerun this script."
@@ -11,13 +13,13 @@ fi
 echo "Reading variables.sh"
 source variables.sh
 
-if [ -z "$GAMEMAKER_CACHE_PATH" ] || [ -z "$USER_DIRECTORY_PATH" ] || [ -z "$PROJECT_PATH" ] || [ -z "$G3MAN_PATH" ] || [ -z "$GAME_PATH" ]; then
+if [ -z "$GAMEMAKER_CACHE_PATH" ] || [ -z "$USER_DIRECTORY_PATH" ] || [ -z "$PROJECT_NAME" ] || [ -z "$G3MAN_PATH" ] || [ -z "$GAME_PATH" ]; then
     echo "Could not build EV:"
     echo "Some variables are empty. Please fill in all of the variables."
     exit 1
 fi
 
-cd "$PROJECT_PATH/mod/igor"
+cd "./igor"
 
 if [ -d "./output" ]; then
   echo "Removing output folder and zip"
@@ -40,7 +42,7 @@ echo "------------------------------------"
 $IGOR_PATH \
     -j=8 \
     --user="$USER_DIRECTORY_PATH" \
-    --project="$PROJECT_PATH/void-stranger-endless-void.yyp" \
+    --project="../../$PROJECT_NAME.yyp" \
     --config="NoVoidStrangerGroups" \
     --runtimePath="$RUNTIME_PATH" \
     --tf="mod-package.zip" \

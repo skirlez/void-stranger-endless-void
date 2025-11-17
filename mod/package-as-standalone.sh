@@ -4,11 +4,10 @@ source build.sh
 
 echo "Creating mod folder..."
 
-
 if [ ! -d "./out/mod" ]; then
   mkdir -p ./out/mod
 fi
-rsync -a --delete ./base ./out/profile
-cp ./igor/mod_data.win ./out/profile/base
+rsync -a --delete ./base/ ./out/mod
+cp ./igor/mod_data.win ./out/mod
 
-echo Done!
+echo Done! Mod folder is in out/mod.
