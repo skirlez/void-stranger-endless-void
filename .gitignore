@@ -18,7 +18,10 @@ projectscripts/variables.bat
 projectscripts/*.plist
 projectscripts/*.zip
 
-mod/igor
-mod/out
-mod/variables.sh
-mod/variables.bat
+# Ignore igor output
+g3man/igor
+g3man/out
+# Under no circumstance do you want a binary blob in your source tree.
+# If your mod depends on other mods and you want them to be in g3man/base,
+# each user must fetch those manually.
+g3man/**/*.win

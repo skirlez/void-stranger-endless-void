@@ -10,7 +10,6 @@ It expects you to run the script on Void Stranger's data.win, and expects you to
 
 `build.sh` - Builds the mod and copies the output data.win to `igor/mod_data.win`
 
-`package-as-standalone.sh` - Builds the mod, and packages it as a standalone g3man mod, with the output mod folder being in `out/mod`. The output folder is composed of the `base` folder, with `igor/mod_data.win` copied in.
-
-`package-as-profile.sh` - Builds the mod, and packages it as a g3man profile, with the output profile folder being in `out/profile`. The profile folder copies everything `base-profile`, which should contain the `profile.json` that defines the profile,
+`package.sh` - Builds the mod, and packages it as a g3man profile, with the output profile folder being in `out`.
+`out` copies everything from `base`, which should contain your mod's folder along with a `profile.json`.
 and any other mods that you want to be included in the final profile folder. Additionally, the `base` folder is copied into the output profile folder.
