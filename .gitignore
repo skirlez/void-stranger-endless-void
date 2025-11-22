@@ -9,19 +9,11 @@ sounds/**/*.wav
 # Ignore all images in the tilesets folder
 tilesets/**/*.png
 
-projectscripts/temp
-projectscripts/cache
-projectscripts/data.win
-projectscripts/output
-projectscripts/variables.sh
-projectscripts/variables.bat
-projectscripts/*.plist
-projectscripts/*.zip
-
-# Ignore igor output
 g3man/igor
 g3man/out
-# Under no circumstance do you want a binary blob in your source tree.
+g3man/user-config.ini
+# Under no circumstance should you want a binary blob in your source tree.
 # If your mod depends on other mods and you want them to be in g3man/base,
 # each user must fetch those manually.
 g3man/**/*.win
+g3man/igor/hash.txt
