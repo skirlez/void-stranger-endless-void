@@ -39,7 +39,7 @@ def cleanup():
 		print("Deleting igor output...")
 		shutil.rmtree("./igor/output", ignore_errors=True)
 	try:
-		os.remove("./igor/output/artifact.zip")
+		os.remove("./igor/artifact.zip")
 	except:
 		pass
 def build_gamemaker_project():
