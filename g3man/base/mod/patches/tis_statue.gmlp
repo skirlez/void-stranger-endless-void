@@ -1,5 +1,5 @@
 meta:
-targets=gml_Object_obj_boulder_Draw_0
+targets='gml_Object_obj_boulder_Draw_0'
 critical=true
 patch:
 // Draw tis statue projection
@@ -13,7 +13,7 @@ if b_form == 10 && (o_move_x != 0 || o_move_y != 0) {
 
 
 meta:
-targets=gml_Object_obj_boulder_Alarm_0
+targets='gml_Object_obj_boulder_Alarm_0'
 critical=true
 patch:
 // Tis statue dialogue
@@ -28,7 +28,7 @@ write_else_if('(b_form == 10) {
 
 
 meta:
-targets=gml_Object_obj_boulder_Step_0
+targets='gml_Object_obj_boulder_Step_0'
 critical=true
 patch:
 // this statue covers most of the implementation

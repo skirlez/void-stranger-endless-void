@@ -1,5 +1,5 @@
 meta:
-targets=gml_Object_obj_spawnpoint_Other_4
+targets='gml_Object_obj_spawnpoint_Other_4'
 critical=true
 patch:
 // replace this blank tile with the void idol tile
@@ -10,7 +10,7 @@ instance_create_layer((ui_x + 96), ui_y, "Floor", obj_ev_floor_memory_swapper)
 
 
 meta:
-targets=gml_Object_obj_spawn_intro_Other_4
+targets='gml_Object_obj_spawn_intro_Other_4'
 critical=true
 patch:
 // replace this blank tile with the void idol tile. the code is duplicated for some reason
@@ -20,7 +20,7 @@ instance_create_layer((ui_x + 96), ui_y, "Floor", obj_ev_floor_memory_swapper)
 ')
 
 meta:
-targets=gml_Object_obj_enter_the_secret_Other_4
+targets='gml_Object_obj_enter_the_secret_Other_4'
 critical=true
 patch:
 move_to_end()
@@ -31,7 +31,7 @@ instance_create_layer((ui_x + 96), ui_y, "Floor", obj_ev_floor_memory_swapper)
 
 // I don't even remember what this object does.
 meta:
-targets=gml_Object_obj_enter_the_danger_Other_4
+targets='gml_Object_obj_enter_the_danger_Other_4'
 critical=true
 patch:
 move_to_end()

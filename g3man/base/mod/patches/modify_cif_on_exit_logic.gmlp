@@ -1,5 +1,5 @@
 meta:
-targets=gml_Object_obj_exit_Step_0
+targets='gml_Object_obj_exit_Step_0'
 critical=true
 patch:
 find_line_with('
@@ -53,7 +53,7 @@ with (obj_boulder) {
 
 
 meta:
-targets=gml_Object_obj_exit_Alarm_2
+targets='gml_Object_obj_exit_Alarm_2'
 critical=true
 patch:
 // remove part of the code that makes cif above exit remain on screen for the cif reset graphics.

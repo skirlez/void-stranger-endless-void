@@ -1,5 +1,5 @@
 meta:
-targets=gml_Object_obj_menu_Draw_0
+targets='gml_Object_obj_menu_Draw_0'
 critical=true
 patch:
 // this makes it so the game only draws the "on" option for the idol

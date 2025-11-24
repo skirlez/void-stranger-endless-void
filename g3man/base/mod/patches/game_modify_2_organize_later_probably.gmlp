@@ -1,5 +1,5 @@
 meta:
-targets=gml_Object_obj_game_Draw_77
+targets='gml_Object_obj_game_Draw_77'
 critical=true
 patch:
 // TODO: maybe redo how this is done

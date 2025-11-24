@@ -1,5 +1,5 @@
 meta:
-targets=gml_Object_obj_exit_Alarm_0
+targets='gml_Object_obj_exit_Alarm_0'
 critical=true
 patch:
 // Make exits clear the EV level

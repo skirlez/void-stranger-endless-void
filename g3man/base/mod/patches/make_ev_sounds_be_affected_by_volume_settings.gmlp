@@ -1,5 +1,5 @@
 meta:
-targets=gml_GlobalScript_scr_audio_group_set_gain_vs
+targets='gml_GlobalScript_scr_audio_group_set_gain_vs'
 critical=true
 patch:
 find_line_with('function scr_audio_group_set_gain_vs')

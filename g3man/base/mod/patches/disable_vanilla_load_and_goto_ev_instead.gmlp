@@ -1,5 +1,5 @@
 meta:
-targets=gml_GlobalScript_scr_loadgame
+targets='gml_GlobalScript_scr_loadgame'
 critical=true
 patch:
 find_line_with('function scr_loadgame')

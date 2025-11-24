@@ -1,5 +1,5 @@
 meta:
-targets=gml_Object_obj_player_Draw_0
+targets='gml_Object_obj_player_Draw_0'
 critical=true
 patch:
 

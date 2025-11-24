@@ -1,5 +1,5 @@
 meta:
-targets=gml_Object_obj_cif_reset_Step_0
+targets='gml_Object_obj_cif_reset_Step_0'
 critical=true
 patch:
 // This object is responsible for restarting your run after a cif reset

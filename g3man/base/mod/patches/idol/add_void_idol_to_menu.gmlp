@@ -1,5 +1,5 @@
 meta:
-targets=gml_GlobalScript_scr_loadmenu
+targets='gml_GlobalScript_scr_loadmenu'
 critical=true
 patch:
 find_line_with('function scr_loadmenu')

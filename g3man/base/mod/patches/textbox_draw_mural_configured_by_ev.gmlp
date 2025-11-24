@@ -1,5 +1,5 @@
 meta:
-targets=gml_Object_obj_textbox_Draw_0
+targets='gml_Object_obj_textbox_Draw_0'
 critical=true
 patch:
 
@@ -17,7 +17,7 @@ else if (name == "wallmural3") {
 
 
 meta:
-targets=gml_Object_obj_mural_Step_0
+targets='gml_Object_obj_mural_Step_0'
 critical=true
 patch:
 

@@ -1,5 +1,5 @@
 meta:
-targets=gml_Object_obj_stinklines_Create_0
+targets='gml_Object_obj_stinklines_Create_0'
 critical=true
 patch:
 // prevent this object from destroying itself due to story conditions

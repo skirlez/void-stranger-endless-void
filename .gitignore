@@ -17,3 +17,4 @@ g3man/user-config.ini
 # each user must fetch those manually.
 g3man/**/*.win
 g3man/igor/hash.txt
+g3man/__pycache__

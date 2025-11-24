@@ -1,5 +1,5 @@
 meta:
-targets=gml_Object_obj_cc_check_Other_12
+targets='gml_Object_obj_cc_check_Other_12'
 critical=true
 patch:
 
@@ -18,11 +18,10 @@ write_replace('var ibrane = ds_map_size(obj_ev_pack_player.visited_levels)')
 
 
 meta:
-targets=gml_Object_obj_cc_check_Step_0
+targets='gml_Object_obj_cc_check_Step_0'
 critical=true
 patch:
 
 // use our own function for high score checking, which overrides whatever the game does before this
 find_line_with('check_state = 5')
 write_before('ev_tis_pack_check_highscore()')
-

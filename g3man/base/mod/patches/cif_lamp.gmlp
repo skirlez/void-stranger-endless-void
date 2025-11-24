@@ -1,5 +1,5 @@
 meta:
-targets=gml_Object_obj_deathfloor_Step_2
+targets='gml_Object_obj_deathfloor_Step_2'
 critical=true
 patch:
 
@@ -17,7 +17,7 @@ with (boulder) {
 
 
 meta:
-targets=gml_Object_obj_boulder_Other_4
+targets='gml_Object_obj_boulder_Other_4'
 critical=true
 patch:
 move_to_end()
@@ -28,7 +28,7 @@ cif_sprite_shaken = lamp ? spr_lamp : spr_atoner_shaken
 ')
 
 meta:
-targets=gml_Object_obj_boulder_Step_0
+targets='gml_Object_obj_boulder_Step_0'
 critical=true
 patch:
 
@@ -48,7 +48,6 @@ move(1)
 enter_scope()
 find_line_with('sprite_index = spr_atoner_shaken')
 write_replace('sprite_index = other.cif_sprite_shaken')
-
 
 
 

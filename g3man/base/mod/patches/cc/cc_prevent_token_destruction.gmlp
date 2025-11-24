@@ -1,5 +1,5 @@
 meta:
-targets=gml_Object_obj_token_uncover_Create_0
+targets='gml_Object_obj_token_uncover_Create_0'
 critical=true
 patch:
 // don't destroy cc tokens

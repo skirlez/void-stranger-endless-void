@@ -1,5 +1,5 @@
 meta:
-targets=gml_Room_rm_cc_menu_Create
+targets='gml_Room_rm_cc_menu_Create'
 critical=true
 patch:
 write('ev_leave_pack()')

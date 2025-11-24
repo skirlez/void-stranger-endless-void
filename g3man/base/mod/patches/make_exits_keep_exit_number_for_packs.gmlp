@@ -1,5 +1,5 @@
 meta:
-targets=gml_Object_obj_player_Create_0
+targets='gml_Object_obj_player_Create_0'
 critical=true
 patch:
 move_to_end()
@@ -8,7 +8,7 @@ ev_exit_numbers = []
 ')
 
 meta:
-targets=gml_Object_obj_player_Step_0
+targets='gml_Object_obj_player_Step_0'
 critical=true
 patch:
 

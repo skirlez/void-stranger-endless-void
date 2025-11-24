@@ -3,9 +3,9 @@
 // if we spawn it
 
 meta:
-targets=gml_Object_obj_jewel_collect_Step_0, 
-gml_Object_obj_jewel_collect_Other_11,
-gml_Object_obj_jewel_collect_Other_4
+targets= { 'gml_Object_obj_jewel_collect_Step_0', 
+	'gml_Object_obj_jewel_collect_Other_11',
+	'gml_Object_obj_jewel_collect_Other_4' }
 critical=true
 patch:
 write('
@@ -15,7 +15,7 @@ if (!visible)
 
 
 meta:
-targets=gml_Object_obj_floor_Step_0
+targets='gml_Object_obj_floor_Step_0'
 critical=true
 patch:
 
@@ -31,7 +31,7 @@ else
 
 
 meta:
-targets=gml_Object_obj_floor_Draw_0
+targets='gml_Object_obj_floor_Draw_0'
 critical=true
 patch:
 find_line_with('draw_sprite_ext(sprite_index, 0, x, y + yy, 1, 1, 0, c_white, flooralpha)')

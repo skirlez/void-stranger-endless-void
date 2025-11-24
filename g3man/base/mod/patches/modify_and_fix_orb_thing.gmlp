@@ -1,5 +1,5 @@
 meta:
-targets=gml_Object_obj_enemy_cv_Create_0
+targets='gml_Object_obj_enemy_cv_Create_0'
 critical=true
 patch:
 
@@ -17,7 +17,7 @@ enemy_score = 6 // cc score
 ')
 
 meta:
-targets=gml_Object_obj_enemy_cv_Step_0
+targets='gml_Object_obj_enemy_cv_Step_0'
 critical=true
 patch:
 
@@ -54,7 +54,7 @@ switch set_e_direction
 
 
 meta:
-targets=gml_Object_obj_enemy_cv_Draw_0
+targets='gml_Object_obj_enemy_cv_Draw_0'
 critical=true
 patch:
 // draw using maggot's draw event, since the one in the game
@@ -63,5 +63,4 @@ write('
 event_perform_object(obj_enemy_cc, ev_draw, 0)
 exit
 ')
-
 

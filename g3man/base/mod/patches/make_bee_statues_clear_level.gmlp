@@ -1,5 +1,5 @@
 meta:
-targets=gml_Object_obj_room_warp_Alarm_1
+targets='gml_Object_obj_room_warp_Alarm_1'
 critical=true
 patch:
 // Make bee statues clear the EV level instead of vanilla behavior

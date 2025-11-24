@@ -1,5 +1,5 @@
 meta:
-targets=gml_GlobalScript_scr_music_strobe_scripts
+targets='gml_GlobalScript_scr_music_strobe_scripts'
 critical=true
 patch:
 
@@ -50,7 +50,6 @@ write('
 if arg2
     return _tempo;
 ')
-
 
 
 

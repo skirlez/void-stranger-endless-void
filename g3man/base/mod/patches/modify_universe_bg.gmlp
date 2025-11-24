@@ -1,12 +1,12 @@
 meta:
-targets=gml_Object_obj_universe_Other_4
+targets='gml_Object_obj_universe_Other_4'
 critical=true
 patch:
 // Prevent universe object from destroying itself
 write('exit')
 
 meta:
-targets=gml_Object_obj_universe_Draw_0
+targets='gml_Object_obj_universe_Draw_0'
 critical=true
 patch:
 

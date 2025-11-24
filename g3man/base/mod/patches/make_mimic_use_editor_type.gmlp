@@ -1,5 +1,5 @@
 meta:
-targets=gml_Object_obj_enemy_cm_Alarm_1
+targets='gml_Object_obj_enemy_cm_Alarm_1'
 critical=true
 patch:
 

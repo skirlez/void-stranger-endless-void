@@ -1,5 +1,5 @@
 meta:
-targets=gml_Object_obj_chest_small_Step_0
+targets='gml_Object_obj_chest_small_Step_0'
 critical=true
 patch:
 

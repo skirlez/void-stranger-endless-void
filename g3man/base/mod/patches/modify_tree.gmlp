@@ -1,5 +1,5 @@
 meta:
-targets=gml_Object_obj_rest_Step_0
+targets='gml_Object_obj_rest_Step_0'
 critical=true
 patch:
 // skip this if-else block that sets the depth of the tree
@@ -12,14 +12,14 @@ depth = layer_get_depth("Player") - 1 - y / 16
 ')
 
 meta:
-targets=gml_Object_obj_rest_Alarm_9
+targets='gml_Object_obj_rest_Alarm_9'
 critical=true
 patch:
 // Don't destroy the tree (I don't know how this alarm gets called but it destroys the tree. Save the trees)
 write('exit')
 
 meta:
-targets=gml_Object_obj_rest_Alarm_0
+targets='gml_Object_obj_rest_Alarm_0'
 critical=true
 patch:
 /* 

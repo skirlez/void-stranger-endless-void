@@ -1,5 +1,5 @@
 meta:
-targets=gml_GlobalScript_scr_savetoken
+targets='gml_GlobalScript_scr_savetoken'
 critical=true
 patch:
 

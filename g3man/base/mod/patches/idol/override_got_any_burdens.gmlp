@@ -1,5 +1,5 @@
 meta:
-targets=gml_Object_obj_menu_Create_0
+targets='gml_Object_obj_menu_Create_0'
 critical=true
 patch:
 find_line_with('function got_any_burdens')

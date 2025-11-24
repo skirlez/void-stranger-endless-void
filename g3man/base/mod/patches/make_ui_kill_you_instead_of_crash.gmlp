@@ -1,5 +1,5 @@
 meta:
-targets=gml_GlobalScript_scr_errorcrash
+targets='gml_GlobalScript_scr_errorcrash'
 critical=true
 patch:
 // make taking voidrod kill you
@@ -26,7 +26,7 @@ exit
 
 // make taking ?? also kill you
 meta:
-targets=gml_GlobalScript_scr_brane_error
+targets='gml_GlobalScript_scr_brane_error'
 critical=true
 patch:
 
@@ -39,5 +39,4 @@ write('
 scr_errorcrash()
 exit
 ')
-
 

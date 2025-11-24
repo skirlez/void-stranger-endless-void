@@ -1,5 +1,5 @@
 meta:
-targets=gml_Object_obj_player_Create_0
+targets='gml_Object_obj_player_Create_0'
 critical=true
 patch:
 move_to_end()
@@ -10,7 +10,7 @@ swapper_flash_counter = 0
 
 
 meta:
-targets=gml_Object_obj_player_Step_0
+targets='gml_Object_obj_player_Step_0'
 critical=true
 patch:
 // Can't really comment about what's being done here cause I didn't write the patch or the code, I'm just porting it to this format.

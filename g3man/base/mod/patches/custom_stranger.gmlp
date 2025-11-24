@@ -1,7 +1,7 @@
 // general patch for More Strangers
 
 meta:
-targets=gml_Object_obj_player_Create_0
+targets='gml_Object_obj_player_Create_0'
 critical=true
 patch:
 
@@ -105,7 +105,7 @@ switch global.blade_style
 
 
 meta:
-targets=gml_Object_obj_player_wings_dissipate_Create_0
+targets='gml_Object_obj_player_wings_dissipate_Create_0'
 critical=true
 patch:
 
@@ -136,7 +136,7 @@ switch global.wings_style
 ')
 
 meta:
-targets=gml_Object_obj_player_golden_Create_0
+targets='gml_Object_obj_player_golden_Create_0'
 critical=true
 patch:
 // set golden sprites for custom strangers (after dying to a mon statue)
@@ -169,7 +169,7 @@ else if (global.stranger == 7) {
 
 
 meta:
-targets=gml_Object_obj_player_fall_Create_0
+targets='gml_Object_obj_player_fall_Create_0'
 critical=true
 patch:
 // set custom fall sprites
@@ -185,7 +185,7 @@ else if (global.stranger == 7)
 
 
 meta:
-targets=gml_Object_obj_enter_the_secret_Create_0
+targets='gml_Object_obj_enter_the_secret_Create_0'
 critical=true
 patch:
 // secret exit entrance sprites
@@ -200,7 +200,7 @@ alarm[1] = 60;
 ')
 
 meta:
-targets=gml_Object_obj_enter_the_secret_Draw_0
+targets='gml_Object_obj_enter_the_secret_Draw_0'
 critical=true
 patch:
 // make falling down a secret work for all strangers
@@ -212,7 +212,7 @@ write('
 // the following 3 patches set the memory/wing/ui tiles to use the right sprites
 // memory
 meta:
-targets=gml_Object_obj_floor_memory1_Create_0
+targets='gml_Object_obj_floor_memory1_Create_0'
 critical=true
 patch:
 find_line_with('spr_inv_items_columns =')
@@ -239,7 +239,7 @@ switch global.memory_style
 
 // wings
 meta:
-targets=gml_Object_obj_floor_memory2_Create_0
+targets='gml_Object_obj_floor_memory2_Create_0'
 critical=true
 patch:
 find_line_with('spr_inv_items_columns =')
@@ -267,7 +267,7 @@ switch global.wings_style
 // sword
 
 meta:
-targets=gml_Object_obj_floor_memory3_Create_0
+targets='gml_Object_obj_floor_memory3_Create_0'
 critical=true
 patch:
 find_line_with('spr_inv_items_columns =')
@@ -314,7 +314,7 @@ switch global.blade_style
 
 
 meta:
-targets=gml_GlobalScript_scr_menueyecatch
+targets='gml_GlobalScript_scr_menueyecatch'
 critical=true
 patch:
 // custom pause menu art
@@ -337,7 +337,7 @@ else if ((global.stranger == 7))
 
 
 meta:
-targets=gml_Object_obj_boulder_Create_0
+targets='gml_Object_obj_boulder_Create_0'
 critical=true
 patch:
 find_line_with('

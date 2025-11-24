@@ -1,5 +1,5 @@
 meta:
-targets=gml_GlobalScript_scr_ambience_check
+targets='gml_GlobalScript_scr_ambience_check'
 critical=true
 patch:
 

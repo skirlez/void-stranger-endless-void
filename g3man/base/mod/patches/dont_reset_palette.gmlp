@@ -1,5 +1,5 @@
 meta:
-targets=gml_Object_obj_menu_Alarm_2
+targets='gml_Object_obj_menu_Alarm_2'
 critical=true
 patch:
 // This code changes the palette to the one set in settings. I don't know why or how or exactly when it runs

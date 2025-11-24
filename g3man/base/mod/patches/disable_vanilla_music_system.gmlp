@@ -1,5 +1,5 @@
 meta:
-targets=gml_GlobalScript_scr_music_check
+targets='gml_GlobalScript_scr_music_check'
 critical=true
 patch:
 find_line_with('function scr_music_check')
