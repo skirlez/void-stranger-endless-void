@@ -9,12 +9,11 @@ sounds/**/*.wav
 # Ignore all images in the tilesets folder
 tilesets/**/*.png
 
+# g3man related ignores
 g3man/igor
 g3man/out
-g3man/user-config.ini
-# Under no circumstance should you want a binary blob in your source tree.
-# If your mod depends on other mods and you want them to be in g3man/base,
-# each user must fetch those manually.
-g3man/**/*.win
-g3man/igor/hash.txt
+g3man/frida-config.ini
+g3man/base/*
+!g3man/base/mod/
 g3man/__pycache__
+g3man/frida-timestamp.txt
