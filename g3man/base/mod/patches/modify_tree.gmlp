@@ -1,0 +1,37 @@
+meta:
+targets='gml_Object_obj_rest_Step_0'
+critical=true
+patch:
+// skip this if-else block that sets the depth of the tree
+find_line_with('depth = 0')
+find_line_with('if')
+
+// override depth so it uses the y position and looks good with other trees
+write_before('
+depth = layer_get_depth("Player") - 1 - y / 16
+')
+
+meta:
+targets='gml_Object_obj_rest_Alarm_9'
+critical=true
+patch:
+// Don't destroy the tree (I don't know how this alarm gets called but it destroys the tree. Save the trees)
+write('exit')
+
+meta:
+targets='gml_Object_obj_rest_Alarm_0'
+critical=true
+patch:
+/* 
+This patch prevents you from talking to trees.
+Usually this entry sets the variable talking to true.
+Instead we don't do that and we set player's state to 0
+(it is already set to something else by other code. if we don't do this, it causes a softlock.
+i think it's because you're in the talking state.)
+*/
+
+write('
+if instance_exists(obj_player)
+    obj_player.state = (0 << 0)
+exit
+')

@@ -1,0 +1,12 @@
+{
+  "format_version": 1,
+  "name": "Endless Void",
+  "separate_modded_save": true,
+  "modded_save_name": "void_stranger_endless_void",
+  "mod_order": ["ev"],
+  "description": "Endless Void profile for separate save data",
+  
+  "version": "",
+  "credits": [],
+  "links": []
+}

@@ -1,0 +1,15 @@
+meta:
+targets='gml_Object_obj_token_uncover_Create_0'
+critical=true
+patch:
+// don't destroy cc tokens
+find_line_with('if (global.voider == true)')
+write('&& false')
+
+/*
+WARNING! SHITTY FORMAT BELOW.
+
+// TARGET: LINENUMBER_REPLACE
+// 3
+if (false) // don't destroy yourself please
+*/

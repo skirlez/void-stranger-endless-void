@@ -410,7 +410,7 @@ function export_pack(pack) {
 
 function get_thumbnail_level_string_from_pack_string(pack_string) {
 	var arr = ev_string_split_buffer(pack_string, "&", 500)
-	// the seventh section contains all the nodes
+	
 	var node_string = arr[8];
 	
 	var node_state_strings = ev_string_split_buffer(node_string, "$", 200);

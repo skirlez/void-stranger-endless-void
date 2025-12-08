@@ -26,6 +26,7 @@ enum ev_grube_types {
 	enemy_cube,
 	egg_cube,
 	level_cube,
+	level_cube_offline,
 	size,
 }
 phy_active = false;
@@ -41,6 +42,14 @@ physics_fixture_set_friction(fix, 0.2);
 
 
 switch (type) {
+	case ev_grube_types.level_cube_offline:
+		display_instance = instance_create_depth(-1000, -1000, 0, agi("obj_ev_display"), {
+			lvl : forced_level,
+			no_spoiling : true,
+		})
+		visible = false;
+		type = ev_grube_types.level_cube
+		break;
 	case ev_grube_types.level_cube:
 		if array_length(global.online_levels) > 0 {
 			// this is so jank but it's worth it

@@ -1,0 +1,8 @@
+meta:
+targets='gml_Object_obj_player_Create_0'
+critical=true
+patch:
+
+find_all_lines_with('scr_steam_achievement_')
+write_before('if false {')
+write_last('}')

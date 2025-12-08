@@ -1,0 +1,83 @@
+meta:
+targets='gml_Object_obj_boulder_Draw_0'
+critical=true
+patch:
+// Draw tis statue projection
+move_to_end()
+write('
+if b_form == 10 && (o_move_x != 0 || o_move_y != 0) {
+	draw_sprite_ext(sprite_index, image_speed, x + o_move_x, y + o_move_y, image_xscale, image_yscale,
+		image_angle, image_blend, (dsin(global.editor_time * 3) / 4) + 0.5)
+}
+')
+
+
+meta:
+targets='gml_Object_obj_boulder_Alarm_0'
+critical=true
+patch:
+// Tis statue dialogue
+move_to_end()
+write_else_if('(b_form == 10) {
+	text[0] = "Don\'t lose my way..."
+    voice = b_voice
+    moods = [neutral]
+    speakers = [id]
+}')
+
+
+
+meta:
+targets='gml_Object_obj_boulder_Step_0'
+critical=true
+patch:
+// this statue covers most of the implementation
+
+// check if lightning effect should appear
+find_line_with('if (o_state == UnknownEnum.Value_5)')
+find_line_with('o_move_y = 0')
+write('
+ev_run_tis_lightning_check()
+')
+
+move_to_end()
+write('
+ev_run_tis_lightning_check()
+')
+
+
+// shaken sprite
+move_to_start()
+find_line_with('else if (shaken == true)')
+move(1)
+enter_scope()
+find_line_with('sprite_index = spr_jb_shaken')
+move(1)
+write_else_if('(b_form == 10) {
+	image_speed += 0.25
+	sprite_index = spr_ev_tis_statue_shaken
+}')
+
+// sprite
+exit_scope()
+move_to_start()
+find_line_with('else if (shaken == true)')
+reverse_find_line_with('sprite_index = spr_jb')
+move(1)
+write_else_if('(b_form == 10) {
+	sprite_index = spr_ev_tis_statue
+}')
+
+// make tis statue have its defining trait
+move_to_start()
+find_line_with('if (o_state == UnknownEnum.Value_0)')
+find_line_with('o_move_x = 0')
+write_before('if b_form != 10 {')
+move(1)
+write_last('}')
+
+
+// wrap around behavior
+find_line_with('else if (o_state == UnknownEnum.Value_10)')
+move(1)
+write('ev_tis_wraparound()')

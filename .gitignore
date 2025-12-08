@@ -9,11 +9,11 @@ sounds/**/*.wav
 # Ignore all images in the tilesets folder
 tilesets/**/*.png
 
-projectscripts/temp
-projectscripts/cache
-projectscripts/data.win
-projectscripts/output
-projectscripts/variables.sh
-projectscripts/variables.bat
-projectscripts/*.plist
-projectscripts/*.zip
+# g3man related ignores
+g3man/igor
+g3man/out
+g3man/frida-config.ini
+g3man/base/*
+!g3man/base/mod/
+g3man/__pycache__
+g3man/frida-timestamp.txt

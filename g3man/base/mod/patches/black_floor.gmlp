@@ -1,0 +1,43 @@
+// we coopt this obj_jewel_collect to make the black floors, since the player doesn't pick up any tiles that have this
+// object on them. it is unused otherwise. we set it to be invisible and we don't want it to run other stuff
+// if we spawn it
+
+meta:
+targets= { 'gml_Object_obj_jewel_collect_Step_0', 
+	'gml_Object_obj_jewel_collect_Other_11',
+	'gml_Object_obj_jewel_collect_Other_4' }
+critical=true
+patch:
+write('
+if (!visible)
+	exit;
+')
+
+
+meta:
+targets='gml_Object_obj_floor_Step_0'
+critical=true
+patch:
+
+// Black floor has another patch for making it actually draw the black floor sprite. sprite index is also used for the 
+// edge graphic, so we set it to the default sprite even if global.universe is 1, since that pit doesn't look right with the black floor.
+// TODO: add a gmlp operation to do this safely
+find_line_with('if (global.universe == 1)')
+write_before_last('
+if variable_instance_exists(id, "black_floor")
+    sprite_index = spr_floor
+else
+')
+
+
+meta:
+targets='gml_Object_obj_floor_Draw_0'
+critical=true
+patch:
+find_line_with('draw_sprite_ext(sprite_index, 0, x, y + yy, 1, 1, 0, c_white, flooralpha)')
+// TODO add gmlp operation to do this safely
+write_before_last('
+if variable_instance_exists(id, "black_floor")
+	draw_sprite_ext(spr_ev_blackfloor, 0, x, (y + yy), 1, 1, 0, c_white, flooralpha)
+else
+')

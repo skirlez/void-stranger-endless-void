@@ -33,6 +33,16 @@ grube_button = instance_create_layer(200, camera_y + 30, "WindowElements", agi("
 				remove_child(scroll_button_down)
 				instance_destroy(scroll_button_up)
 				instance_destroy(scroll_button_down)
+				if instance_exists(community_display) {
+					var cgrube = instance_create_layer(community_display.x + community_display.sprite_width / 2,
+														community_display.y + community_display.sprite_height / 2, "Grube", grube_obj, {
+						type : ev_grube_types.level_cube_offline,
+						forced_level : community_display.lvl
+					})
+					cgrube.window = id;
+					array_push(grubes, cgrube)
+					instance_destroy(community_display)
+				}
 				var t = instance_create_layer(200, camera_get_view_y(view_camera[0]) + 72, "Textbox", agi("obj_ev_textbox"), {
 					opened_x : 112,
 					opened_y : 72 + camera_get_view_y(view_camera[0]),
@@ -147,7 +157,8 @@ function ev_credits_spacing(spacing = 8) : ev_credits_entry("") constructor {
 	self.spacing = spacing;
 	self.skip_active_timing = true;
 }
-
+level_name_credit = new ev_credits_text("Name")
+level_author_credit = new ev_credits_text("Author")
 credits = [
 	[
 		new ev_credits_header("Contributors"),
@@ -227,9 +238,23 @@ credits = [
 		new ev_credits_text("Void Stranger"),
 		new ev_credits_text("by System Erasure"),
 	],
+	[
+		new ev_credits_header("Endless Void Community"),
+		level_name_credit,
+		level_author_credit,
+	],
 ]
 
+function get_random_level_string() {
+	return global.online_levels[irandom_range(0, array_length(global.online_levels) - 1)];	
+}
 
+community_display = noone;
+
+time_until_next_level_max = 60;
+time_until_next_level = time_until_next_level_max;
+
+#macro CREDITS_COMMUNITY_PAGE 7
 
 function load_credits_page(page_index) {
 	for (var i = 0; i < array_length(current_page); i++) {
@@ -242,8 +267,25 @@ function load_credits_page(page_index) {
 			continue;
 		accum_time += 5;
 		current_page[i].time_until_active = accum_time;
-		
 	}
+	
+	if (page_index == CREDITS_COMMUNITY_PAGE) {
+		// TODO handle offline
+		var level_string = get_random_level_string();
+		var lvl = import_level(level_string);
+		community_display = instance_create_layer(20, room_height - 80, "Instances", agi("obj_ev_display"), {
+			lvl : lvl,
+			display_context : display_contexts.level_select,
+			no_spoiling : true,
+			image_xscale : 0.5,
+			image_yscale : 0.5
+		})
+		level_name_credit.txt = lvl.name
+		level_author_credit.txt = lvl.author
+		time_until_next_level = time_until_next_level_max;
+	}
+	else
+		instance_destroy(community_display)
 }
 current_page = []
 current_page_index = 0;

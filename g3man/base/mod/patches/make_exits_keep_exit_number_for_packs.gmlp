@@ -1,0 +1,32 @@
+meta:
+targets='gml_Object_obj_player_Create_0'
+critical=true
+patch:
+move_to_end()
+write('
+ev_exit_numbers = []
+')
+
+meta:
+targets='gml_Object_obj_player_Step_0'
+critical=true
+patch:
+
+// save exit numbers when picking up exits
+find_line_with('destroyer_id = 1')
+write('
+if (object_index == obj_exit) {
+	array_push(other.ev_exit_numbers, ev_exit_number)
+}
+')
+
+// restore exit numbers when putting down exits
+move_to_start()
+find_line_with('instance_create_layer(x + p_move_x, y + p_move_y, "Floor", obj_exit)')
+write_replace('inst = instance_create_layer(x + p_move_x, y + p_move_y, "Floor", obj_exit)')
+write('      
+if (array_length(ev_exit_numbers) != 0) {
+	var number = array_pop(ev_exit_numbers);
+	inst.ev_exit_number = number;
+}
+')

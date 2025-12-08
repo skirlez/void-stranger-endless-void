@@ -1,0 +1,13 @@
+meta:
+targets='gml_Room_rm_cc_menu_Create'
+critical=true
+patch:
+write('ev_leave_pack()')
+
+/*
+WARNING! SHITTY FORMAT BELOW.
+
+// Leave pack instead of going to the cif's challenge menu room
+// TARGET: HEAD
+ev_leave_pack()
+*/

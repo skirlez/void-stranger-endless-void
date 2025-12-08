@@ -14,6 +14,20 @@ if !grube_mode {
 				step();
 		}
 	}
+	
+	if current_page_index == CREDITS_COMMUNITY_PAGE {
+		time_until_next_level--;
+		if (time_until_next_level < 0) {
+			var level_string = get_random_level_string();
+			var lvl = import_level(level_string);
+			community_display.lvl = lvl
+			level_name_credit.txt = lvl.name
+			level_author_credit.txt = lvl.author
+			time_until_next_level = time_until_next_level_max
+			
+		}
+	}
+	
 	exit
 }
 var ypos = camera_get_view_y(view_camera[0])
@@ -132,6 +146,5 @@ if potential_new_highest_stack != 0 {
 		potential_new_highest_stack = 0;	
 		timer_hold_highest_stack = 0;
 	}
-	
 }
 

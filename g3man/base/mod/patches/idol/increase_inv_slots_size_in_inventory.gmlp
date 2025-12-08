@@ -1,0 +1,6 @@
+meta:
+targets='gml_Object_obj_inventory_Create_0'
+critical=true
+patch:
+find_line_with('inv_slots = 4')
+write_replace('inv_slots = 5')

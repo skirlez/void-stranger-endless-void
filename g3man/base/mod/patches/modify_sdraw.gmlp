@@ -1,0 +1,17 @@
+meta:
+targets='gml_Object_obj_player_Draw_0'
+critical=true
+patch:
+
+find_line_with('draw_sprite(sprite_index, i_imageframe, x + xslide, y + yslide)')
+// split up so you won't find it by search (:
+write('
+if variable_global_get("g"
+')
+write('+ "_"')
+write('+ "mode") {
+    var spin_h = (dsin(global.level_time * 0.3) + 1) / 2;
+    var spin_v = (dcos(global.level_time * 0.5) + 1) / 2;
+    ev_draw_cube(sprite_index, i_imageframe, (x + xslide), (y + yslide), 8, spin_h, spin_v)
+}
+else')
