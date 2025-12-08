@@ -10,12 +10,6 @@ This repository contains:
 - Its [g3man](https://github.com/skirlez/g3man/) mod definition, build scripts, and patches (in `mod/`)
 
 ## Installing
-The recommended way to install Endless Void is through [g3man](https://github.com/skirlez/g3man/releases). Install g3man through that link, and import the profile zip from
-the [latest release](https://github.com/Skirlez/void-stranger-endless-void/releases/latest).
-
-If you don't want to use g3man, you can also patch the game's data.win manually. 
-You'll need an application that can do xdelta patching. I recommend [Delta Patcher.](https://www.romhacking.net/utilities/704/)
-
 - Go to the [latest release](https://github.com/Skirlez/void-stranger-endless-void/releases/latest) and grab the .xdelta file which matches your copy of Void Stranger (Steam/itch.io).
 - Apply the xdelta patch to Void Stranger's data.win file, which is found in its installation folder.  (On Steam, right-click the game, Manage->Browse local files) **Make sure it's the original, vanilla data.win. If you previously installed this mod, or any other mod, restore the original data.win first.** in order to uninstall the mod, bring back the original data.win in any way (either keep a backup, or on Steam, find and press the "verify integrity of the game files" button).
 
