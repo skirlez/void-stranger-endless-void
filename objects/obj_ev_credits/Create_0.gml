@@ -211,7 +211,7 @@ credits = [
 		new ev_credits_header("Music"),
 		new ev_credits_text("Tamarind,"),
 		new ev_credits_text("Outer Tamarind,"),
-		new ev_credits_text("Darkroom"),
+		new ev_credits_text("Darkroom,"),
 		new ev_credits_text("Hadean,"),
 		new ev_credits_text("by B. Spaghettini"),
 	],
@@ -254,7 +254,7 @@ community_display = noone;
 time_until_next_level_max = 60;
 time_until_next_level = time_until_next_level_max;
 
-#macro CREDITS_COMMUNITY_PAGE 7
+#macro CREDITS_COMMUNITY_PAGE 8
 
 function load_credits_page(page_index) {
 	for (var i = 0; i < array_length(current_page); i++) {

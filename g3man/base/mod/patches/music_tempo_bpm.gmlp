@@ -43,6 +43,18 @@ case snd_ev_music_determined_descent:
 case msc_rytmi2:
     _tempo = 142
     break
+case snd_ev_music_hadean:
+    _tempo = 160
+    break
+case snd_ev_music_darkroom:
+    _tempo = 144
+    break
+case snd_ev_music_tamarind:
+    _tempo = 90
+    break
+case snd_ev_music_outer_tamarind:
+    _tempo = 90
+    break
 ')
 
 enter_scope() move_to_end() exit_scope() move(1)
