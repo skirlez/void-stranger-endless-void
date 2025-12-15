@@ -351,3 +351,127 @@ else if (global.stranger == 6)
 else if (global.stranger == 7)
     b_voice = snd_baal
 ')
+
+
+
+meta:
+targets='gml_Object_obj_chest_small_Create_0'
+critical=true
+patch:
+find_line_with('else if (global.stranger == 2)')
+skip_scope()
+write_else_if('(global.stranger == 5)
+    voice = 175
+else if (global.stranger == 6)
+    voice = 195
+else if (global.stranger == 7)
+    voice = snd_baal
+')
+
+
+meta:
+targets='gml_Object_obj_chest_small_Step_0'
+critical=true
+patch:
+
+// chest locust dialogue
+find_line_with('if (global.locust == false)')
+move(2)
+skip_scope()
+write_else_if('(global.stranger == 7)
+{
+    text[0] = scrScript(173)
+    text[1] = "[What a delectable find!]"
+    text[2] = "[You swear you put this one somewhere else, though]"
+    moods = [neutral, neutral, neutral]
+    speakers = [id, id, id]
+}')
+
+// chest sword dialogue
+find_line_with('else if (contents == 2)')
+move(1)
+write('text = ev_sword_chest_dialogue()')
+write('if false {')
+enter_scope() 
+move_to_end()
+write_last('}')
+exit_scope()
+
+// chest wing dialogue
+find_line_with('else if (contents == 3)')
+
+move(1)
+write('text = ev_wings_chest_dialogue()')
+write('if false {')
+enter_scope() 
+move_to_end()
+write_last('}')
+exit_scope()
+
+// chest memory dialogue
+find_line_with('else if (contents == 4)')
+
+move(1)
+write('text = ev_memory_chest_dialogue()')
+write('if false {')
+enter_scope() 
+move_to_end()
+write_last('}')
+exit_scope()
+
+
+// i don't know what this one is 
+find_line_with('else if (contents == 6)')
+move(2)
+skip_scope()
+write_else_if('(global.stranger == 7)
+{
+    text[0] = scrScript(221)
+    text[1] = "[T A S T Y !]"
+    moods = [neutral, neutral]
+    speakers = [id, id]
+}')
+
+// swapper
+find_line_with('else if (contents == 10)')
+skip_scope()
+write_else_if('(contents == 495) {
+    text = ev_you_shouldnt_have_this()
+}')
+
+// don't repeat chest dialogues (the _get variables are set by us only)
+find_line_with('var tbox = create_textbox(text, speakers, moods)')
+find_line_with('active_textbox = tbox')
+
+write('
+if (empty == false && contents == 2 && global.blade_get == true)
+    instance_destroy(active_textbox)
+else if (empty == false && contents == 3 && global.wings_get == true)
+    instance_destroy(active_textbox)
+else if (empty == false && contents == 4 && global.memory_get == true)
+    instance_destroy(active_textbox)
+else if (empty == false && contents == 6 && global.luckylocust != 0 && locust_overflow == false)
+    instance_destroy(active_textbox)
+else if (empty == false && contents == 495 && global.swapper_get == true)
+    instance_destroy(active_textbox)
+')
+
+find_line_with('else if (!instance_exists(active_textbox))')
+move(1) enter_scope() move_to_end()
+write('
+switch contents
+{
+    case 2:
+        global.blade_get = true
+        break
+    case 3:
+        global.wings_get = true
+        break
+    case 4:
+        global.memory_get = true
+        break
+    case 495:
+        global.swapper_get = true
+        break			
+}
+')

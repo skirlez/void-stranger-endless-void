@@ -58,7 +58,7 @@ if (global.mouse_layer == 0 || selected_thing == pack_things.wrench) {
 		calculate_zoom()
 	}
 	
-	if keyboard_check(vk_control) && keyboard_check_pressed(ord("V")) {
+	if keyboard_check(vk_control) && keyboard_check_pressed(ord("V")) && global.mouse_layer == 0 {
 		var str = clipboard_get_text();
 		var read_version = read_string_until(str, 1, "|").substr
 		var version = int64_safe(read_version, 0)
@@ -69,6 +69,8 @@ if (global.mouse_layer == 0 || selected_thing == pack_things.wrench) {
 			var level = import_level(str);
 			strip_level_for_pack(level);
 			var level_nodes = get_all_level_node_instances()
+			if level.name == ""
+				level.name = "Unnamed"
 			try_level_name_and_rename(level, level_nodes)
 			var level_node_state = new node_with_state(level_node, 
 				mouse_x - global.level_node_display_scale * 224 / 2, 

@@ -13,8 +13,9 @@ if type == ev_grube_types.level_cube && !visible {
 }
 if death_timer != -1 {
 	death_timer++
-	
+	cube_size = max(cube_size_start * power(1 + 1 / (death_timer - 140), 3), 0)
 	if death_timer > 140 || !audio_is_playing(death_sound) {
+		
 		audio_stop_sound(death_sound)
 		audio_play_sound(agi("snd_ex_enemyexplosion_009"), 0, false, 0.8)
 		for (var i = 0; i < array_length(window.grubes); i++) {

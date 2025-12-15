@@ -211,6 +211,7 @@ enter_scope()
 			swap_stage = 0
 			counter = 0
 			instance_destroy(obj_ev_swapper_laser)
+			audio_stop_sound(snd_laser)
 			audio_play_sound(snd_ex_diestar, 0, false, 1, 0, 0.5)
 		}
     }

@@ -26,7 +26,6 @@ enum ev_grube_types {
 	enemy_cube,
 	egg_cube,
 	level_cube,
-	level_cube_offline,
 	size,
 }
 phy_active = false;
@@ -42,19 +41,16 @@ physics_fixture_set_friction(fix, 0.2);
 
 
 switch (type) {
-	case ev_grube_types.level_cube_offline:
-		display_instance = instance_create_depth(-1000, -1000, 0, agi("obj_ev_display"), {
-			lvl : forced_level,
-			no_spoiling : true,
-		})
-		visible = false;
-		type = ev_grube_types.level_cube
-		break;
 	case ev_grube_types.level_cube:
 		if array_length(global.online_levels) > 0 {
+			var lvl;
+			if forced_level == noone {
+				var level_string = global.online_levels[irandom_range(0, array_length(global.online_levels) - 1)];
+				lvl = import_level(level_string);
+			}
+			else
+				lvl = forced_level;
 			// this is so jank but it's worth it
-			var level_string = global.online_levels[irandom_range(0, array_length(global.online_levels) - 1)];
-			var lvl = import_level(level_string);
 			display_instance = instance_create_depth(-1000, -1000, 0, agi("obj_ev_display"), {
 				lvl : lvl,
 				no_spoiling : true,
@@ -102,4 +98,6 @@ switch (type) {
 }
 phy_active = true;
 physics_fixture_bind(fix, id);
+
+cube_size_start = cube_size;
 

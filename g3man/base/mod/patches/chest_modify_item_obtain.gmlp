@@ -3,6 +3,15 @@ targets='gml_Object_obj_chest_small_Alarm_0'
 critical=true
 patch:
 
+find_line_with('else if (contents == 10)')
+skip_scope()
+write_else_if('(contents == 495)
+{
+    ds_grid_set(obj_inventory.ds_equipment, 0, 4, 1)
+    global.collect_swapper = 1
+}')
+write('after_chest_opened()')
+
 /*
 WARNING! SHITTY FORMAT BELOW.
 

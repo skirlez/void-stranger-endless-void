@@ -1,0 +1,15 @@
+meta:
+targets='gml_Object_obj_chest_small_Alarm_0'
+critical=true
+patch:
+
+find_all_lines_with('if (global.stranger != 2)')
+write_or_condition('true')
+
+meta:
+targets='gml_Object_obj_chest_small_Step_0'
+critical=true
+patch:
+
+find_line_with('if (global.stranger >= 2)')
+write_and_condition('false')

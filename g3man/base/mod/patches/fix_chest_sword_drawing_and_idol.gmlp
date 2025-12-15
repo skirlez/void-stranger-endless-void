@@ -1,0 +1,37 @@
+meta:
+targets='gml_Object_obj_chest_small_Draw_0'
+critical=true
+patch:
+
+find_line_with('draw_sprite(sprite_index, image_speed, x, y)')
+write_before('
+if (contents == 2)
+    sprite_index = spr_chest_small
+')
+
+find_line_with('else if (contents == 2)') move(2)
+write_replace('
+if global.blade_style == 2 
+    draw_sprite_part(asset_get_index("spr_ev_items_lev"), 0, 48, 0, 16, 16, (x - 8), (y - 8 + cont_y))		
+else 
+    draw_sprite_part(ev_get_burden_sprite(global.blade_style), 0, 48, 0, 16, 16, (x - 8), (y - 8 + cont_y))
+')
+
+find_line_with('else if (contents == 3)') move(2)
+write_replace('
+draw_sprite_part(ev_get_burden_sprite(global.wings_style), 0, 32, 0, 16, 16, (x - 8), (y - 8 + cont_y))
+')
+
+find_line_with('else if (contents == 4)') move(2)
+write_replace('
+draw_sprite_part(ev_get_burden_sprite(global.memory_style), 0, 16, 0, 16, 16, (x - 8), (y - 8 + cont_y))
+')
+
+find_line_with('else if (contents == 10)') move(2)
+write_replace('
+draw_sprite_part(ev_get_burden_sprite(global.blade_style), 0, 48, 0, 16, 16, (x - 8), (y - 8 + cont_y))
+')
+skip_scope()
+write_else_if('(contents == 495) {
+    draw_sprite(spr_ev_swapper, 0, (x - 8), (y - 8 + cont_y))
+}')

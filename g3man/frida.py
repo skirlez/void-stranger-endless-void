@@ -69,7 +69,7 @@ def hash_project():
 		if (os.path.isfile(full_item_path)):
 			hash_file(full_item_path, item, hash_func)
 			continue
-		for root, _, files in os.walk(full_item_path):
+		for root, _, files in os.walk(full_item_path, followlinks=True):
 			for file_path in sorted(files):
 				full_path = os.path.join(root, file_path)
 				relative_path = os.path.relpath(full_path, project_folder)
@@ -192,9 +192,15 @@ def build_gamemaker_project(force = False):
 			f.write(new_hash)
 
 
+def symlink(target, output):
+	if os.name == "nt":
+		os.link(target, output)
+	else:
+		os.symlink(target, output)
+
 ### packaging mod
 MOD_NAME = ""
-def package_mod():
+def package_mod(linkbase=False):
 	global MOD_NAME
 
 	print("---Packaging the mod---")
@@ -221,20 +227,26 @@ def package_mod():
 		shutil.rmtree("./out")
 	
 	print("Creating out folder...")
-	shutil.copytree("./base", "./out")
+	if not linkbase:
+		shutil.copytree("./base", "./out")
+		if os.path.isdir("./igor/included_files"):
+			shutil.copytree("./igor/included_files", "./out/mod", dirs_exist_ok=True)
+	else:
+		for target in ("./base", "./igor/included_files"):
+			for root, directories, files in os.walk(os.path.abspath(target), followlinks=True):
+				relative_root = os.path.relpath(root, target)
+				for directory in directories:
+					os.makedirs(f"./out/{relative_root}/{directory}", exist_ok=True)
+				for file in files:
+					symlink(f"{root}/{file}",f"./out/{relative_root}/{file}")
+			
 	if os.path.isfile("./igor/mod_data.win"):
 		shutil.copy("./igor/mod_data.win", f"./out/mod/mod_data.win")
 	else:
 		print("No datafile found in ./igor, so nothing was copied...")
 
-	included_files_path = "./igor/included_files/"
-	for root, directories, files in os.walk(included_files_path):
-		relative_root = os.path.relpath(root, included_files_path)
-		for directory in directories:
-			os.makedirs(f"./out/mod/{relative_root}/{directory}", exist_ok=True)
-		for file in files:
-			shutil.copy(f"{root}/{file}", f"./out/mod/{relative_root}/{file}")
 	
+
 
 	os.rename("./out/mod", f"./out/{MOD_NAME}")
 
@@ -283,7 +295,7 @@ def save_update_timestamp(offset):
 	except:
 		return True
 
-frida_version = 1
+frida_version = 2
 def check_update():
 	print("Checking for updates...")
 	print("Remember that you can disable this by setting CHECK_FOR_UPDATES=0 in frida-config.ini")
@@ -291,13 +303,14 @@ def check_update():
 	try:
 		with urllib.request.urlopen(url) as response:
 			content = json.loads(response.read().decode('utf-8'))
-			tag_name = int(content["tag_name"])
+			tag_name = ''.join(c for c in content["tag_name"] if c.isdigit())
+			tag_number = int(tag_name)
 	except Exception as e:
 		print("Error occured while checking for updates. You should probably check manually. See you tomorrow!")
 		save_update_timestamp(86400)
 		return
-	
-	if tag_name > frida_version:
+
+	if tag_number > frida_version:
 		print(f"Update found! You are on version {frida_version}, and the latest version is {tag_name}.")
 		print("You can update by going to https://github.com/skirlez/frida/releases/latest, downloading the script, and replacing this script with the downloaded one.")
 	else:
@@ -307,11 +320,14 @@ def check_update():
 	save_update_timestamp(604800)
 	
 
-usage = "Usage: frida.py [ACTION]"
+usage = "Usage: frida.py [ACTION] [OPTIONS]..."
 def bad_usage():
 	print(usage)
 	print("Try 'frida.py --help' for more information.")
 	exit()
+
+def is_help(arguments):
+	return "-h" in arguments or "--help" in arguments
 
 if __name__ == "__main__":
 	# Let me Ctrl+C in peace
@@ -321,7 +337,7 @@ if __name__ == "__main__":
 
 	CHECK_FOR_UPDATES = demand("CHECK_FOR_UPDATES")
 	
-	if (len(sys.argv) != 2):
+	if (len(sys.argv) < 2):
 		bad_usage()
 	argument = sys.argv[1]
 	if argument == '--help' or argument == 'h':
@@ -331,18 +347,39 @@ if __name__ == "__main__":
 		print("Actions list:")
 		print("    build")
 		print("    package")
-		print("    apply")
+		print("    apply [--linkbase]")
 		print("    check_updates")
+		print()
+		print("You can use '--help' on each of the actions to learn more about them and their options.")
 		exit()
-	
+
+	subarguments = sys.argv[2:]
 	opname = argument
 	if argument == "build":
+		if is_help(subarguments):
+			print("frida.py build - Builds the mod's GameMaker project.")
+			print()
+			print("This action will attempt to build the project,")
+			print("regardless of the previous build's hash or the SHOULD_BUILD_PROJECT variable.")
+			print()
+			print("The output datafile will be in igor/mod_data.win.")
+			print("Output included files, including streamed music, will be in igor/included_files.")
+			exit()
 		build_gamemaker_project(force=True)
 		print("Done!")
 		if (should_check_for_update()):
 			check_update()
 		exit()
 	if argument == "package":
+		if is_help(subarguments):
+			print("frida.py package - Packages this mod.")
+			print()
+			print("This action will build the GameMaker project if necessary, and package it into a folder,")
+			print("for distribution or application.")
+			print()
+			print("The output mod folder will be in out/(mod's ID)")
+			print("The mod ID is defined in base/mod/mod.json.")
+			exit()
 		build_gamemaker_project()
 		package_mod()
 		print(f"Done! Your mod is in out/{MOD_NAME}.")
@@ -350,14 +387,41 @@ if __name__ == "__main__":
 			check_update()
 		exit()
 	if argument == "apply":
+		if is_help(subarguments):
+			print("frida.py apply [ARGUMENTS] - Applies this mod.")
+			print()
+			print("This action will build the GameMaker project if necessary, package it into a folder,")
+			print("And then call g3man to apply it on a GameMaker game.")
+			print()
+			print("Arguments:")
+			
+			print("  -l, --linkbase     When packaging, link files in \"out\" to \"base\" instead of copying")
+			indent = "                       "
+			print(f"{indent}This is useful if your mod has included files it reads from at runtime,")
+			print(f"{indent}as this argument effectively makes it so any changes to files in \"base\"")
+			print(f"{indent}are visible to the modded game immediately.")
+			print(f"{indent}Note: This argument uses hard links on Windows")
+			print(f"{indent}and symlinks everywhere else.")
+			exit()
+		linkbase = "-l" in subarguments or "--linkbase" in subarguments 
+
 		build_gamemaker_project()
-		package_mod()
+		package_mod(linkbase)
 		apply_mod()
 		print("Done! Your mod has been applied.")
 		if (should_check_for_update()):
 			check_update()
 		exit()
 	if argument == "check_updates":
+		if is_help(subarguments):
+			print("frida.py check_updates - Checks for updates to Frida.")
+			print()
+			print("This action will check https://github.com/skirlez/frida/releases,")
+			print("And print a message if there's a newer version.")
+			print()
+			print("This action works regardless of CHECK_FOR_UPDATES.")
+			print("That option only controls if the other actions occassionally perform the update check.")
+			exit()
 		check_update()
 		exit()
 

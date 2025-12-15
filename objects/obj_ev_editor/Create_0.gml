@@ -9,7 +9,7 @@ global.is_html5 = (os_browser != browser_not_a_browser)
 surface_depth_disable(false)
 global.latest_lvl_format = 3;
 global.latest_pack_format = 2;
-global.ev_version = "0.996";
+global.ev_version = "0.997";
 global.ev_fall_down_next_level = false;
 
 if global.is_html5 {

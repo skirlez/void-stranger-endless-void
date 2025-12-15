@@ -209,11 +209,13 @@ vanilla_options = instance_create_layer(139, 120, "Instances", agi("obj_ev_execu
 				global.timer_count = false
 				alarm[1] = 40
 				agi("scr_loadmenu")()
-				layer = layer_get_id("Pause")
+	
 				instance_create_layer(x, y, "Pause", agi("obj_fade_black_in"))
 				agi("obj_music_controller").alarm[1] = 1
-				with (agi("obj_menu"))
+				with (agi("obj_menu")) {
+					layer = layer_get_id("Pause")
 					transition = true
+				}
 				transition = true
 				alarm[4] = 80
 			}

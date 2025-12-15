@@ -21,6 +21,27 @@ var seconds = num_to_string((total_play_time div 1000) % 60, 2)
 var minutes = num_to_string((total_play_time div 60000) % 60, 2)
 var hours = num_to_string(total_play_time div 3600000, 2)
 
+
+
+function count_all_memory_crystals(array, seen) {
+	var count = 0;
+	for (var i = 0; i < array_length(array); i++) {
+		var node_state = array[i]
+		if (ds_map_exists(seen, node_state))
+			continue;
+		ds_map_set(seen, node_state, true)
+		
+		if node_state.node == global.pack_editor.level_node
+			count += (level_contains_crystal_memory(node_state.properties.level))
+		count += count_all_memory_crystals(node_state.exits, seen)
+	}
+	return count;
+}
+var map = ds_map_create();
+var total_memory_crystals = count_all_memory_crystals(global.pack.starting_node_states, map)
+ds_map_destroy(map)
+
+
 stat_texts = [
 	"Deaths",
 	"Time spent",
@@ -30,7 +51,7 @@ stat_texts = [
 stat_values = [
 	string(global.death_count),
 	$"{hours}:{minutes}:{seconds}",
-	string(ds_map_size(pack_player.pack_memories)),
+	$"{ds_map_size(pack_player.pack_memories)}/{total_memory_crystals}",
 	string(pack_player.total_locusts_collected),
 	string(ds_map_size(pack_player.visited_levels))
 ]

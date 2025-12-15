@@ -27,7 +27,7 @@ if (room == global.pack_editor_room) {
 			
 	save_timestamp = current_time
 }
-if (room != global.editor_room && room != agi("rm_ev_after_erase")
+if (room != global.editor_room && room != agi("rm_ev_after_erase") && room != global.level_room
 		&& room != global.pack_editor_room && room != global.pack_level_room && in_pack_editor) {
 	// TODO check if left pack editor in a better way
 	log_info("leaving pack editor")

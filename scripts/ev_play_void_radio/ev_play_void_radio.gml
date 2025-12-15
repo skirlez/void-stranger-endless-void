@@ -27,8 +27,8 @@ function ev_play_void_radio() {
 	var start;
 	var endpoint;
 	do {
-		// i'm sorry..............................
-		static exclude = ["msc_universe"]
+
+		static exclude = [""]
 		
 		var exclude_indices = array_create(array_length(exclude));
 		for (var i = 0; i < array_length(exclude); i++) {

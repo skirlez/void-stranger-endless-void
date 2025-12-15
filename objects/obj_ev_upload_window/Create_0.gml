@@ -3,15 +3,7 @@ event_inherited();
 if lvl == noone
 	exit
 	
-function level_contains_crystal_memory(level) {
-	for (var i = 0; i < 9; i++) {
-		for (var j = 0; j < 14; j++) {
-			if level.objects[i][j].tile == global.editor.object_memory_crystal
-				return true;
-		}
-	}
-	return false;
-}
+
 
 function can_upload_level(level) {
 	var sha = level_content_sha1(level);

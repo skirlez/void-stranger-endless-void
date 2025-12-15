@@ -36,7 +36,7 @@ grube_button = instance_create_layer(200, camera_y + 30, "WindowElements", agi("
 				if instance_exists(community_display) {
 					var cgrube = instance_create_layer(community_display.x + community_display.sprite_width / 2,
 														community_display.y + community_display.sprite_height / 2, "Grube", grube_obj, {
-						type : ev_grube_types.level_cube_offline,
+						type : ev_grube_types.level_cube,
 						forced_level : community_display.lvl
 					})
 					cgrube.window = id;
@@ -202,17 +202,17 @@ credits = [
 	],
 	[
 		new ev_credits_header("Music"),
-		new ev_credits_text("Judgment Jingle"),
+		new ev_credits_text("21 - Judgment Jingle"),
 		new ev_credits_text("by gooeyPhantasm"),
-		new ev_credits_text("Determined Descent"),
+		new ev_credits_text("22 - Determined Descent"),
 		new ev_credits_text("by Emidemi"),
 	],
 	[
 		new ev_credits_header("Music"),
-		new ev_credits_text("Tamarind,"),
-		new ev_credits_text("Outer Tamarind,"),
-		new ev_credits_text("Darkroom,"),
-		new ev_credits_text("Hadean,"),
+		new ev_credits_text("23 - Tamarind,"),
+		new ev_credits_text("24 - Outer Tamarind,"),
+		new ev_credits_text("25 - Darkroom,"),
+		new ev_credits_text("26 - Hadean,"),
 		new ev_credits_text("by B. Spaghettini"),
 	],
 	[
@@ -246,6 +246,10 @@ credits = [
 ]
 
 function get_random_level_string() {
+	if array_length(global.online_levels) == 0 {
+		static eeg = "3|WW91IGFyZSB0b28gZWFybHku||bXNjXzAwMQ==||2693408940|||0|ptX16flX2ptX5flX2ptX5flX2ptX5flX2ptX35flptX3flptX10flX3ptX20|emX90plemX35|0|-1";
+		return eeg;
+	}
 	return global.online_levels[irandom_range(0, array_length(global.online_levels) - 1)];	
 }
 

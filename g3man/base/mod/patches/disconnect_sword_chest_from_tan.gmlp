@@ -1,0 +1,20 @@
+meta:
+targets='gml_Object_obj_chest_small_Step_0'
+critical=true
+patch:
+
+move_to_end()
+reverse_find_line_with('if (contents == 2)')
+// Don't Do That
+write_and_condition('false')
+
+
+meta:
+targets='gml_Object_obj_chest_small_Other_4'
+critical=true
+patch:
+
+move_to_end()
+reverse_find_line_with('if (contents != 2)')
+// Always create collision
+write_or_condition('true')

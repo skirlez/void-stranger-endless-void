@@ -1,0 +1,37 @@
+meta:
+targets='gml_Object_obj_chest_small_Other_4'
+critical=true
+patch:
+
+// the following operations make chests check for equipment rather than if they specifically got the add version of the burden, which is a different flag
+// (cif has those flags unset)
+
+find_all_lines_with('ds_grid_get(obj_inventory.ds_player_info, 15, 1)')
+write_replace_substring('obj_inventory.ds_player_info, 15, 1', 'obj_inventory.ds_equipment, 0, 2')
+consolidate_into_top(1)
+
+move(1) find_line_with('ds_grid_get(obj_inventory.ds_player_info, 15')
+write_replace_substring('obj_inventory.ds_player_info, 15, 2', 'obj_inventory.ds_equipment, 0, 1')
+move(1) find_line_with('ds_grid_get(obj_inventory.ds_player_info, 15')
+write_replace_substring('obj_inventory.ds_player_info, 15, 0', 'obj_inventory.ds_equipment, 0, 0')
+move(1) find_line_with('ds_grid_get(obj_inventory.ds_player_info, 15')
+write_replace_substring('ds_grid_get(obj_inventory.ds_player_info, 15, 3) != 0', 'ds_grid_get(obj_inventory.ds_player_info, 10, 2) != 4')
+
+// Make chest opened if we already have idol
+skip_scope()
+write('
+if (contents == 495 && ds_grid_get(obj_inventory.ds_equipment, 0, 4) != 0)
+{
+    image_speed = 1
+    empty = true
+}
+')
+
+
+// make sword chest not destroy itself
+move_to_start()
+find_line_with('if (contents == 2 && ds_grid_get(obj_inventory.ds_player_info, 15, 1) != 0)')
+find_line_with('instance_destroy()')
+write_before('if false {')
+write_last('}')
+

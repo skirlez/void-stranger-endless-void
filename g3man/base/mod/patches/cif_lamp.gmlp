@@ -15,39 +15,18 @@ with (boulder) {
 }
 ')
 
-
-meta:
-targets='gml_Object_obj_boulder_Other_4'
-critical=true
-patch:
-move_to_end()
-write('
-var lamp = variable_instance_exists(id, "editor_lamp");
-cif_sprite = lamp ? spr_lamp : spr_atoner
-cif_sprite_shaken = lamp ? spr_lamp : spr_atoner_shaken
-')
-
 meta:
 targets='gml_Object_obj_boulder_Step_0'
 critical=true
 patch:
-
+write('
+var lamp = variable_instance_exists(id, "editor_lamp");
+var cif_sprite = lamp ? spr_lamp : spr_atoner
+var cif_sprite_shaken = lamp ? spr_lamp : spr_atoner_shaken
+')
 // make the lamp sprite Appear
-find_all_lines_with('spr_atoner_shaken')
-write_replace_substring('spr_atoner_shaken', 'cif_sprite_shaken')
-
-move_to_start()
-
 find_all_lines_with('spr_atoner')
 write_replace_substring('spr_atoner', 'cif_sprite')
-
-move_to_start()
-
-find_all_lines_with('with (create_fall_effect)')
-move(1)
-enter_scope()
-find_line_with('sprite_index = spr_atoner_shaken')
-write_replace('sprite_index = other.cif_sprite_shaken')
 
 
 

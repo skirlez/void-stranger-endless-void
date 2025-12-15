@@ -10,3 +10,14 @@ spin_v = 0;
 
 cube_scale_multiplier = 5.5;
 additional_spin = 0;
+
+music_index = 0
+number_angle = 0;
+number_x = 0;
+number_y = 0;
+number_size = 0;
+
+ratio_x = 0;
+ratio_y = 0;
+
+surface_number = noone

@@ -310,6 +310,17 @@ function level_get_exit_count(lvl) {
 	}
 	return exits;
 }
+
+function level_contains_crystal_memory(level) {
+	for (var i = 0; i < 9; i++) {
+		for (var j = 0; j < 14; j++) {
+			if level.objects[i][j].tile == global.editor.object_memory_crystal
+				return true;
+		}
+	}
+	return false;
+}
+
 function strip_level_for_pack(lvl) {
 	lvl.description = ""
 	lvl.music = ""

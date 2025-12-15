@@ -130,6 +130,7 @@
     {"name":"spr_ev_textbox","order":16,"path":"sprites/spr_ev_textbox/spr_ev_textbox.yy",},
     {"name":"spr_ev_orb_thing_alt_up","order":7,"path":"sprites/spr_ev_orb_thing_alt_up/spr_ev_orb_thing_alt_up.yy",},
     {"name":"obj_ev_pack_random_node","order":83,"path":"objects/obj_ev_pack_random_node/obj_ev_pack_random_node.yy",},
+    {"name":"ev_dialogue","order":57,"path":"scripts/ev_dialogue/ev_dialogue.yy",},
     {"name":"ev_is_level_brand_room","order":36,"path":"scripts/ev_is_level_brand_room/ev_is_level_brand_room.yy",},
     {"name":"msc_looptest","order":18,"path":"sounds/msc_looptest/msc_looptest.yy",},
     {"name":"spr_ev_white_button","order":10,"path":"sprites/spr_ev_white_button/spr_ev_white_button.yy",},

@@ -353,10 +353,25 @@ function create_pack_save_struct(current_level_name) {
 		pack_memories : ds_map_keys_to_array_fix(player.pack_memories),
 		palette : global.s_g_pal,
 		play_time : player.play_time + (current_time - player.start_time),
-		burdens : [ds_grid_get(inv.ds_equipment, 0, 0) != 0,
+		burdens : get_currently_existing_burdens()
+	}
+}
+function get_currently_existing_burdens() {
+	static inv = agi("obj_inventory")
+	var arr = [ds_grid_get(inv.ds_equipment, 0, 0) != 0,
 					ds_grid_get(inv.ds_equipment, 0, 1) != 0,
 					ds_grid_get(inv.ds_equipment, 0, 2) != 0,
 					ds_grid_get(inv.ds_player_info, 10, 2) != 4,
-					ds_grid_get(inv.ds_equipment, 0, 4) != 0],
-	}
+					ds_grid_get(inv.ds_equipment, 0, 4) != 0]
+	
+	var tile_string = agi("obj_player").tile_str;
+	if string_count("G", tile_string) > 0
+		arr[burden_types.memory] = true;
+	if string_count("H", tile_string) > 0
+		arr[burden_types.wings] = true;
+	if string_count("I", tile_string) > 0
+		arr[burden_types.sword] = true;
+	if string_count("N", tile_string) > 0
+		arr[burden_types.swapper] = true;
+	return arr;
 }

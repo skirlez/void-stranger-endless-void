@@ -158,6 +158,7 @@
     {"id":{"name":"spr_ev_textbox","path":"sprites/spr_ev_textbox/spr_ev_textbox.yy",},},
     {"id":{"name":"spr_ev_orb_thing_alt_up","path":"sprites/spr_ev_orb_thing_alt_up/spr_ev_orb_thing_alt_up.yy",},},
     {"id":{"name":"obj_ev_pack_random_node","path":"objects/obj_ev_pack_random_node/obj_ev_pack_random_node.yy",},},
+    {"id":{"name":"ev_dialogue","path":"scripts/ev_dialogue/ev_dialogue.yy",},},
     {"id":{"name":"ev_is_level_brand_room","path":"scripts/ev_is_level_brand_room/ev_is_level_brand_room.yy",},},
     {"id":{"name":"msc_looptest","path":"sounds/msc_looptest/msc_looptest.yy",},},
     {"id":{"name":"spr_ev_white_button","path":"sprites/spr_ev_white_button/spr_ev_white_button.yy",},},
