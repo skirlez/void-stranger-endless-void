@@ -1,6 +1,6 @@
 meta:
 targets='gml_Object_obj_player_Create_0'
-critical=true
+critical=false
 patch:
 
 find_all_lines_with('scr_steam_achievement_')

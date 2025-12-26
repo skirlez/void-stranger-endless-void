@@ -7,11 +7,3 @@ move(1)
 write('
 return;
 ')
-
-/*
-WARNING! SHITTY FORMAT BELOW.
-
-// TARGET: LINENUMBER
-// 3
-return;
-*/

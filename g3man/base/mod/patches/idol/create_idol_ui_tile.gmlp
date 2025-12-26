@@ -23,9 +23,9 @@ meta:
 targets='gml_Object_obj_enter_the_secret_Other_4'
 critical=true
 patch:
-move_to_end()
 // create idol tile
-write('
+find_line_with('var hpn3 = ')
+write_replace('
 instance_create_layer((ui_x + 96), ui_y, "Floor", obj_ev_floor_memory_swapper)
 ')
 
@@ -34,8 +34,8 @@ meta:
 targets='gml_Object_obj_enter_the_danger_Other_4'
 critical=true
 patch:
-move_to_end()
 // create idol tile
-write('
+find_line_with('var hpn3 = ')
+write_replace('
 instance_create_layer((ui_x + 96), ui_y, "Floor", obj_ev_floor_memory_swapper)
 ')

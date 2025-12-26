@@ -28,9 +28,15 @@ if (global.pack_editor.pack_arrow_boost_max - global.pack_editor.pack_arrow_boos
 	music_index = -1	
 }
 else {
+	var name;
+	if ev_is_music_elysium(global.music_inst)
+		name = "msc_test2"
+	else
+		name = audio_get_name(global.music_inst)
+	
 	music_index = 0;
 	for (var i = 0; i < array_length(global.music_names); i++) {
-		if audio_get_name(global.music_inst) == global.music_names[i]
+		if name == global.music_names[i]
 			music_index = i
 	}
 }

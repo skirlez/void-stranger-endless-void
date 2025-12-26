@@ -4,6 +4,15 @@ critical=true
 patch:
 // This object is responsible for restarting your run after a cif reset
 
+
+// don't send the player to any vanilla starting room
+find_line_with('if (global.stranger == 0)')
+write_before('if false {')
+find_line_with('else if (global.stranger == 2)')
+skip_scope()
+write('}')
+
+
 // Reset player data check. We're doing this ourselves, so remove it
 find_line_with('if (global.cc_state == 0)')
 write('&& false')
@@ -14,24 +23,3 @@ move(2) enter_scope() move_to_end() exit_scope() move(1)
 // (cancel else block by adding an always true else if)
 write_else_if('true {}')
 
-// TODO: figure out what the 39 replace was for?
-/*
-WARNING! SHITTY FORMAT BELOW.
-
-// TARGET: LINENUMBER_REPLACE
-// 79
-if (false)
-
-
-// TARGET: LINENUMBER_REPLACE
-// 64
-ev_on_pack_cif_reset()
-if (false)
-
-// TARGET: LINENUMBER_REPLACE
-// 39
-// don't send back to B001
-if (false)
-
-
-*/

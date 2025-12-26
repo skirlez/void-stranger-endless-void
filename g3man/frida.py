@@ -133,7 +133,9 @@ def build_gamemaker_project(force = False):
 	elif os.name == "nt":
 		IGOR_OS_SUBFOLDER="windows"
 		IGOR_OUTPUT_PATH="data.win"
-		IGOR_TARGETS=["Windows" "PackageZip"]
+		IGOR_TARGETS=["Windows", "PackageZip"]
+		IGOR_ASSETS_FOLDER=""
+		IGOR_ASSETS_FILTER=["options.ini", "igor.output.manifest", f"{PROJECT_NAME}.exe"]
 
 	IGOR_PATH=f"{GAMEMAKER_CACHE_PATH}/runtimes/runtime-{RUNTIME_VERSION}/bin/igor/{IGOR_OS_SUBFOLDER}/x64/Igor"
 	RUNTIME_PATH=f"{GAMEMAKER_CACHE_PATH}/runtimes/runtime-{RUNTIME_VERSION}"
@@ -182,9 +184,7 @@ def build_gamemaker_project(force = False):
 		print(e)
 		exit()
 
-
-
-	#cleanup()
+	cleanup()
 
 	if (SHOULD_HASH != "0"):
 		new_hash = hash_project()
@@ -295,7 +295,7 @@ def save_update_timestamp(offset):
 	except:
 		return True
 
-frida_version = 2
+frida_version = 3
 def check_update():
 	print("Checking for updates...")
 	print("Remember that you can disable this by setting CHECK_FOR_UPDATES=0 in frida-config.ini")

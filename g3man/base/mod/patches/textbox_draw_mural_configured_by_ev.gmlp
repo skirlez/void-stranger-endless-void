@@ -11,6 +11,8 @@ write('&& false')
 // instead, draw the mural configured by the mural object.
 write_before('
 else if (name == "wallmural3") {
+	draw_sprite(spr_mural_bg, 0, 0, 0)
+	draw_sprite(mood, portrait_index, 0, 0)
 	ev_draw_mural_brand(88, 24, ev_mural_brand, ev_mural_text)
 }')
 
