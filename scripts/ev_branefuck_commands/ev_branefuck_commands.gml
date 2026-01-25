@@ -536,6 +536,10 @@ global.branefuck_command_functions[? "set_palette"] = function(memory, pointer) 
 		i++
 	}
 }
+
+global.branefuck_command_functions[? "reset_palette"] = function(memory, pointer) {
+	ev_switch_to_user_palette()
+}
 global.branefuck_command_functions[? "irandom"] = function(memory, pointer) {
 	var params = get_command_parameters(memory, pointer, 1)
 	command_return(memory, pointer, int64(irandom(params[0])))
