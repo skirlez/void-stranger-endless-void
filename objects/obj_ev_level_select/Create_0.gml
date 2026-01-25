@@ -285,7 +285,8 @@ function switch_internet_mode(new_mode) {
 	no_filter = ev_array_create_ext(array_length(levels), function (i) {
 		return i;
 	})
-	create_displays();
+	if (!instance_exists(agi("obj_ev_level_highlight")))
+		create_displays();
 }
 
 
@@ -344,8 +345,6 @@ function on_level_update() {
 		read_offline_levels()
 	}
 	switch_internet_mode(global.online_mode)
-	if (!instance_exists(agi("obj_ev_level_highlight")))
-		create_displays();
 }
 
 
@@ -356,5 +355,3 @@ read_offline_levels()
 if mode != level_selector_modes.selecting_level_for_pack && mode != level_selector_modes.packs
 	read_online_levels()
 switch_internet_mode(global.online_mode)
-create_displays()
-
