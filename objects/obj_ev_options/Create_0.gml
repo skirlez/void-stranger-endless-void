@@ -246,6 +246,9 @@ question = instance_create_layer(112, 144 * 2 + 72, "Instances", agi("obj_ev_exe
 			global.mouse_layer++;
 			instance_create_layer(0, 0, "EditorObject", agi("obj_ev_question_mark_darkness"));
 		}
+		else {
+			audio_play_sound(snd_reveal, 10, false)
+		}
 	}
 })
 add_child(question)

@@ -117,9 +117,11 @@ function level_clicked(display_inst) {
 }
 
 function destroy_displays(except = noone) {
+	// .id access for html5
 	for (var i = 0; i < array_length(children); i++) {
 		var inst = children[i]
-		if (inst.object_index == global.display_object && inst != except) { 
+		
+		if (inst.object_index == global.display_object && inst.id != except) { 
 			array_delete(children, i, 1)
 			i--;
 			instance_destroy(inst)	

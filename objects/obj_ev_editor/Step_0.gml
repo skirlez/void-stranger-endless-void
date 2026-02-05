@@ -134,6 +134,11 @@ else if preview_transition != -1 {
 	}
 	
 	if preview_transition == -1 {
+		with (preview_transition_highlight) {
+			for (var i = 0; i < array_length(children); i++) {
+				children[i].image_alpha = 1	
+			}
+		}
 		with (display) {
 			xstart = x
 			ystart = y

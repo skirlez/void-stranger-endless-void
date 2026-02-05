@@ -16,6 +16,8 @@ function struct_copy(SS) {
 	return(SS_new);
 }
 
+// not used anywhere but it's cool you can do this though i guess it's incomplete
+// since it doesn't deep copy arrays
 function struct_deep_copy(struct) {
 	var arr = variable_struct_get_names(struct);
 	

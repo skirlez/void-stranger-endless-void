@@ -390,7 +390,7 @@ function node_instance_step() {
 							node_inst.display.delete_cached_game_surface();
 						}
 						else if node_type == global.pack_editor.level_node {
-							if properties.level.bount != -1 {
+							if properties.level.bount != -1 && properties.level.bount != 999  {
 								node_inst.properties.level.bount = properties.level.bount + 1;
 								node_inst.display.delete_cached_game_surface();	
 							}

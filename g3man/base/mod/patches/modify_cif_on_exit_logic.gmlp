@@ -8,7 +8,6 @@ var cif_flicker = instance_place(x, y - 16, obj_boulder)
 write('
 
 // kill player if cif statue is ontop of exit instead of reseting the playthrough
-var cif_flicker = noone
 var are_all_lamp = true
 with (obj_exit) {
 	var cif = instance_place(x, y - 16, obj_boulder)
@@ -20,7 +19,7 @@ with (obj_exit) {
 	}
 }
 
-should_kill_instead = room != rm_ev_pack_level || are_all_lamp
+var should_kill_instead = room != rm_ev_pack_level || are_all_lamp
 
 if (should_kill_instead) {
 	with (obj_player)

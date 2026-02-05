@@ -25,7 +25,7 @@ function ev_load() {
 	ini_open(global.save_directory + "ev_options.ini")
 	global.author.username = ini_read_string("options", "username", "Anonymous")
 	global.author.brand = int64(ini_read_string("options", "brand", 0))
-	global.server_ip = ini_read_string("options", "server_ip", "http://skirlez.com")
+	global.server_ip = ini_read_string("options", "server_ip", "skirlez.com")
 	
 	global.server_port = ini_read_string("options", "server_port", 443)
 	global.stranger = ini_read_real("options", "stranger", 0)
@@ -97,7 +97,7 @@ function delete_from_file_registry(registry, location) {
 function ev_update_vars() {
 	var prefix = "";
 	if !string_starts_with(global.server_ip, "http://") && !string_starts_with(global.server_ip, "https://") {
-		prefix = "http://"
+		prefix = global.server_port == 443 ? "https://" : "http://";
 	}
 	global.server = $"{prefix}{global.server_ip}:{global.server_port}/voyager"
 	
