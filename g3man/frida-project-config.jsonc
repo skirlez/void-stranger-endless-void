@@ -1,0 +1,50 @@
+// This file is the project config. This file isn't personal to any user and should be shared by everyone working on this mod.
+// 
+// You *can* use backslashes when filling out paths, but they must be escaped, i.e. you have to write "\\" instead of "\" every time.
+// Save yourself the hassle and use forward slashes.
+// 
+// Frida wiki entry: https://github.com/skirlez/frida/wiki/Project-Config
+{
+	// Path to the folder with this mod's GameMaker project.
+	// If this mod has no GameMaker project, leaving this as blank
+	// will disable GameMaker project building.
+	// This path should be a relative path.
+	// Relative paths, e.g. "src" means "the src folder present inside this folder", or
+	// ".." meaning "the folder above this one"
+	"gamemaker_project_path": "..",
+	
+	// The GameMaker runtime this project should be built for.
+	// Example: "2023.4.0.113"
+	"gamemaker_runtime_version": "2023.4.0.113",
+	
+	// Endless Void uses this to not include any sprites or audio from Void Stranger in the output datafile,
+  // saving compilation time (since said sprites and audio will exist in the final merged datafile)
+	"gamemaker_configuration": "NoVoidStrangerGroups",
+	
+	// Where Frida should place the GameMaker project's output datafile when packaging.
+	// For example: to make it place the datafile in your mod's folder,
+	// set this to: out/(your mod's ID)/mod_data.win.
+	// If you don't use a GameMaker project, leave as blank.
+	"gamemaker_datafile_export_path": "out/ev/mod_data.win",
+	
+	// Dependencies that frida should fetch and build.
+	// These can be local paths if you start the string with \"path:\"
+	// or a link to a GitHub repository (with "github:user/repo/branch" or "github-tag:user/repo")
+	// For more information, see https://github.com/skirlez/frida/wiki/Dependency-Management
+	"dependencies": [],
+	
+	// Evaluate dependencies of dependencies
+	// If this is disabled, you have to manually specify all the dependencies of your dependencies.
+	"recursive_dependencies" : true,
+	
+	// We have a profile.json in the base folder, so these settings have no effect.
+	"mod_order" : [""],
+	"modded_save_name" : "",
+	
+	// Which files and folders inside "out" should not be zipped when using `frida.py package --zip`.
+	"zip_exclude" : [],
+	
+	// This number is used for potential auto-upgrading of this file,
+	// and you shouldn't change it.
+	"format_version": 1
+}

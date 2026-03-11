@@ -10,10 +10,7 @@ sounds/**/*.wav
 tilesets/**/*.png
 
 # g3man related ignores
-g3man/igor
 g3man/out
-g3man/frida-config.ini
-g3man/base/*
-!g3man/base/mod/
+g3man/.frida
 g3man/__pycache__
-g3man/frida-timestamp.txt
+g3man/frida-user-config.jsonc

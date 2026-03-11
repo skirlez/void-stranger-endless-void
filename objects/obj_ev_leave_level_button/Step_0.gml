@@ -7,10 +7,9 @@ var mouse_in_region = mouse_y < 32 && mouse_x < 48
 
 can_use = (mouse_in_region || end_of_pack)
 	&& !quill_exists 
-	&& !global.pause
-	&& !instance_exists(agi("obj_darkness_begins"))
-	&& !instance_exists(agi("obj_darkness"))
-	&& !instance_exists(agi("obj_cif_reset"))
+	&& global.can_leave_level
+	
+
 		
 
 if can_use

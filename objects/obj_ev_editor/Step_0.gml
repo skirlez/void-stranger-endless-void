@@ -35,11 +35,15 @@ for (var i = 0; i < length; i++) {
 ds_list_destroy(list)
 global.instance_touching_mouse = min_inst;
 
+global.can_leave_level = !global.pause
+	&& !instance_exists(agi("obj_darkness_begins"))
+	&& !instance_exists(agi("obj_darkness"))
+	&& !instance_exists(agi("obj_cif_reset"))
+	&& global.level_time > 1
+	
 if room == global.level_room {
-	if !global.pause { 
-		if (ev_is_leave_key_pressed()) {
-			ev_leave_level()
-		}
+	if (ev_is_leave_key_pressed() && global.can_leave_level) {
+		ev_leave_level(true)
 	}
 }
 
@@ -164,10 +168,11 @@ else if (edit_transition != -1) {
 		y = lerp(ystart, 144 - sprite_height - 1.5, curve)
 	}
 	
-	if (edit_transition == -1) {
+	if (edit_transition == 0) {
 		global.mouse_layer = 0;
 		global.editor.reset_editor_history();
 		room_goto(global.editor_room);
+		edit_transition = -1
 	}
 }
 else if (edit_pack_transition != -1) {
@@ -177,10 +182,44 @@ else if play_pack_transition_time != -1 {
 	play_pack_transition_time--;
 	if play_pack_transition_time == 0 {
 		room_goto(global.pack_level_room)
+		play_pack_transition_time = -1
 	}
 }
 
-if room == global.editor_room { 
+if room == global.editor_room {
+
+	if (back_to_editor_transition != -1) {
+		if back_to_editor_transition == max_back_to_editor_transition
+			flatten_memory_surface_buffers()
+		back_to_editor_transition--;
+		with (global.display_object) {
+			var t = (other.max_back_to_editor_transition - other.back_to_editor_transition) 
+				/ other.max_back_to_editor_transition
+			
+			var forced_buffer_index = round((1-t) * (min(other.max_memory_surface_buffers - 1, other.memory_surface_time)));
+			forced_surface_buffer = other.memory_surface_buffers[forced_buffer_index]
+			if other.last_forced_buffer_index != forced_buffer_index {
+				other.last_forced_buffer_index = forced_buffer_index
+				audio_play_sound(agi("snd_ev_drag"), 10, false, 1, 0, 1 + t*1.1)
+			}
+			var curve = animcurve_channel_evaluate(other.edit_curve, t)
+			image_xscale = lerp(1, 0.7615918, curve)
+			image_yscale = lerp(1, 0.7615918, curve)
+			x = lerp(0, 224 - sprite_width - 1.5, curve)
+			y = lerp(0, 144 - sprite_height - 1.5, curve)
+		}
+		if back_to_editor_transition == 0 {
+			back_to_editor_transition = -1
+			for (var i = 0; i < array_length(memory_surface_buffers); i++) {
+				if memory_surface_buffers[i] != noone
+					buffer_delete(memory_surface_buffers[i])	
+			}
+			reset_memory_surface_buffers()
+			with (global.display_object)
+				forced_surface_buffer = noone
+		}
+		
+	}
 	if global.mouse_layer == 0 {
 		if ev_is_tile_mode_hotkey_pressed() {
 			switch_tile_mode(!global.tile_mode)
@@ -360,8 +399,4 @@ if(global.death_count > 0){
 	global.death_frames += 1
 }
 
-if (stupid_sprite_i_can_only_delete_later_lest_the_cube_shall_whiten != noone) {
-	sprite_delete(stupid_sprite_i_can_only_delete_later_lest_the_cube_shall_whiten)
-	stupid_sprite_i_can_only_delete_later_lest_the_cube_shall_whiten = noone
-}
 

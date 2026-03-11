@@ -1,9 +1,16 @@
 
-function ev_leave_level() {
-	if (global.playtesting)
+function ev_leave_level(should_do_transition = false) {
+	if (global.playtesting) {
 		room_goto(agi("rm_ev_editor"))
+		if should_do_transition
+			global.editor.play_back_to_editor_transition()
+	}
 	else
 		room_goto(agi("rm_ev_level_select"))
+		
+	// death black screen effect
+	instance_destroy(agi("obj_diamond_fade"))
+	
 	global.playtesting = false;
 	ev_switch_to_user_palette()
 	global.editor.reset_branefuck_persistent_memory()

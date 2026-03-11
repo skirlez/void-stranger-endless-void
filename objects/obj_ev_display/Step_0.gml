@@ -6,7 +6,8 @@ switch (display_context) {
 			var tile_i = floor((mouse_y - y) / (16 * image_yscale))
 	
 			if ev_mouse_held() && !dragging {
-				if (last_clicked_i != tile_i || last_clicked_j != tile_j) {
+				if (last_clicked_i != tile_i || last_clicked_j != tile_j)
+					&& tile_j >= 0 && tile_j <= 9 && tile_i >= 0 && tile_i <= 14 {
 		
 					if painting = false {
 						if (global.selected_thing != thing_nothing && global.selected_thing != thing_picker) // these do not change level state

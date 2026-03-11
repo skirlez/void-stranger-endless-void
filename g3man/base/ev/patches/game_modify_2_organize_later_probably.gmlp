@@ -19,3 +19,10 @@ move_to_start()
 // TODO: maybe take a look at why this is done at all later
 find_line_with('if (global.fullscreen_scaling == 0)')
 write('&& false')
+
+meta:
+targets='gml_Object_obj_game_Draw_77'
+critical=true
+patch:
+find_line_with('draw_surface_ext(surface_final')
+write_before('ev_final_draw_callback(surface_final)')

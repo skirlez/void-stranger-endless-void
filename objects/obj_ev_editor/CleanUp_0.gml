@@ -10,7 +10,6 @@ if global.logging_socket != noone
 
 clean_struct_maps()
 ds_map_destroy(global.struct_map_cleaner)
-surface_free(spin_surface)
 
 ds_map_destroy(global.branefuck_command_functions)
 ds_map_destroy(global.branefuck_command_tiles)

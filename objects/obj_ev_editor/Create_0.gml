@@ -1714,6 +1714,13 @@ function edit_level_pack_transition(nodeless_pack, display_instance) {
 }
 
 
+back_to_editor_transition = -1
+max_back_to_editor_transition = 35
+function play_back_to_editor_transition() {
+	back_to_editor_transition = max_back_to_editor_transition
+	global.mouse_layer = -1
+}
+
 
 // used in obj_ev_level_select, is essentially the level/pack "page". we want this to be global so it persists
 global.level_start = 0;
@@ -1845,12 +1852,6 @@ global.newest_version = "0.90";
 global.startup_room = agi("rm_ev_startup")
 global.playtesting = false;
 
-spin_surface = surface_create(16, 16)
-
-stupid_sprite_i_can_only_delete_later_lest_the_cube_shall_whiten = noone
-
-spin_time_h = 0
-spin_time_v = 0;
 
 global.death_count = 0
 global.turn_frames = 0
@@ -1873,3 +1874,29 @@ function get_universe_instance() {
 }
 
 
+
+max_memory_surface_buffers = 12;
+
+
+function reset_memory_surface_buffers() {
+	// this array will be two times the size of the max memory surface buffers,
+	// each index will either hold a buffer or noone
+	memory_surface_buffers = array_create(max_memory_surface_buffers * 2, noone);
+	memory_surface_time = 0;
+	memory_surface_era = max_memory_surface_buffers
+	
+	last_forced_buffer_index = -1
+}
+reset_memory_surface_buffers()
+
+function flatten_memory_surface_buffers() {
+	var arr = array_create(max_memory_surface_buffers * 2, noone);
+	var j = 0;
+	for (var i = 0; i < max_memory_surface_buffers * 2; i++) {
+		if memory_surface_buffers[i] != noone {
+			arr[j] = memory_surface_buffers[i]
+			j++;	
+		}
+	}
+	memory_surface_buffers = arr
+}

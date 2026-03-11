@@ -4,6 +4,13 @@ if outside_view
 
 function draw() {
 	surface_set_target(game_surface)
+	if forced_surface_buffer != noone {
+		draw_clear_alpha(c_black, 0)
+		buffer_set_surface(forced_surface_buffer, game_surface, 0)
+		surface_reset_target()
+		return;
+	}
+	
 	if lvl.theme == level_themes.white_void
 		draw_clear_alpha(c_white, 1)
 	else
@@ -288,6 +295,7 @@ else if global.is_merged {
 var draw_x = x;
 
 gpu_set_blendenable(false)
+var surface_to_draw = game_surface
 draw_surface_ext(game_surface, draw_x, y, image_xscale, image_yscale, 0, c_white, 1)
 gpu_set_blendenable(true)
 draw_exit_numbers()

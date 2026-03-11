@@ -371,6 +371,7 @@
     {"id":{"name":"spr_cm_down","path":"sprites/spr_cm_down/spr_cm_down.yy",},},
     {"id":{"name":"snd_player_damage","path":"sounds/snd_player_damage/snd_player_damage.yy",},},
     {"id":{"name":"ev_warps","path":"scripts/ev_warps/ev_warps.yy",},},
+    {"id":{"name":"obj_ev_3d_cube_display","path":"objects/obj_ev_3d_cube_display/obj_ev_3d_cube_display.yy",},},
     {"id":{"name":"obj_ev_placeables_window","path":"objects/obj_ev_placeables_window/obj_ev_placeables_window.yy",},},
     {"id":{"name":"spr_lover","path":"sprites/spr_lover/spr_lover.yy",},},
     {"id":{"name":"spr_ev_brand_hitbox","path":"sprites/spr_ev_brand_hitbox/spr_ev_brand_hitbox.yy",},},
@@ -449,6 +450,7 @@
     {"id":{"name":"ev_leave_level","path":"scripts/ev_leave_level/ev_leave_level.yy",},},
     {"id":{"name":"ev_strobe","path":"scripts/ev_strobe/ev_strobe.yy",},},
     {"id":{"name":"spr_ev_grube_non_phy_collision_box","path":"sprites/spr_ev_grube_non_phy_collision_box/spr_ev_grube_non_phy_collision_box.yy",},},
+    {"id":{"name":"ev_final_draw_callback","path":"scripts/ev_final_draw_callback/ev_final_draw_callback.yy",},},
     {"id":{"name":"spr_ev_orb_thing_alt_down","path":"sprites/spr_ev_orb_thing_alt_down/spr_ev_orb_thing_alt_down.yy",},},
     {"id":{"name":"ev_input","path":"scripts/ev_input/ev_input.yy",},},
     {"id":{"name":"spr_ev_tis_statue","path":"sprites/spr_ev_tis_statue/spr_ev_tis_statue.yy",},},
@@ -542,7 +544,7 @@
     {"roomId":{"name":"rm_ev_pretitle","path":"rooms/rm_ev_pretitle/rm_ev_pretitle.yy",},},
   ],
   "TextureGroups": [
-    {"resourceType":"GMTextureGroup","resourceVersion":"1.3","name":"Default","autocrop":true,"border":2,"compressFormat":"bz2","ConfigValues":{"NoVoidStrangerGroups":{"groupParent":"null","compressFormat":"bz2","loadType":"default",},},"directory":"","groupParent":null,"isScaled":true,"loadType":"default","mipsToGenerate":0,"targets":-1,},
-    {"resourceType":"GMTextureGroup","resourceVersion":"1.3","name":"VoidStrangerTextureGroup","autocrop":true,"border":2,"compressFormat":"bz2","ConfigValues":{"NoVoidStrangerGroups":{"groupParent":"null","compressFormat":"bz2","loadType":"default","targets":"-3035426170322551023",},},"directory":"","groupParent":null,"isScaled":true,"loadType":"default","mipsToGenerate":0,"targets":-1,},
+    {"resourceType":"GMTextureGroup","resourceVersion":"1.3","name":"Default","autocrop":true,"border":2,"compressFormat":"bz2","ConfigValues":{"NoVoidStrangerGroups":{"compressFormat":"bz2","groupParent":"null","loadType":"default",},},"directory":"","groupParent":null,"isScaled":true,"loadType":"default","mipsToGenerate":0,"targets":-1,},
+    {"resourceType":"GMTextureGroup","resourceVersion":"1.3","name":"VoidStrangerTextureGroup","autocrop":true,"border":2,"compressFormat":"bz2","ConfigValues":{"NoVoidStrangerGroups":{"compressFormat":"bz2","groupParent":"null","loadType":"default","targets":"-3035426170322551023",},},"directory":"","groupParent":null,"isScaled":true,"loadType":"default","mipsToGenerate":0,"targets":-1,},
   ],
 }
