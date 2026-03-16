@@ -27,21 +27,30 @@ dotfrida = ".frida"
 
 ### dependency management ### 
 
+class DependencyFetchException(FridaException):
+	pass
+
 def lockfile_set(dependency: str, value: str):
 	print(f"Locking {dependency}: {value}")
 	if not os.path.isfile(f"{cli_frida_root}/frida.lock"):
 		lock = dict()
 	else:
-		with open(f"{cli_frida_root}/frida.lock", "r") as f:
-			lock = json.load(f)
+		try:
+			with open(f"{cli_frida_root}/frida.lock", "r") as f:
+				lock = json.load(f)
+		except:
+			raise DependencyFetchException("Failed to read lockfile/it is invalid")
 	lock[dependency] = value
 	with open(f"{cli_frida_root}/frida.lock", "w") as f:
 		json.dump(lock, f)
 
 def lockfile_get(dependency: str):
 	if os.path.isfile(f"{cli_frida_root}/frida.lock"):
-		with open(f"{cli_frida_root}/frida.lock", "r") as f:
-			lock = json.load(f)
+		try:
+			with open(f"{cli_frida_root}/frida.lock", "r") as f:
+				lock = json.load(f)
+		except:
+			raise DependencyFetchException("Failed to read lockfile/it is invalid")
 		if dependency in lock:
 			return lock[dependency]
 	return None
@@ -50,10 +59,9 @@ def path_explore_downwards(path: str, amount: int) -> str:
 	if amount <= 0:
 		return path
 	ls = os.listdir(path)
-	if len(ls) == 1 and os.path.isdir(ls[0]):
+	if len(ls) == 1 and os.path.isdir(f"{path}/{ls[0]}"):
 		return path_explore_downwards(f"{path}/{ls[0]}", amount - 1)
-	# not sure what to do in this case
-	return path
+	raise DependencyFetchException("Wrong amount of zip wrappers set for this dependency")
 		
 class Dependency():
 	def __init__(self):
@@ -85,6 +93,7 @@ class PathDependency(Dependency):
 	def __str__(self):
 		return f"path:{self.path}"
 
+
 class GitHubTagDependency(Dependency):
 	def __init__(self, user: str, repo: str, frida_root : str, tag: Optional[str]):
 		self.user = user
@@ -106,7 +115,7 @@ class GitHubTagDependency(Dependency):
 						content = json.loads(response.read().decode('utf-8'))
 						tag_name = content["tag_name"]
 				except Exception as e:
-					raise FridaException(f"Failed to fetch latest release of {self}")
+					raise DependencyFetchException(f"Failed to fetch latest release of {self}")
 				lockfile_set(str(self), tag_name)
 		else:
 			tag_name = self.tag
@@ -395,7 +404,7 @@ def recreate_out_folder(frida_root: str):
 	
 def package_routine(frida_root: str, project_config: ProjectConfig, should_package_dependencies = True, linkbase=False, name = ""):
 	if name == "":
-		print(f"Packaging...")
+		print(f"Packaging: This project")
 	else:
 		print(f"Packaging: {name}")
 
@@ -938,7 +947,6 @@ def validate_combination(user_dict, project_dict):
 	if (project_dict["gamemaker_runtime_version"] != ""
 		and os.path.exists(f"{user_dict["gamemaker_cache_path"]}/runtimes") 
 		and not os.path.exists(f"{user_dict["gamemaker_cache_path"]}/runtimes/runtime-{project_dict["gamemaker_runtime_version"]}")):
-		print(f"{user_dict["gamemaker_cache_path"]}/runtimes/runtime-{project_dict["gamemaker_runtime_version"]}")
 		issues.append(f"You are missing the \"{project_dict["gamemaker_runtime_version"]}\" runtime, which is required by one of the projects. Please download it from the IDE.")
 	return (issues, [])
 		
@@ -1070,29 +1078,45 @@ def print_issues(issues, filename):
 			print(f"{i + 1}. {issues[i]}")
 		print()
 
-
-
-
-				
-
 def fetch_dependencies(frida_root, project_config: ProjectConfig):
 	for dependency in project_config.dependencies:
+		print(f"Fetching: \"{dependency}\"... ", end="", flush=True)
 		path = dependency.get_path()
-		os.makedirs(path, exist_ok=True)
 		if dependency.needs_download():
-			zip_url = dependency.get_zip_url()
-			urllib.request.urlretrieve(zip_url, f"{dotfrida}/tmp.zip")
-			with zipfile.ZipFile(f"{dotfrida}/tmp.zip", "r") as f:
-				f.extractall(path)
-			os.remove(f"{dotfrida}/tmp.zip")
+			if os.path.exists(path):
+				
+				def normabs(path):
+					return os.path.normpath(os.path.abspath(path))
+					
+				assert os.path.commonpath([normabs(dotfrida), normabs(path)]) == normabs(dotfrida)
+				shutil.rmtree(path)
+			os.makedirs(path, exist_ok=True)
+			try:
+				zip_url = dependency.get_zip_url()
+				urllib.request.urlretrieve(zip_url, f"{dotfrida}/tmp.zip")
+				with zipfile.ZipFile(f"{dotfrida}/tmp.zip", "r") as f:
+					f.extractall(path)
+			except DependencyFetchException as e:
+				print("Failed")
+				print(f"Failed to fetch {dependency}: {e.message}")
+				continue
+			except Exception as e:
+				print("Failed")
+				print(f"Something went wrong while fetching {dependency}: {e}")
+				
+			try:
+				os.remove(f"{dotfrida}/tmp.zip")
+			except:
+				pass
+			print("Done")
 			
 		if project_config.recursive_dependencies:
 			paths = dependency.get_frida_root_candidate_paths(path)
 			frida_root = check_frida_root_candidates(paths)
 			dependency_project_dict = get_project_config(frida_root)
-			print(f"Fetching: \"{dependency}\"")
 			dependency_project_config = validation_routine(frida_root, dependency_project_dict)
 			fetch_dependencies(frida_root, dependency_project_config)
+
 
 if __name__ == "__main__":
 	python_version_routine()

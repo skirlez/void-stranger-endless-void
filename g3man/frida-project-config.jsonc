@@ -38,7 +38,7 @@
 	"recursive_dependencies" : true,
 	
 	// We have a profile.json in the base folder, so these settings have no effect.
-	"mod_order" : [""],
+	"mod_order" : [],
 	"modded_save_name" : "",
 	
 	// Which files and folders inside "out" should not be zipped when using `frida.py package --zip`.
