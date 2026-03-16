@@ -318,7 +318,6 @@ def build_gamemaker_project(mod_path: str, project_config: ProjectConfig, force_
 		
 				
 		included_files_top_level = [file for file in os.listdir(included_files_path) if file not in IGOR_ASSETS_FILTER]
-		print(included_files_top_level)
 		if (len(included_files_top_level) != 0):
 			os.mkdir(new_included_files_path)
 			for root, directories, files in os.walk(included_files_path):
@@ -357,10 +356,6 @@ def make_profile_json_dict(project_config: ProjectConfig):
 	p["credits"] = []
 	p["links"] = []
 	return p
-
-
-
-		
 
 
 ### packaging mod
@@ -468,7 +463,7 @@ def apply_mod(frida_root, user_config):
 	try:
 		status = subprocess.run(
 			[user_config["g3man_path"], "apply",
-				"--path", "out",
+				"--path", os.path.abspath(f"{cli_frida_root}/out"),
 				"--datafile", user_config["clean_datafile_path"],
 				"--out", user_config["game_path"],
 				"--outname", user_config["game_datafile_name"]
@@ -477,8 +472,16 @@ def apply_mod(frida_root, user_config):
 	except Exception as e:
 		print("Failed to launch g3man. Do you have all your variables set correctly?\n" + str(e))
 		return
+	
 	if (status.returncode != 0):
+		
 		print("Something failed in g3man. Aborting.")
+		print("Args:")
+		print(f"{status.args}")
+		print("stdout:")
+		print(f"{status.stdout}")
+		print("stderr:")
+		print(f"{status.stderr}")
 		exit()
 
 ### cli
@@ -543,6 +546,8 @@ def strip_comments(str: str):
 			build += str[i]
 			if str[i] == '"':
 				state = 0
+	if state == 0 or state == 3:
+		build += str[len(str) - 1]
 	return build
 
 def fixup_paths_user_config(dict: dict[str, Any]):

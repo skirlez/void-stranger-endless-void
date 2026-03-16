@@ -1,0 +1,113 @@
+name: Package EV
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+      branches: [ main ]
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+        # i'm not sure if this should be kept or not since this is caching something we're already downloading off github
+      - name: Cache UndertaleModCli
+        id: cache-undertalemodcli
+        uses: actions/cache@v4
+        with:
+          path: g3man/UndertaleModCli.zip
+          key: undertalemodcli-0.8.4.1
+          
+      - name: Download UndertaleModCli
+        if: steps.cache-undertalemodcli.outputs.cache-hit != 'true'
+        run: |
+          cd g3man
+          curl -L -o UndertaleModCli.zip https://github.com/UnderminersTeam/UndertaleModTool/releases/download/0.8.4.1/UTMT_CLI_v0.8.4.1-Windows.zip
+          
+        # According to the docs the cache is publically accessible
+        # so alongside the game files being stored in a secret link, I've also encrypted them
+      - name: Cache Encrypted VS Archive
+        id: cache-vs
+        uses: actions/cache@v4
+        with:
+          path: g3man/vs.7z
+          key: vs-1.1.3
+    
+      - name: Download Encrypted VS Archive
+        if: steps.cache-vs.outputs.cache-hit != 'true'
+        run: |
+          cd g3man
+          curl -L -o vs.7z ${{ secrets.VS_ENCRYPTED_GAME_LINK }}
+          
+      - name: Setup 7zip
+        uses: milliewalky/setup-7-zip@v2
+          
+      - name: Setup VS Assets
+        run: |
+          cd g3man
+          Expand-Archive UndertaleModCli.zip
+          7z x vs.7z -p${{ secrets.VS_DECRYPTION_PASSWORD }} -ovs
+          UndertaleModCli/UndertaleModCli.exe load vs/data.win --scripts copy-game-assets.csx
+
+      # This step is taken from https://gamemaker.io/en/blog/bs-tech-automate-builds
+      # (they're very right to call it "bs" in the URL)
+      # This step sets up the GameMaker build CLI tool Igor https://github.com/bscotch/igor-setup
+      - name: Setup Igor
+        uses: bscotch/igor-setup@v3
+        id: igor
+        with:
+          target-yyp: ${{ github.workspace }}/void-stranger-endless-void.yyp
+          access-key: ${{ secrets.GAMEMAKER_ACCESS_KEY }} # 📝 To generate your Access Key, check out the Access Key section of the GameMaker Manual's Building via Command Line page: https://manual.gamemaker.io/monthly/en/#t=Settings%2FBuilding_via_Command_Line.htm
+
+      - name: Cache g3man
+        id: cache-g3man
+        uses: actions/cache@v4
+        with:
+          path: g3man/g3man-executable.zip
+          key: g3man-6
+      - name: Download g3man
+        if: steps.cache-g3man.outputs.cache-hit != 'true'
+        run: |
+          cd g3man
+          curl -L -o g3man-executable.zip https://github.com/skirlez/g3man/releases/download/6/g3man-windows-amd64.zip
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12' 
+          
+      - name: Setup Frida
+        run: |
+          python3 .github/workflows/create_actions_user_config.py ${{ steps.igor.outputs.runtime-dir }} ${{ steps.igor.outputs.user-dir }}
+          cd g3man
+          Expand-Archive g3man-executable.zip
+          
+      - name: Package and Apply Endless Void
+        run: |
+          cd g3man
+          echo User config:
+          cat frida-user-config.jsonc
+          python3 frida.py apply 
+          
+      - name: Upload g3man profile
+        uses: actions/upload-artifact@v4
+        with:
+          name: endless-void
+          path: g3man/out
+          
+      - name: Setup xdelta
+        run: |
+          cd g3man
+          curl -L -o xdelta.zip https://github.com/jmacd/xdelta-gpl/releases/download/v3.1.0/xdelta3-3.1.0-x86_64.exe.zip
+          Expand-Archive xdelta.zip
+          
+      - name: Create xdelta patch
+        run: |
+          cd g3man
+          xdelta/xdelta3-3.1.0-x86_64.exe -e -s vs/data.win vs/final_data.win Endless_Void_STEAM.xdelta
+
+      - name: Upload xdelta
+        uses: actions/upload-artifact@v4
+        with:
+          name: ev-xdelta.zip
+          path: Endless_Void_STEAM.xdelta
