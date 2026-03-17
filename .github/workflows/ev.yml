@@ -1,9 +1,9 @@
 name: Package EV
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-      branches: [ main ]
+on: [push, pull_request]
+
+# TODO:
+# should we be caching undertalemodcli and g3man even though they're from github?
+      
 jobs:
   build:
     runs-on: windows-2022
@@ -11,7 +11,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         
-        # i'm not sure if this should be kept or not since this is caching something we're already downloading off github
       - name: Cache UndertaleModCli
         id: cache-undertalemodcli
         uses: actions/cache@v4
@@ -60,6 +59,11 @@ jobs:
           target-yyp: ${{ github.workspace }}/void-stranger-endless-void.yyp
           access-key: ${{ secrets.GAMEMAKER_ACCESS_KEY }} # 📝 To generate your Access Key, check out the Access Key section of the GameMaker Manual's Building via Command Line page: https://manual.gamemaker.io/monthly/en/#t=Settings%2FBuilding_via_Command_Line.htm
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+          
       - name: Cache g3man
         id: cache-g3man
         uses: actions/cache@v4
@@ -101,13 +105,20 @@ jobs:
           curl -L -o xdelta.zip https://github.com/jmacd/xdelta-gpl/releases/download/v3.1.0/xdelta3-3.1.0-x86_64.exe.zip
           Expand-Archive xdelta.zip
           
-      - name: Create xdelta patch
+      - name: Create xdelta patches
         run: |
           cd g3man
           xdelta/xdelta3-3.1.0-x86_64.exe -e -s vs/data.win vs/final_data.win Endless_Void_STEAM.xdelta
+          xdelta/xdelta3-3.1.0-x86_64.exe -e -s vs/itch_data.win vs/final_data.win Endless_Void_ITCH.xdelta
 
-      - name: Upload xdelta
+      - name: Upload Steam xdelta
         uses: actions/upload-artifact@v4
         with:
-          name: ev-xdelta.zip
-          path: Endless_Void_STEAM.xdelta
+          name: Endless_Void_STEAM_xdelta
+          path: g3man/Endless_Void_STEAM.xdelta
+          
+      - name: Upload Itch xdelta
+        uses: actions/upload-artifact@v4
+        with:
+          name: Endless_Void_ITCH_xdelta
+          path: g3man/Endless_Void_ITCH.xdelta
