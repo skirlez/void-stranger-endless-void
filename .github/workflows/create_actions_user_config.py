@@ -19,7 +19,6 @@ if __name__ == "__main__":
 			"clean_datafile_path" : abspath("g3man/vs/data.win"),
 			"game_path": abspath("g3man/vs"),
 			"game_datafile_name" : "final_data.win",
-			"start_game_command" : "",
 			
 			"gamemaker_cache_path" : cache_dir,
 			"gamemaker_user_directory_path" : user_dir,
