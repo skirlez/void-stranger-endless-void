@@ -401,7 +401,7 @@ def recreate_out_folder(frida_root: str):
 	
 def package_routine(frida_root: str, project_config: ProjectConfig, should_package_dependencies = True, linkbase=False, name = ""):
 	if name == "":
-		print(f"Packaging: This project...")
+		print(f"Packaging: This project")
 	else:
 		print(f"Packaging: {name}")
 
@@ -1075,7 +1075,7 @@ def print_issues(issues, filename):
 
 def fetch_dependencies(frida_root, project_config: ProjectConfig):
 	for dependency in project_config.dependencies:
-		print(f"Fetching: \"{dependency}\"... ", end="")
+		print(f"Fetching: \"{dependency}\"... ", end="", flush=True)
 		path = dependency.get_path()
 		if dependency.needs_download():
 			if os.path.exists(path):

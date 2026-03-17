@@ -9,11 +9,11 @@ jobs:
     runs-on: windows-2022
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         
       - name: Cache UndertaleModCli
         id: cache-undertalemodcli
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: g3man/UndertaleModCli.zip
           key: undertalemodcli-0.8.4.1
@@ -28,7 +28,7 @@ jobs:
         # so alongside the game files being stored in a secret link, I've also encrypted them
       - name: Cache Encrypted VS Archive
         id: cache-vs
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: g3man/vs.7z
           key: vs-1.1.3
@@ -53,7 +53,7 @@ jobs:
       # (they're very right to call it "bs" in the URL)
       # This step sets up the GameMaker build CLI tool Igor https://github.com/bscotch/igor-setup
       - name: Setup Igor
-        uses: bscotch/igor-setup@v3
+        uses: bscotch/igor-setup@v1.3.0
         id: igor
         with:
           target-yyp: ${{ github.workspace }}/void-stranger-endless-void.yyp
@@ -66,7 +66,7 @@ jobs:
           
       - name: Cache g3man
         id: cache-g3man
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: g3man/g3man-executable.zip
           key: g3man-6
@@ -94,9 +94,9 @@ jobs:
           python3 frida.py apply 
           
       - name: Upload g3man profile
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
-          name: endless-void
+          name: endless-void-g3man
           path: g3man/out
           
       - name: Setup xdelta
@@ -108,17 +108,17 @@ jobs:
       - name: Create xdelta patches
         run: |
           cd g3man
-          xdelta/xdelta3-3.1.0-x86_64.exe -e -s vs/data.win vs/final_data.win Endless_Void_STEAM.xdelta
-          xdelta/xdelta3-3.1.0-x86_64.exe -e -s vs/itch_data.win vs/final_data.win Endless_Void_ITCH.xdelta
+          xdelta/xdelta3-3.1.0-x86_64.exe -e -s vs/data.win vs/final_data.win endless-void-steam.xdelta
+          xdelta/xdelta3-3.1.0-x86_64.exe -e -s vs/itch_data.win vs/final_data.win endless-void-itch.xdelta
 
       - name: Upload Steam xdelta
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
-          name: Endless_Void_STEAM_xdelta
-          path: g3man/Endless_Void_STEAM.xdelta
+          name: endless-void-steam-xdelta
+          path: g3man/endless-void-steam.xdelta
           
       - name: Upload Itch xdelta
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
-          name: Endless_Void_ITCH_xdelta
-          path: g3man/Endless_Void_ITCH.xdelta
+          name: endless-void-itch-xdelta
+          path: g3man/endless-void-itch.xdelta
