@@ -60,7 +60,7 @@ jobs:
           access-key: ${{ secrets.GAMEMAKER_ACCESS_KEY }} # 📝 To generate your Access Key, check out the Access Key section of the GameMaker Manual's Building via Command Line page: https://manual.gamemaker.io/monthly/en/#t=Settings%2FBuilding_via_Command_Line.htm
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.x
           
@@ -89,7 +89,7 @@ jobs:
       - name: Package and Apply Endless Void
         run: |
           cd g3man
-          echo User config:
+          echo "User config:"
           cat frida-user-config.jsonc
           python3 frida.py apply 
           

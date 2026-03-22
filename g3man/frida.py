@@ -13,7 +13,7 @@ from typing import *
 import urllib.request
 
 
-frida_version = 4
+frida_version = 5
 
 class FridaException(Exception):
 	def __init__(self, message: str):
@@ -191,7 +191,7 @@ def hash_gamemaker_project(path: str):
 		i = 0
 		length = len(directories)
 		while (i < length):
-			if os.path.normpath(directories[i]) in normalized_ignored_files:
+			if os.path.normpath(f"{relative_root}/{directories[i]}") in normalized_ignored_files:
 				del directories[i]
 				i -= 1
 				length -= 1
@@ -199,7 +199,7 @@ def hash_gamemaker_project(path: str):
 		for file_path in sorted(files):
 			full_path = os.path.join(root, file_path)
 			relative_path = os.path.relpath(full_path, project_folder)
-			#hash_file(full_path, relative_path, hash_func)
+			hash_file(full_path, relative_path, hash_func)
 
 	return hash_func.hexdigest()
 
@@ -319,7 +319,6 @@ def build_gamemaker_project(mod_path: str, project_config: ProjectConfig, force_
 		
 				
 		included_files_top_level = [file for file in os.listdir(included_files_path) if file not in IGOR_ASSETS_FILTER]
-		print(included_files_top_level)
 		if (len(included_files_top_level) != 0):
 			os.mkdir(new_included_files_path)
 			for root, directories, files in os.walk(included_files_path):
@@ -443,7 +442,7 @@ def zip_out_folder(frida_root, project_config: ProjectConfig):
 			length = len(directories)
 			i = 0
 			while (i < length):
-				if os.path.normpath(directories[i]) in normalized_zip_exclude:
+				if os.path.normpath(f"{relative_root}/{directories[i]}") in normalized_zip_exclude:
 					del directories[i]
 					i -= 1
 					length -= 1

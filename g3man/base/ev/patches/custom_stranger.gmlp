@@ -285,10 +285,10 @@ switch global.blade_style
         swordflash_index = spr_ev_void_sword_flash_lev
         break
     case 1:
-        swordflash_index = 2463
+        swordflash_index = spr_sword_flash_cif
         break
     default:
-        swordflash_index = 2244
+        swordflash_index = spr_sword_flash
         break
 }
 
