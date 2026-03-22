@@ -8,10 +8,7 @@
   },
   "bitDepth": 1,
   "bitRate": 128,
-  "compression": 1,
-  "ConfigValues": {
-    "NoVoidStrangerGroups": {"audioGroupId":"{\"name\":\"VoidStrangerAudio\",\"path\":\"audiogroups/VoidStrangerAudio\"}",},
-  },
+  "compression": 0,
   "conversionMode": 0,
   "duration": 1.001474,
   "parent": {
