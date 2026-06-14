@@ -3,7 +3,7 @@
     "display_name" : "Endless Void",
     "description" : "A level builder for Void Stranger",
     "version" : "0.9.98",
-    "target_g3man_version" : 6,
+    "target_g3man_version" : 9,
     "depends" : [],
     "breaks" : [],
 

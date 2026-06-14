@@ -8,29 +8,39 @@ import shutil
 import signal
 import hashlib
 import zipfile
+import argparse
 import subprocess
 from typing import *
 import urllib.request
+from dataclasses import *
+from datetime import datetime
 
-
-frida_version = 5
+FRIDA_VERSION = 6
 
 class FridaException(Exception):
 	def __init__(self, message: str):
 		self.message = message
+	def add_unwind_action(self, action):
+		self.message = f"{action}\n{self.message}"
 
-### global state ###
+def unwind_action(adder):
+	def decorator(func):
+		def wrapper(*args, **kwargs):
+			try:
+				func(*args, **kwargs)
+			except FridaException as e:
+				e.add_unwind_action(adder(*args, **kwargs))
+				raise e
+		return wrapper
+	return decorator
 
-user_dict: dict[str, Any] = {}
-cli_frida_root: str = "."
-dotfrida = ".frida"
-
+	
 ### dependency management ### 
 
 class DependencyFetchException(FridaException):
 	pass
 
-def lockfile_set(dependency: str, value: str):
+def lockfile_set(cli_frida_root: str, dependency: str, value: str):
 	print(f"Locking {dependency}: {value}")
 	if not os.path.isfile(f"{cli_frida_root}/frida.lock"):
 		lock = dict()
@@ -44,7 +54,7 @@ def lockfile_set(dependency: str, value: str):
 	with open(f"{cli_frida_root}/frida.lock", "w") as f:
 		json.dump(lock, f)
 
-def lockfile_get(dependency: str):
+def lockfile_get(cli_frida_root, dependency: str) -> str | None:
 	if os.path.isfile(f"{cli_frida_root}/frida.lock"):
 		try:
 			with open(f"{cli_frida_root}/frida.lock", "r") as f:
@@ -65,28 +75,28 @@ def path_explore_downwards(path: str, amount: int) -> str:
 		
 class Dependency():
 	def __init__(self):
-		self.frida_root = ""
+		self.path_offset = ""
 		pass
-	def get_path(self) -> str:
+	def get_path(self, dotfrida) -> str:
 		return ""
 	def needs_download(self) -> bool:
 		return True
-	def get_zip_url(self) -> str:
+	def get_zip_url(self, cli_frida_root) -> str:
 		return ""
 	def get_zip_wrappers(self) -> int:
 		return 0
 	def get_frida_root_candidate_paths(self, path: str) -> list[str]:
 		path = path_explore_downwards(path, self.get_zip_wrappers())
-		if self.frida_root != "":
-			return [f"{path}/{self.frida_root}"]
+		if self.path_offset != "":
+			return [f"{path}/{self.path_offset}", f"{path}/{self.path_offset}/g3man"]
 		else:
 			return [path, f"{path}/g3man"]
 		
 class PathDependency(Dependency):
 	def __init__(self, path):
 		self.path = path
-		self.frida_root = ""
-	def get_path(self) -> str:
+		self.path_offset = ""
+	def get_path(self, dotfrida) -> str:
 		return self.path
 	def needs_download(self) -> bool:
 		return False
@@ -95,17 +105,17 @@ class PathDependency(Dependency):
 
 
 class GitHubTagDependency(Dependency):
-	def __init__(self, user: str, repo: str, frida_root : str, tag: Optional[str]):
+	def __init__(self, user: str, repo: str, path_offset : str, tag: Optional[str]):
 		self.user = user
 		self.repo = repo
 		self.tag = tag
-		self.frida_root = frida_root
-	def get_path(self) -> str:
+		self.path_offset = path_offset
+	def get_path(self, dotfrida) -> str:
 		return f"{dotfrida}/deps/github-{self.user}-{self.repo}"
 
-	def get_zip_url(self) -> str:
+	def get_zip_url(self, cli_frida_root) -> str:
 		if self.tag == None:
-			early = lockfile_get(str(self))
+			early = lockfile_get(cli_frida_root, str(self))
 			if early is not None:
 				tag_name = early
 			else:
@@ -116,7 +126,7 @@ class GitHubTagDependency(Dependency):
 						tag_name = content["tag_name"]
 				except Exception as e:
 					raise DependencyFetchException(f"Failed to fetch latest release of {self}")
-				lockfile_set(str(self), tag_name)
+				lockfile_set(cli_frida_root, str(self), tag_name)
 		else:
 			tag_name = self.tag
 		return f"https://api.github.com/repos/{self.user}/{self.repo}/zipball/{tag_name}"
@@ -126,17 +136,17 @@ class GitHubTagDependency(Dependency):
 		return f"github-tag:{self.user}/{self.repo}"
 		
 class GitHubCommitDependency(Dependency):
-	def __init__(self, user: str, repo: str, branch: str, frida_root : str, commit: Optional[str]):
+	def __init__(self, user: str, repo: str, branch: str, path_offset : str, commit: Optional[str]):
 		self.user = user
 		self.repo = repo
 		self.branch = branch
 		self.commit = commit
-		self.frida_root = frida_root
-	def get_path(self) -> str:
+		self.path_offset = path_offset
+	def get_path(self, dotfrida) -> str:
 		return f"{dotfrida}/deps/github-{self.user}-{self.repo}-{self.branch}"
-	def get_zip_url(self) -> str:
+	def get_zip_url(self, cli_frida_root) -> str:
 		if self.commit == None:
-			early = lockfile_get(str(self))
+			early = lockfile_get(cli_frida_root, str(self))
 			if early is not None:
 				sha = early
 			else:
@@ -148,7 +158,7 @@ class GitHubCommitDependency(Dependency):
 						sha = commit["sha"]
 				except Exception as e:
 					raise FridaException(f"Failed to fetch latest release of {self}")
-				lockfile_set(str(self), sha)
+				lockfile_set(cli_frida_root, str(self), sha)
 		else:
 			sha = self.commit
 			
@@ -158,19 +168,382 @@ class GitHubCommitDependency(Dependency):
 	def __str__(self):
 		return f"github:{self.user}/{self.repo}/{self.branch}"
 
-class ProjectConfig:
-	def __init__(self, config: dict[str, Any], dependencies: list[Dependency]):
-		self.gamemaker_project_path = config["gamemaker_project_path"]
-		self.gamemaker_runtime_version = config["gamemaker_runtime_version"]
-		self.gamemaker_configuration = config["gamemaker_configuration"]
-		self.gamemaker_datafile_export_path = config["gamemaker_datafile_export_path"]
-		self.gamemaker_included_files_export_path = config["gamemaker_included_files_export_path"]
-		self.dependencies = dependencies
-		self.recursive_dependencies: bool = config["recursive_dependencies"]
-		self.zip_exclude = config["zip_exclude"]
-		self.mod_order = config["mod_order"]
-		self.modded_save_name = config["modded_save_name"]
 
+def parse_dependency_or_return_string_error(dependency):
+	parts = dependency.split(':', 1)
+	if dependency.strip() == "" or len(parts) == 1:
+		return f"Dependency {dependency} does not have a prefix. You need to specify a prefix, like \"path:\", or \"github-tag:\"."
+	
+	arg_parts = parts[1].rsplit('?', 1)
+	args = dict()
+	if len(arg_parts) == 2:
+		assignments = arg_parts[1].split('&')
+		for assignment in assignments:
+			lr = dependency.split('=', 1)
+			if len(lr) != 2:
+				return f"Dependency {dependency} has invalid argument assignment: {assignment}"
+			args[lr[0]] = lr[1]
+	
+	
+	prefix = parts[0]
+	if prefix == "path":
+		path = parts[1]
+		return PathDependency(path)
+	if prefix == "github-tag":
+		subparts = parts[1].split('/')
+		
+		if len(subparts) == 2:
+			user = subparts[0]
+			repo = subparts[1]
+			return GitHubTagDependency(user, repo, args.get("frida_root", ""), args.get("tag"))
+		else:
+			return f"Dependency {dependency}'s content should be of the form \"user/repo\""
+	if prefix == "github":
+		subparts = parts[1].split('/')
+		if len(subparts) == 3:
+			user = subparts[0]
+			repo = subparts[1]
+			branch = subparts[2]
+
+			return GitHubCommitDependency(user, repo, branch, args.get("frida_root", ""), args.get("commit"))
+		else:
+			return f"Dependency {dependency}'s content should be of the form \"user/repo/branch\""
+
+
+def parse_project_dependencies(arr, issues, _):
+	parsed_dependencies = []
+	for dependency in arr:
+		ret = parse_dependency_or_return_string_error(dependency)
+		if type(ret) == str:
+			issues.append(ret)
+		else:
+			parsed_dependencies.append(ret)
+	return parsed_dependencies
+
+### frida configs ### 
+
+## project config ##
+
+def non_blank_string(string: str, issues, field_name):
+	if string.strip() == "":
+		issues.append(f"{field_name} cannot be a blank string, if provided")
+	return string
+
+@dataclass
+class Issues:
+	critical: list[str]
+	non_critical : list[str]
+	def has_critical_issues(self):
+		return len(self.critical) > 0
+	def issues_as_string(self, filename):
+		str = f"Issues found with {filename}:\n"
+		i = 1
+		for issue in self.critical:
+			str += f"{i}. {issue}\n"
+			i += 1
+		return str
+	def print_issues(self, filename):
+		print(self.issues_as_string(filename))
+
+
+project_config_template = """// This file is the project config. This file isn't personal to any user and should be shared by everyone working on this mod.
+//
+// You *can* use backslashes when filling out paths, but they must be escaped, i.e. you have to write "\\" instead of "\" every time.
+// Save yourself the hassle and use forward slashes.
+//
+// Frida wiki entry: https://github.com/skirlez/frida/wiki/Project-Config
+{
+	// Name that gets printed out when Frida mentions this project.
+	// It is not important.
+	"name": "",
+
+	// Example build strategy for GameMaker (gms2 and above) projects:
+	"build": {
+		// Where to export the project's datafile inside the output mods folder.
+		// This path is usually set to "(your mod's ID)/mod_data.win"
+		// So then you can reference it in your mod.json file.
+		"export_path": "",
+		
+		"type": "gms2",
+		"options": {
+			// (Relative!) path to the GameMaker project.
+			"project_path": "",
+			// Runtime version this project was made for
+			"runtime_version": "",
+		},
+	},
+
+	// Testing profile:
+	// When you apply your mod to the game using `frida.py apply`,
+	// frida generates a profile using the following block.
+	"profile": {
+		// Mod order/priority
+		// You should put the ID of your mod and its dependencies here.
+		// Earlier in the list means higher priority.		
+		"mod_order": ["mod_id_here"],
+	},
+
+	// Don't change this number.
+	"format_version": 2,
+}
+"""
+
+@dataclass(eq=False) # need eq=False for dicts
+class ProjectConfig:
+	name : str
+	
+	@dataclass
+	class Profile:
+		mod_order : list[str]
+		modded_save_name: str | None = field(default=None, metadata={"type_override": str, "pass_through": non_blank_string, "optional": True})
+		name: str = field(default_factory=lambda : "Frida testing profile", metadata={ "optional": True })
+		id: str = field(default_factory=lambda : "frida_testing_profile", metadata={ "optional": True })
+		description: str = field(default_factory=lambda : "", metadata={ "optional": True })
+		
+	profile : Profile = field(metadata={"contract": Profile })
+	
+	@dataclass
+	class Publish:
+		archive_exclude: list[str] = field(default_factory=list, metadata={"optional": True})
+		as_profile: bool = field(default=False, metadata={"optional": True})
+	publish: Publish = field(default_factory=lambda: ProjectConfig.Publish(), metadata={"contract": Publish, "optional": True})
+	
+	@dataclass
+	class Fetch:
+			dependencies: list[Dependency] = field(default_factory=list,
+				metadata={"optional": True, 
+				"pass_through_initial_type": list[str], 
+				"pass_through": parse_project_dependencies}
+			)
+			recursive: bool = field(default=False, metadata={"optional": True})
+
+	fetch : Fetch = field(default_factory=lambda: ProjectConfig.Fetch(), metadata={"contract": Fetch, "optional": True})
+
+	
+	@dataclass
+	class Build:
+		@dataclass
+		class GMS2Options:
+			project_path : str
+			runtime_version : str
+			configuration: str = field(default_factory=lambda : "Default", metadata={"optional": True})
+			included_files_export_path : str | None = field(default=None, metadata={"type_override": str, "optional": True})
+		
+		export_path : str
+		options : GMS2Options = (
+			field(metadata= {
+				"contract_switch_field": "type",
+				"contract_switch_map" : {
+					"gms2" : GMS2Options,
+				}
+			}
+		))
+
+	build : Build | None = field(default=None, metadata={"contract": Build, "optional": True})
+
+
+
+		
+@dataclass
+class Project:
+	config : ProjectConfig
+	frida_root : str
+	
+## user config ##
+
+user_config_template = """// This file is the user config. This file is personal to you and your computer, and should not be shared with others or committed with Git.
+//
+// You *can* use backslashes when filling out paths, but they must be escaped, i.e. you have to write "\\" instead of "\" every time.
+// Save yourself the hassle and use forward slashes.
+//
+// Frida wiki entry: https://github.com/skirlez/frida/wiki/User-Config
+{
+	// Fill this part out if you want to build GameMaker (gms2 and above) projects.
+	"gms2": {
+		// Linux: Likely is /home/USER/.local/share/GameMakerStudio-Beta/Cache
+		// Windows: Likely is C:/ProgramData/GameMakerStudio2/Cache
+		"cache_path": "",
+	},
+
+	// Fill this part out if you want to be able to apply your mod to the game using Frida.
+	"apply": {
+		// The path to g3man's executable file.
+		// https://github.com/skirlez/g3man/releases		
+		"g3man_path": "",
+		
+		"game_path": "",
+
+		// The name of the new datafile g3man will put in the game folder, with mods applied to it.
+		"output_datafile_name": "data.win",
+		
+		// Path to the game's clean/unmodified/vanilla datafile.
+		// Take notice: It is recommended to not just put the game's datafile (data.win) here, it can easily get modified
+		// by accident. It's better to copy the clean version of it elsewhere, and provide the path to that location.
+		"clean_datafile_path": "",
+	},
+
+	"check_for_updates": true,  
+	"format_version": 2
+}
+"""
+
+@dataclass
+class UserConfig:
+	check_for_updates: bool
+
+	@dataclass
+	class Gms2:
+		cache_path : str
+		#user_directory_or_license_path : str
+	gms2 : Gms2 | None =  field(default=None, metadata={"contract": Gms2, "optional": True})
+
+	@dataclass
+	class Apply:
+		g3man_path: str
+		game_path: str
+		clean_datafile_path: str
+		output_datafile_name: str = field(default="g3man_data.win", metadata={"pass_through": non_blank_string, "optional": True})
+		@dataclass
+		class ExeLaunchOptions:
+			path: str
+		@dataclass
+		class SteamLaunchOptions:
+			app_id : int
+			steam_executable_path: str
+		launch_options : ExeLaunchOptions | SteamLaunchOptions | None = (
+			field(default=None, metadata = {
+				"contract_switch_field": "launch_type",
+				"contract_switch_map" : {
+					"steam" : SteamLaunchOptions,
+					 "executable" : ExeLaunchOptions 
+				},
+				"optional": True,
+			}
+		))
+	apply : Apply | None = field(default=None, metadata={"contract": Apply, "optional": True})
+
+
+def type_name(atype):
+	if (get_origin(atype) is list):
+		return f"a list of {type_name(get_args(atype)[0])}"
+	elif get_origin(atype) is None:
+		if atype == list:
+			return "a list of unknown type"
+		if atype == str:
+			return "a string"
+		if atype == int:
+			return "an integer"
+		if atype == bool:
+			return "a boolean"
+		return atype.__name__
+def conforms(value, expected_type):
+	if (type(value) is expected_type):
+		return True
+
+	if (get_origin(expected_type) is list):
+		if (len(value) == 0):
+			return True
+		if (get_args(expected_type))[0] == type(value[0]):
+			return True
+	return False
+
+
+def construct_with_issues(json: dict[str, Any], dataclass: type, issues: list[str], prefix = ""):
+	# allows us to set attributes despite types being frozen
+	# (ended up not freezing the dataclasses but whatever)
+	set_attribute = object.__setattr__
+	
+	instance: Any = object.__new__(dataclass)
+	def type_error(key, expected, got):
+		return f"\"{prefix}{key}\" is of the wrong type: It should be {type_name(expected)}, but it's {type_name(got)}"
+	for field in fields(dataclass):
+		key = field.name
+		ftype = field.type
+		
+		if key not in json:
+			if not field.metadata.get("optional", False):
+				issues.append(f"\"{prefix}{key}\" is missing")
+			else:
+				if not (field.default is MISSING):
+					set_attribute(instance, key, field.default)
+				else:
+					assert field.default_factory is not MISSING
+					set_attribute(instance, key, field.default_factory())
+			# TODO: report as missing recursively any non-optional field under this guy
+			continue
+
+		if "type_override" in field.metadata:
+			ftype = field.metadata["type_override"]
+		if "contract" in field.metadata:
+			if (type(json[key]) is not dict):
+				print("her")
+				issues.append(type_error(key, ftype, type(json[ftype])))
+				continue
+			result = construct_with_issues(json[key], field.metadata["contract"], issues, f"{prefix}{key}.")
+			set_attribute(instance, key, result)
+			continue
+		if "contract_switch_field" in field.metadata:
+			assert "contract_switch_map" in field.metadata
+			
+			if (type(json[key]) is not dict):
+				issues.append(type_error(key, dict, type(json[key])))
+				continue
+			target_field = field.metadata["contract_switch_field"]
+			if (target_field not in json):
+				issues.append(f"\"{prefix}{key}\" is defined, but the matching field \"{prefix}{target_field}\" is not")
+				continue
+				
+			
+			map = field.metadata["contract_switch_map"]
+			if json[target_field] not in map:
+				issues.append(f"\"{json[target_field]}\" is not a valid value for \"{prefix}{target_field}\". Possible values: {[x for x in map.keys()]}")
+				continue
+			chosen_dataclass: type = map[json[target_field]]
+			result = construct_with_issues(json[key], chosen_dataclass, issues, f"{prefix}{key}.")
+			set_attribute(instance, key, result)
+			continue
+		if "pass_through" in field.metadata:
+			if "pass_through_initial_type" in field.metadata:
+				initial_type = field.metadata["pass_through_initial_type"]
+			else:
+				initial_type = ftype
+			if not conforms(json[key], initial_type):
+				issues.append(type_error(key, ftype, type(json[key])))
+				continue
+			value = field.metadata["pass_through"](json[key], issues, f"{prefix}{key}")
+			set_attribute(instance, key, value)
+			continue
+		if not conforms(json[key], ftype):
+			issues.append(type_error(key, ftype, type(json[key])))
+			continue
+		set_attribute(instance, key, json[key])
+	return instance
+
+
+def generate_dependency_graph(frida_root, project_config: ProjectConfig) -> dict[ProjectConfig, list[Project]]:
+	graph : dict[ProjectConfig, list[Project]] = dict()
+	dotfrida = f"{frida_root}/.frida"
+
+	@unwind_action(lambda project_config: f"While fetching dependencies of \"{project_config.name}\"")
+	def fill_dependency_graph(project_config: ProjectConfig):
+		projects = []
+		graph[project_config] = projects
+		for dependency in project_config.fetch.dependencies:
+			path = dependency.get_path(dotfrida)
+			if (not os.path.exists(path)):
+				raise FridaException(f"Dependency \"{dependency}\" has not yet been fetched. Please fetch first.")
+			candidate_paths = dependency.get_frida_root_candidate_paths(path)
+			dependency_project_dict, dependency_frida_root = get_project_dict(path, candidate_paths)
+			dependency_project_config, issues = construct_project_config_with_issues(dependency_frida_root, dependency_project_dict)
+			if (dependency_project_config is None or issues.has_critical_issues()):
+				raise FridaException(f"Dependency \"{dependency}\" has issues:\n{issues.issues_as_string("frida-project-config.jsonc")}")
+
+			projects.append(Project(dependency_project_config, dependency_frida_root))
+			fill_dependency_graph(dependency_project_config)
+		
+	fill_dependency_graph(project_config)
+	return graph
+	
 ### building project ### 
 
 def hash_file(full_path: str, relative_path: str, hash_func):
@@ -179,265 +552,310 @@ def hash_file(full_path: str, relative_path: str, hash_func):
 		for chunk in iter(lambda: f.read(4096), b''):
 			hash_func.update(chunk)
 
-def hash_gamemaker_project(path: str):
-	project_folder = os.path.abspath(path)
-	listdir = sorted(os.listdir(project_folder))
+def hash_gamemaker_project(project_path: str, yyp_file: str):
+	with open(yyp_file, 'r') as f:
+		json_str = f.read() # todo: make a function to just strip trailing commas
+	yyp_json = json.loads(strip_comments_and_trailing_commas(json_str))
+	interesting_folders = set()
+	for resource in yyp_json["resources"]:
+		unwrapped = resource["id"]
+		path: str = os.path.normpath(unwrapped["path"])
+		interesting_folders.add(path.split(os.path.sep)[0])
 
-	normalized_ignored_files = [os.path.normpath(path) for path in user_dict["gamemaker_hash_exclude"]]
+	interesting_folders.add("options")
+
+	# todo: this should parse the yyp
+	interesting_folders.add("datafiles")
+	
+	project_folder = os.path.abspath(project_path)
+	normalized_ignored_files = []
 
 	hash_func = hashlib.md5()
-	for root, directories, files in os.walk(project_folder, followlinks=True):
-		relative_root = os.path.relpath(root, project_folder)
-		i = 0
-		length = len(directories)
-		while (i < length):
-			if os.path.normpath(f"{relative_root}/{directories[i]}") in normalized_ignored_files:
-				del directories[i]
-				i -= 1
-				length -= 1
-			i += 1
-		for file_path in sorted(files):
-			full_path = os.path.join(root, file_path)
-			relative_path = os.path.relpath(full_path, project_folder)
-			hash_file(full_path, relative_path, hash_func)
+	hash_file(yyp_file, os.path.basename(yyp_file), hash_func)
+	for interesting_folder in sorted(list(interesting_folders)):
+		if not os.path.exists(f"{project_path}/{interesting_folder}"):
+			continue
+		for root, directories, files in os.walk(f"{project_path}/{interesting_folder}", followlinks=True):
+			relative_root = os.path.relpath(root, project_folder)
+			i = 0
+			length = len(directories)
+			while (i < length):
+				if os.path.normpath(f"{relative_root}/{directories[i]}") in normalized_ignored_files:
+					del directories[i]
+					i -= 1
+					length -= 1
+				i += 1
+			for file_path in sorted(files):
+				full_path = os.path.join(root, file_path)
+				relative_path = os.path.relpath(full_path, project_folder)
+				hash_file(full_path, relative_path, hash_func)
 
 	return hash_func.hexdigest()
-
-def cleanup():
-	if os.path.isdir(f"{dotfrida}/igor/output"):
-		print("Deleting .frida/igor/output...")
-		shutil.rmtree(f"{dotfrida}/igor/output", ignore_errors=True)
 
 def get_yyp_filename(path):
 	for filename in os.listdir(path):
 		if filename.endswith(".yyp"):
 			return filename
 			
-	return ""
+	raise FridaException(f"No .yyp file found in {path}")
+def build_routine(cli_frida_root: str, frida_root: str, project_config: ProjectConfig, user_config : UserConfig, dependency_graph: dict[ProjectConfig, list[Project]], should_build_dependencies = True, force_build = False, verbose = False):
+	if (project_config.build is not None):
+		build_config = project_config.build
+		assert type(build_config.options) is ProjectConfig.Build.GMS2Options
+		if (user_config.gms2 is None):
+			raise FridaException("Tried to build gms2 project, but gms2 user config is missing.")
+		build_gamemaker_project(cli_frida_root, frida_root, build_config.options, user_config.gms2, force_build=force_build, verbose=verbose)
 
-def build_routine(frida_root: str, project_config: ProjectConfig, should_build_dependencies = True, force_build = False):
-	project_path = project_config.gamemaker_project_path
-	if project_path != "":
-		build_gamemaker_project(frida_root, project_config,
-								force_build=force_build)
-	
 	if not should_build_dependencies:
 		return
-	for dependency in project_config.dependencies:
-		path = dependency.get_path()
-		if not os.path.exists(path):
-			print(f"Dependency \"{dependency}\" has not yet been fetched. Please fetch it using \"frida.py fetch\".")
-			exit()
-			
-		paths = dependency.get_frida_root_candidate_paths(path)
-		dependency_frida_root = check_frida_root_candidates(paths)
-		dependency_project_dict = get_project_config(dependency_frida_root)
-		dependency_project_config = validation_routine(dependency_frida_root, dependency_project_dict)
-		build_routine(dependency_frida_root, dependency_project_config, project_config.recursive_dependencies, force_build=force_build)
+	for dependency in dependency_graph[project_config]:
+		if (dependency.config.build is not None):
+			build_routine(cli_frida_root, dependency.frida_root, dependency.config, user_config, dependency_graph, should_build_dependencies=project_config.fetch.recursive, force_build=force_build, verbose=verbose)
 
-def build_gamemaker_project(mod_path: str, project_config: ProjectConfig, force_build = False):
-	gamemaker_project_path = f"{mod_path}/{project_config.gamemaker_project_path}"
+
+def build_gamemaker_project(
+		cli_frida_root: str,
+		frida_root: str,
+		build_options: ProjectConfig.Build.GMS2Options, 
+		gms2_user_config: UserConfig.Gms2,
+		force_build = False,
+		verbose=False):
+
+	dotfrida = os.path.abspath(f"{cli_frida_root}/.frida")
+	gamemaker_project_path = f"{frida_root}/{build_options.project_path}"
 	yyp_filename = get_yyp_filename(gamemaker_project_path)
-	if yyp_filename == "":
-		raise FridaException("Provided folder has no .yyp file")
 	
-	project_hash = hash_gamemaker_project(gamemaker_project_path)
+	project_hash = hash_gamemaker_project(gamemaker_project_path, f"{gamemaker_project_path}/{yyp_filename}")
 	project_name = yyp_filename.removesuffix(".yyp")
 	yyp_path = os.path.abspath(f"{gamemaker_project_path}/{yyp_filename}")
 	
 	if (not force_build):
-		previous_hash = ""
-		if (os.path.isfile(f"{dotfrida}/igor/results/{project_name}/hash.txt")):
-			with open(f"{dotfrida}/igor/results/{project_name}/hash.txt", 'r') as f:
-				previous_hash = f.read()
-			if previous_hash != "":
-				if project_hash == previous_hash:
-					print(f"Previous build hash matches, skipping build for {project_name}...")
-					return
+		if (os.path.isfile(f"{dotfrida}/gmac/outputs/{project_name}/hash.txt")):
+			try:
+				with open(f"{dotfrida}/gmac/outputs/{project_name}/hash.txt", 'r') as f:
+					previous_hash = f.read()
+				if previous_hash != "":
+					if project_hash == previous_hash:
+						return			
+			except:
+				pass
 
-	cleanup()
-	print(f"---Building GameMaker project: \"{project_name}\"---")
+	print(f"Building GameMaker project: \"{yyp_filename}\"")
 	
 	if os.name == "posix":
-		IGOR_OS_SUBFOLDER="linux"
-		IGOR_TARGETS=["Linux", "Package"]
-		IGOR_OUTPUT_PATH="package/assets/game.unx"
-		IGOR_ASSETS_FOLDER="package/assets"
-		IGOR_ASSETS_FILTER=["options.ini", "icon.png"]
+		GMAC_OS="linux"
+		GMAC_DATAFILE_EXT="unx"
 	elif os.name == "nt":
-		IGOR_OS_SUBFOLDER="windows"
-		IGOR_OUTPUT_PATH="data.win"
-		IGOR_TARGETS=["Windows", "PackageZip"]
-		IGOR_ASSETS_FOLDER=""
-		IGOR_ASSETS_FILTER=["options.ini", "igor.output.manifest", f"{project_name}.exe"]
+		GMAC_OS="windows"
+		GMAC_DATAFILE_EXT="win"
 
-	runtime_path = f"{user_dict["gamemaker_cache_path"]}/runtimes/runtime-{project_config.gamemaker_runtime_version}"
-	igor_path = f"{runtime_path}/bin/igor/{IGOR_OS_SUBFOLDER}/x64/Igor"
+	runtime_path = f"{gms2_user_config.cache_path}/runtimes/runtime-{build_options.runtime_version}"
+	gmac_path = f"{runtime_path}/bin/assetcompiler/{GMAC_OS}/x64/GMAssetCompiler"
 	
 	try:
-		if not os.path.isdir(f"{dotfrida}/igor"):
-			os.makedirs(f"{dotfrida}/igor")
-		status = subprocess.run(
-			[igor_path, 
-			"-j=8",
-			f"--user={user_dict["gamemaker_user_directory_path"]}",
-			f"--project={yyp_path}",
-			f"--config={project_config.gamemaker_configuration}",
-			f"--runtimePath={runtime_path}",
-			"-v",
-			"--tf=artifact.zip",
+		outputs_folder = f"{dotfrida}/gmac/outputs/{project_name}"	
+		cache_folder = f"{dotfrida}/gmac/cache/{project_name}"	
+		temp_folder = f"{dotfrida}/gmac/temp"
 
-			IGOR_TARGETS[0],
-			IGOR_TARGETS[1],
+		for folder in [temp_folder, cache_folder, outputs_folder]:
+			os.makedirs(folder, exist_ok=True)
+			
+		for folder in [temp_folder, outputs_folder]:
+			for entry in os.listdir(folder):
+				full_path = f"{folder}/{entry}"
+				if os.path.isfile(full_path):
+					os.remove(full_path)
+				else:
+					shutil.rmtree(full_path)
+		
+	except Exception as e:
+		raise FridaException(f"Failed to set up build folders:\n{e}")
+		
+	try:
+		# these arguments are copied from how the IDE runs gmac. Comments are mostly from gmac's help command.
+		program = subprocess.Popen(
+			[gmac_path, 
+				"/c", # "do not display gui compile only"
+				"/cvm", # compile to vm (YYC otherwise?) 
+				"/zpex", # "enable zp mode" (tries loading kernel32 otherwise?)
+				"/cins", # case insensitive
+				"/nru", # NoRemoveUnused
+				"/mv=1", # "major version"
+				"/iv=0", # "minor version"
+				"/rv=0", # "release version"
+				"/bv=0", # "build version"
+				"/j=8", # number of processors to use for parallel tasks (TODO: why not increase this to 16)
+				"/sh=True", # enable / disable Short Circuit evaluation on VM 
+				#	f"/zpuf={gms2_user_config.user_directory_or_license_path}", "zp user folder"
+				f"/td={temp_folder}", # "temp base directory"
+				f"/cd={cache_folder}", # cache directory
+				f"/o={outputs_folder}", # output directory (we later take the datafile outside this folder)
+				f"/rtp={runtime_path}", # runtime path
+				f"/cfg={build_options.configuration}",
+				"/rt=v", # "runtime" (no idea)
+				f"/m={GMAC_OS}", # "set machine type"
+				yyp_path,
 			],
-			cwd = f"{dotfrida}/igor")
+			cwd = f"{dotfrida}/gmac",
+			text=True,
+			stdout=subprocess.PIPE,
+		)
 	except Exception as e:
-		print("Failed to launch igor. Do you have all your variables set correctly?\n" + str(e))
-		cleanup()
-		exit()
+		raise FridaException(f"Failed to launch asset compiler:\n{e}")
 
-	if (status.returncode != 0):
-		cleanup()
-		raise FridaException("Something went wrong during building, aborting. If it's a normal issue with the project (e.g. a syntax error) it should be somewhere in the output above.")
+	assert program.stdout is not None
+	errors = []
+	for line in program.stdout:
+		if verbose:
+			print(line, end="")
+		if line.startswith("Error : "):
+			errors.append(line.rstrip())
 
-	# I don't think there's a way to make igor not output this.
+	returncode = program.wait()
+
+	if (returncode != 0):
+		if (len(errors) != 0):
+			raise FridaException(f"Asset compiler gave return code {returncode}, with the following errors: \n{'\n'.join(errors)}")
+		else:
+			raise FridaException(f"Asset compiler gave return code {returncode}, with no errors")
+	if not os.path.exists(f"{outputs_folder}/{project_name}.{GMAC_DATAFILE_EXT}"):
+		raise FridaException(f"Building failed to produce a datafile. Report this as an error!")
+
 	try:
-		os.remove(f"{dotfrida}/igor/artifact.zip")
-	except:
-		pass
-
-	try:
-		igor_output = f"{dotfrida}/igor/output/{project_name}"
-		igor_results = f"{dotfrida}/igor/results/{project_name}"
-		if os.path.exists(f"{igor_results}/included_files"):
-			shutil.rmtree(f"{igor_results}/included_files")
-		os.makedirs(igor_results, exist_ok=True)
-		os.replace(f"{igor_output}/{IGOR_OUTPUT_PATH}", f"{igor_results}/datafile")
-		
-		included_files_path = f"{igor_output}/{IGOR_ASSETS_FOLDER}"
-		new_included_files_path = f"{igor_results}/included_files"
-		
-				
-		included_files_top_level = [file for file in os.listdir(included_files_path) if file not in IGOR_ASSETS_FILTER]
-		if (len(included_files_top_level) != 0):
-			os.mkdir(new_included_files_path)
-			for root, directories, files in os.walk(included_files_path):
-				relative_root = os.path.relpath(root, included_files_path)
-				for directory in directories:
-					os.makedirs(f"{new_included_files_path}/{relative_root}/{directory}", exist_ok=True)
-				for file in files:
-					if root == included_files_path and file in IGOR_ASSETS_FILTER:
-						continue
-					shutil.copy(f"{root}/{file}", f"{new_included_files_path}/{relative_root}/{file}")
-		
-		with open(f"{dotfrida}/igor/results/{project_name}/hash.txt", 'w') as f:
+		outputs = os.listdir(outputs_folder)
+		if (len(outputs) != 1):
+			os.mkdir(f"{outputs_folder}/included_files")
+			for entry in outputs:
+				if entry != f"{project_name}.{GMAC_DATAFILE_EXT}":
+					shutil.move(f"{outputs_folder}/{entry}", f"{outputs_folder}/included_files")
+		else:
+			if (build_options.included_files_export_path is not None):
+				raise FridaException(
+									"Build error: Project config has \"build.options.included_files_export_path\" set"
+									f" to {build_options.included_files_export_path}, but the build produced no included files.")
+			
+		shutil.move(f"{outputs_folder}/{project_name}.{GMAC_DATAFILE_EXT}", f"{outputs_folder}/datafile")
+			
+		with open(f"{outputs_folder}/hash.txt", 'w') as f:
 			f.write(project_hash)
-		
 	except Exception as e:
-		print("Failed to copy igor results. Please report this bug!")
-		print(e)
-		exit()
-
-
-		
+		raise FridaException(f"Error occurred after building:\n{e}")			
 
 
 
-def make_profile_json_dict(project_config: ProjectConfig):
+def make_profile_json_dict(profile: ProjectConfig.Profile):
 	p = {}
 	p["format_version"] = 2
-	p["name"] = "Testing Profile"
-	p["id"] = "out"
-	p["separate_modded_save"] = (project_config.modded_save_name != "")
-	p["modded_save_name"] = project_config.modded_save_name
-	p["mod_order"] = project_config.mod_order
+	p["name"] = profile.name
+	p["id"] = profile.id
+	
+	modded_save_name = profile.modded_save_name
+	p["separate_modded_save"] = modded_save_name is not None
+	p["modded_save_name"] = "" if modded_save_name is None else modded_save_name
+	
+	p["mod_order"] = profile.mod_order
+	
 	p["mods_disabled"] = []
-	p["description"] = ""
+	p["description"] = profile.description
 	p["version"] = ""
 	p["credits"] = []
 	p["links"] = []
 	return p
 
 ### packaging mod
-# 
-def package_mod(frida_root: str, project_config: ProjectConfig, linkbase=False):
-	profile_json = make_profile_json_dict(project_config)
-	if not os.path.exists(f"{cli_frida_root}/base/profile.json"):
-		with open(f"{cli_frida_root}/out/profile.json", "wt") as f:
-			json.dump(profile_json, f)
-	
-	if project_config.gamemaker_project_path == "":
-		gamemaker_project_name = ""
-	else:
-		gamemaker_project_name = get_yyp_filename(f"{frida_root}/{project_config.gamemaker_project_path}").removesuffix(".yyp")
-	
-	igor_results = f"{dotfrida}/igor/results/{gamemaker_project_name}"
-	
+ 
+def pack_project(cli_frida_root: str, out_mods_folder: str, frida_root: str, project_config: ProjectConfig, linkbase=False):
+	dotfrida = f"{cli_frida_root}/.frida"
+
 	def symlink(target: str, output: str):
 		if os.name == "nt":
 			os.link(target, output)
 		else:
 			os.symlink(target, output)
+
+	
+	has_true_symlink = (os.name != "nt")
 	
 	copy_function = shutil.copy2 if not linkbase else symlink
-	shutil.copytree(f"{os.path.abspath(frida_root)}/base", f"{cli_frida_root}/out", dirs_exist_ok=True, copy_function=copy_function)
-
-	if os.path.isfile(f"{igor_results}/datafile"):
-		export_path = project_config.gamemaker_datafile_export_path
-		if os.path.isdir(export_path):
-			export_path += "/mod_data.win"
-		shutil.copy(f"{igor_results}/datafile", export_path)
-	if project_config.gamemaker_included_files_export_path != "" and os.path.isdir(f"{igor_results}/included_files"):
-		export_path = project_config.gamemaker_included_files_export_path
-		shutil.copytree(f"{igor_results}/included_files", f"{frida_root}/out/{export_path}", dirs_exist_ok=True, copy_function=copy_function)
-
-def recreate_out_folder(frida_root: str):
-	if os.path.isdir(f"{frida_root}/out"):
-		print("Deleting previous out folder...")
-		shutil.rmtree(f"{frida_root}/out")
-	print("Creating out folder...")
-	os.mkdir(f"{frida_root}/out")
+	required_symlink_copy_func = copy_function if has_true_symlink else shutil.copy2
 	
-def package_routine(frida_root: str, project_config: ProjectConfig, should_package_dependencies = True, linkbase=False, name = ""):
-	if name == "":
-		print(f"Packaging: This project")
-	else:
-		print(f"Packaging: {name}")
-
-	package_mod(frida_root, project_config, linkbase=linkbase)
-
-	if not should_package_dependencies:
+	shutil.copytree(f"{frida_root}/base", out_mods_folder, dirs_exist_ok=True, copy_function=copy_function)
+	
+	if (project_config.build is None):
 		return
-	for dependency in project_config.dependencies:
-		path = dependency.get_path()
-		paths = dependency.get_frida_root_candidate_paths(path)
-		dependency_frida_root = check_frida_root_candidates(paths)
-		dependency_project_dict = get_project_config(dependency_frida_root)
-		dependency_project_config = validation_routine(dependency_frida_root, dependency_project_dict)
-		package_routine(dependency_frida_root, dependency_project_config, project_config.recursive_dependencies, linkbase=linkbase, name = str(dependency))
-		
+	match (type(project_config.build.options)):
+		case ProjectConfig.Build.GMS2Options:
+			options = project_config.build.options
+			gamemaker_project_name = get_yyp_filename(f"{frida_root}/{options.project_path}").removesuffix(".yyp")
+			
+			gmac_results = f"{dotfrida}/gmac/outputs/{gamemaker_project_name}"
+			if not os.path.isfile(f"{gmac_results}/hash.txt") or not os.path.isfile(f"{gmac_results}/datafile"):
+				raise FridaException(f"Cannot package this project: Build outputs are missing")
+				
+			export_path = f"{out_mods_folder}/{project_config.build.export_path}"
+			if os.path.isdir(export_path):
+				export_path += "/mod_data.win"
+			shutil.copy(f"{gmac_results}/datafile", export_path)
+			if options.included_files_export_path is not None:
+				if (f"{gmac_results}/included_files"):
+					raise FridaException(f"Cannot package this project: Included files folder is missing")
+				export_path = f"{out_mods_folder}/{options.included_files_export_path}"
+				shutil.copytree(f"{gmac_results}/included_files", f"{out_mods_folder}/{export_path}", dirs_exist_ok=True, copy_function=required_symlink_copy_func)
 
-def zip_out_folder(frida_root, project_config: ProjectConfig):
-	if os.path.exists(f"{frida_root}/out.zip"):
-		os.remove(f"{frida_root}/out.zip")
+def pack_subroutine(cli_frida_root: str, out_profile_folder : str, frida_root: str, project_config: ProjectConfig, 
+		dependency_graph: dict[ProjectConfig, list[Project]], linkbase=False):
+	print(f"Packing: {project_config.name}")
+	pack_project(cli_frida_root, 
+					out_profile_folder,
+					frida_root,
+					project_config,
+				 	linkbase=linkbase)
+
+	for dependency in dependency_graph.get(project_config, []):
+		pack_subroutine(cli_frida_root, out_profile_folder, dependency.frida_root, dependency.config, dependency_graph, linkbase=linkbase)
+
+
+def pack_routine(cli_frida_root: str, project_config: ProjectConfig, dependency_graph : dict[ProjectConfig, list[Project]], linkbase=False):
+	out_folder = f"{cli_frida_root}/out"
+	out_mods_folder = f"{out_folder}/mods"
+
+	if os.path.isdir(out_folder):
+		shutil.rmtree(out_folder)
+	os.makedirs(out_folder, exist_ok=True)
+	pack_subroutine(cli_frida_root, out_mods_folder, cli_frida_root, project_config, dependency_graph, linkbase=linkbase)
+
+	profile_json = make_profile_json_dict(project_config.profile)
 	
-	normalized_zip_exclude = [os.path.normpath(path) for path in project_config.zip_exclude]
+	os.mkdir(f"{out_folder}/jsons")
+	with open(f"{out_folder}/jsons/profile.json", "wt") as f:
+		json.dump(profile_json, f)
+
+
+def publish_as_zip(cli_frida_root, project_config: ProjectConfig):
+	out_folder = f"{cli_frida_root}/out"
+	out_mods_folder = f"{out_folder}/mods"
 	
-	zip_filename = "out"
-	root_folder_name = ""
-	out_folder = f"{frida_root}/out"
-	if os.path.normpath("profile.json") not in normalized_zip_exclude:
-		with open(f"{out_folder}/profile.json", "rt") as f:
+	if os.path.exists(f"{cli_frida_root}/out.zip"):
+		os.remove(f"{cli_frida_root}/out.zip")
+	normalized_zip_exclude = [os.path.normpath(path) for path in project_config.publish.archive_exclude]
+	
+	if project_config.publish.as_profile:
+		with open(f"{out_folder}/jsons/profile.json", "rt") as f:
 			profile_json = json.load(f)
-			if "id" not in profile_json:
-				print("profile.json in \"base\" folder does not contain \"id\" field - this is probably because it's on format version 1. Change the format version to 2, and add an \"id\" field.")
-				print("An \"id\" field is necessary to determine the name of the root folder of the ZIP. If you don't care about that, you can just delete the profile.json from the \"base\" folder and use Frida's autogenerated one.")
-			else:
-				root_folder_name = profile_json["id"] 
-				zip_filename = profile_json["id"]
-	with zipfile.ZipFile(f"{frida_root}/{zip_filename}.zip", "w") as f:
-		for root, directories, files in os.walk(out_folder, followlinks=True):
-			relative_root = os.path.relpath(root, out_folder)
+			profile_id = profile_json["id"]
+		zip_filename = profile_id
+		prepend_relative_root = f"{profile_id}/"
+	else:
+		zip_filename = "out"
+		prepend_relative_root = ""
+
+
+	zip_full_path = f"{out_folder}/{zip_filename}.zip"
+	with zipfile.ZipFile(zip_full_path, "w") as f:
+		if project_config.publish.as_profile:
+			f.write(f"{out_folder}/jsons/profile.json", f"{profile_id}/profile.json")
+		for root, directories, files in os.walk(out_mods_folder, followlinks=True):
+			relative_root = prepend_relative_root + os.path.relpath(root, out_mods_folder)
 
 			length = len(directories)
 			i = 0
@@ -452,20 +870,59 @@ def zip_out_folder(frida_root, project_config: ProjectConfig):
 				archive_path = f"{relative_root}/{file}"
 				if os.path.normpath(archive_path) not in normalized_zip_exclude:
 					f.write(f"{root}/{file}", f"{relative_root}/{file}")
+	return os.path.relpath(zip_full_path, cli_frida_root)
 
 
 ### applying mod ###
 
-def apply_mod(frida_root, user_config):
-	print("---Applying the mod---")
+def make_game_json_dict(apply: UserConfig.Apply):
+	p = {}
+	p["format_version"] = 2
+	p["display_name"] = ""
+	p["internal_name"] = ""
+	p["datafile_name"] = ""
+
+	p["executable_type"] = 0
+	p["executable_path"] = ""
+	p["executable_steam_app_id"] = -1
+	match type(apply.launch_options):
+		case UserConfig.Apply.ExeLaunchOptions:
+			assert type(apply.launch_options) is UserConfig.Apply.ExeLaunchOptions
+			p["executable_type"] = 0
+			p["executable_path"] = apply.launch_options.path
+		case UserConfig.Apply.SteamLaunchOptions:
+			assert type(apply.launch_options) is UserConfig.Apply.SteamLaunchOptions
+			p["executable_type"] = 1
+			p["executable_steam_app_id"] = apply.launch_options.app_id
+	p["output_datafile_name"] = apply.output_datafile_name
+	return p
+
+	
+def apply_routine(cli_frida_root, apply_config: UserConfig.Apply, launch: bool):
+	game_json = make_game_json_dict(apply_config)
+	out_folder = f"{cli_frida_root}/out"
+	with open(f"{out_folder}/jsons/game.json", "w") as f:
+		json.dump(game_json, f)
+
+	
+	print("Applying the mod(s)")
+
+	bonus_launch_arguments = []
+	if launch:
+		bonus_launch_arguments.append("--launch")
+		if type(apply_config.launch_options) is UserConfig.Apply.SteamLaunchOptions:
+			bonus_launch_arguments.append("--steam")
+			bonus_launch_arguments.append(apply_config.launch_options.steam_executable_path)
 	try:
 		status = subprocess.run(
-			[user_config["g3man_path"], "apply",
-				"--path", f"{cli_frida_root}/out",
-				"--datafile", user_config["clean_datafile_path"],
-				"--out", user_config["game_path"],
-				"--outname", user_config["game_datafile_name"]
-			],
+			[apply_config.g3man_path, "apply",
+				"--game-json", f"{out_folder}/jsons/game.json",	
+				"--game-folder", apply_config.game_path,	
+				"--profile-json", f"{out_folder}/jsons/profile.json",	
+				"--mods-folder", f"{out_folder}/mods",
+				"--clean_data", apply_config.clean_datafile_path
+			] + bonus_launch_arguments,
+			
 			cwd = ".")
 	except Exception as e:
 		print("Failed to launch g3man. Do you have all your variables set correctly?\n" + str(e))
@@ -477,46 +934,14 @@ def apply_mod(frida_root, user_config):
 
 ### cli
 
-def is_executable(path: str):
-	if os.name == "nt":
-		return path.endswith(".exe") or path.endswith(".bat")
-	elif os.access(path, os.X_OK): # this ends up being true for almost every file for me, but i don't know any better way to check
-		return path
 
-def try_starting_game():
-	game_path = user_dict["game_path"]
-	executables = []
-	for file in os.listdir(game_path):
-		if is_executable(f"{game_path}/{file}"):
-			executables.append(f"{game_path}/{file}")
-	start_game_command = user_dict["start_game_command"]
-	
-	if len(executables) != 1:
-		if start_game_command == "":
-			print("Couldn't determine which file is the executable. Please supply \"start_game_command\" in the user config to tell Frida what to do to launch the game.")
-			return
-		cmd = start_game_command
-	else:
-		cmd = executables[0]
-
-		
-	
-	print(f"Launching game. Running command: {cmd}")
-	try:
-		status = subprocess.run(
-			cmd,
-			cwd = game_path,
-			shell = True,
-		)
-	except Exception as e:
-		print(e)
-		pass
-
-def strip_comments(str: str):
-	build = ""
+def strip_comments_and_trailing_commas(str: str):
+	build = list()
 	state = 0
+	last_seen_comma = -1
 	for i in range(len(str) - 1):
 		if state == 0:
+			# "normal" state
 			if str[i] == '/' and str[i + 1] == '/':
 				state = 1
 			elif str[i] == '/' and str[i + 1] == '*':
@@ -526,30 +951,39 @@ def strip_comments(str: str):
 				state = 3
 			else:
 				build += str[i]
+				if str[i] == ',':
+					last_seen_comma = len(build) - 1
+				if last_seen_comma != -1 and (str[i + 1] == ']' or str[i + 1] == '}'):
+					found = False
+					for j in range(last_seen_comma + 1, len(build) - 1):
+						if not build[j].isspace():
+							found = True
+							break
+					if not found:
+						build[last_seen_comma] = ' ';
+						last_seen_comma = -1
 		elif state == 1:
+			# inside a line comment
+			build += ' '
 			if str[i + 1] == '\n':
 				state = 0
 		elif state == 2:
-			if str[i] == '*' and str[i + 1] == '/':
+			# inside a multi line comment
+			if str[i - 1] == '*' and str[i] == '/':
 				state = 0
-				i += 1
+			elif str[i] == '\n':
+				build += '\n'
+			else:
+				build += ' '
 		elif state == 3:
+			# inside a string
 			build += str[i]
 			if str[i] == '"':
 				state = 0
 	if state == 0 or state == 3:
 		build += str[len(str) - 1]
-	return build
+	return ''.join(build)
 
-def fixup_paths_user_config(dict: dict[str, Any]):
-	for key in ["g3man_path", "game_path", "gamemaker_cache_path", "gamemaker_user_directory_path"]:
-		if key in dict and dict[key] != "":
-			dict[key] = os.path.normpath(dict[key]).replace('\\', '/')
-			
-def fixup_paths_project_config(dict: dict[str, Any]):
-	for key in ["gamemaker_project_path", "gamemaker_datafile_export_path", "gamemaker_datafile_export_path"]:
-		if key in dict and dict[key] != "":
-			dict[key] = os.path.normpath(dict[key]).replace('\\', '/').removesuffix('/')
 
 def check_frida_root_candidates(paths: list[str]) -> str:
 	for path in paths:
@@ -557,451 +991,85 @@ def check_frida_root_candidates(paths: list[str]) -> str:
 			return path
 	raise FridaException(f"No project config exists in any candidate path: {paths}")
 
-def get_project_config(path: str):
+def get_project_dict(path: str, candidate_paths = None):
+	if (candidate_paths is None):
+		candidate_paths = [path, f"{path}/g3man"]
+	frida_root = check_frida_root_candidates(candidate_paths)
+	frida_root = os.path.abspath(frida_root)
 	try:
-		with open(f"{path}/frida-project-config.jsonc") as f:
-			config = json.loads(strip_comments(f.read()))
-			fixup_paths_project_config(config)
-			return config
+		with open(f"{frida_root}/frida-project-config.jsonc") as f:
+			json_string = strip_comments_and_trailing_commas(f.read())
+			project_dict = json.loads(json_string)
+			return project_dict, frida_root
 	except Exception as e:
-		raise FridaException(f"Couldn't load project config: {e}")
-		
-def project_config_routine(create: bool):
-	try:
-		frida_root = check_frida_root_candidates([".", "./g3man"])
-	except:
-		print("No project config found.")
-		if create:
-			print("Creating...")
-			try:
-				with open(f"./frida-project-config.jsonc", "wt") as f:
-					f.write(frida_template_project_config)
-			except Exception as e:
-				print(f"Could not create frida-project-config.jsonc: {e}")
-				exit()
-		return None, "."
-	try:
-		return get_project_config(cli_frida_root), frida_root
-	except FridaException as e:
-		print(e.message)
-		exit()
+		raise FridaException(f"Error while reading project config:\n{e}")
 
-def user_config_routine(create):
-	if not os.path.isfile(f"{cli_frida_root}/frida-user-config.jsonc"):
-		print("No user config found.")
-		if create:
-			print("Creating...")
-			try:
-				with open(f"{cli_frida_root}/frida-user-config.jsonc", "wt") as f:
-					f.write(frida_template_user_config)
-			except Exception as e:
-				print(f"Could not create frida-user-config.jsonc: {e}")
-				exit()
-		return None
+def get_user_dict(frida_root):
+	if not os.path.isfile(f"{frida_root}/frida-user-config.jsonc"):
+		raise FridaException(f"User config does not exist in {frida_root}")
 	try:
-		with open(f"{cli_frida_root}/frida-user-config.jsonc") as f:
-			dict = json.loads(strip_comments(f.read()))
-			fixup_paths_user_config(dict)
-			return dict
+		with open(f"{frida_root}/frida-user-config.jsonc") as f:
+			json_string = strip_comments_and_trailing_commas(f.read())
+			user_dict = json.loads(json_string)
+			return user_dict
 	except Exception as e:
-		print(f"Couldn't read from frida-user-config.jsonc! {e}")
-		exit()
+		raise FridaException(f"Error while reading user config:\n{e}")
 
-
-	
-	return
-
-def convert_to_new_setup():
-	files = ["base/mod/profile.json", "frida-timestamp.txt", ".frida-config-template.ini", "frida-config.ini"]
-	for file in files:
-		print(f"Removing {file}")
-		if os.path.exists(file):
-			try:
-				os.remove(file)
-			except Exception as e:
-				print(f"Couldn't remove {file}, Error: {e}")
-				return
-	
-	if os.path.exists("./igor"):
-		print(f"Removing ./igor folder")
-		try:
-			shutil.rmtree("./igor")
-		except Exception as e:
-			print(f"Couldn't remove ./igor. Error: {e}")
-			return
-			
-	if os.path.exists("./base/mod/mod.json"):
-		print(f"Renaming ./base/mod")
-		try:
-			with open("./base/mod/mod.json") as f:
-				mod_json = json.load(f)
-				if "mod_id" not in mod_json:
-					print("Invalid mod.json in \"base\", couldn't determine mod ID, so the folder cannot be renamed")
-					return
-		except Exception as e:
-			print(f"Failed to read ./base/mod/mod.json, Error: {e}")
-			return
-		print(f"Mod ID is {mod_json["mod_id"]}")
-		try:
-			shutil.move("./base/mod", f"./base/{mod_json["mod_id"]}")
-		except Exception as e:
-			print(f"Renaming failed. Error: {e}")
-			return
-
-def old_setup_routine():
-	if os.path.isfile("frida-config.ini") and not os.path.isfile("frida-project-config.jsonc"):
-		print("Old setup detected. In order for this dialogue to go away, delete frida-config.ini, or read the text below.")
-		print()
-		print("Frida's setup has been completely changed for version 4.")
-		print("Would you like your current setup to be automatically converted?")
-		print()
-		print("This will:")
-		print("1. Remove \"base/mod/profile.json\" (back it up and copy it back if you're distributing your mod as a profile)")
-		print("2. Remove \"igor\", \"frida-timestamp.txt\", and \".frida-config-template.ini\"")
-		print("3. Rename \"base/mod\" to \"base/(your mod's ID)\"")
-		print("4. frida-config.ini will be removed, and you will need to create the two new config files and fill them again. So you should probably back it up to make this part easier.")
-		print()
-		print("With the renaming of \"base/mod\", make sure to update your .gitignore file as well.")
-		print("You can find info on that on Frida's wiki: https://github.com/skirlez/frida/wiki/gitignore")
-		print()
-		print("y/Y - Convert and Continue")
-		print("Anything else - Exit")
-		print()
-		choice = input("Input your choice: ")
-		if choice.lower() != "y":
-			exit()
-		convert_to_new_setup()
-  		# in case user double clicked
-		input()
-		exit()
-
-
-def compare_dict_to_contract_assign_if_missing(dict, contract, issues):
-	for key in contract:
-		if key not in dict:
-			dict[key] = contract[key]
-		elif type(contract[key]) != type(dict[key]):
-			issues.append(f"\"{key}\" is of the wrong type: It should be {type(contract[key])}, but it's {type(dict[key])}")
-
-
-def compare_dict_to_contract(dict, contract, issues):
-	for key in contract:
-		if key not in dict:
-			issues.append(f"\"{key}\" is missing")
-		elif type(contract[key]) != type(dict[key]):
-			issues.append(f"\"{key}\" is of the wrong type: It should be {type(contract[key])}, but it's {type(dict[key])}")
-
-
-
-		
-frida_template_project_config = """
-// This file is the project config. This file isn't personal to any user and should be shared by everyone working on this mod.
-// 
-// You *can* use backslashes when filling out paths, but they must be escaped, i.e. you have to write "\\\\" instead of "\" every time.
-// Save yourself the hassle and use forward slashes.
-//
-// Frida wiki entry: https://github.com/skirlez/frida/wiki/Project-Config
-{
-	// Path to the folder with this mod's GameMaker project.
-	// If this mod has no GameMaker project, leaving this as blank
-	// will disable GameMaker project building.
-	// This path should be a relative path.
-	// Relative paths, e.g. "src" means "the src folder present inside this folder", or
-	// ".." meaning "the folder above this one"
-	"gamemaker_project_path": "",
-	
-	// The GameMaker runtime the project should be built for.
-	// Example: "2023.4.0.113"
-	"gamemaker_runtime_version": "",
-	
-	// The GameMaker configuration to use. If you don't know what this is, leave as "Default".
-	"gamemaker_configuration": "Default",
-	
-	// Where Frida should place the GameMaker project's output datafile when packaging.
-	// For example: to make it place the datafile in your mod's folder,
-	// set this to: out/(your mod's ID)/mod_data.win.
-	// If you don't use a GameMaker project, leave as blank.
-	"gamemaker_datafile_export_path": "",
-	
-	// Dependencies that frida should fetch and build.
-	// These can be local paths if you start the string with \"path:\"
-	// or a link to a GitHub repository (with "github:user/repo/branch" or "github-tag:user/repo")
-	// For more information, see https://github.com/skirlez/frida/wiki/Dependency-Management
-	"dependencies": [],
-	
-	// Evaluate dependencies of dependencies
-	// If this is disabled, you have to manually specify all the dependencies of your dependencies.
-	"recursive_dependencies" : true,
-	
-	// Mod priority for the output profile (the "out" folder"). 
-	// You should put the ID of your mod and its dependencies here.
-	// Earlier in the list means higher priority.
-	// 
-	// If you have a profile.json file in the "base" folder,
-	// this setting will not override it.
-	"mod_order" : [],
-	
-	// Modded save name for the output profile (the "out" folder).
-	// Leaving this as blank will use the same save folder as the vanilla game,
-	// Changing this will change the save folder. (Meaning you will have completely isolated save files).
-	//
-	// If you have a profile.json file in the "base" folder,
-	// this setting will not override it.
-	"modded_save_name" : "",
-	
-	// Which files and folders inside "out" should not be zipped when using `frida.py package --zip`.
-	"zip_exclude" : ["profile.json"],
-	
-	// This number is used for potential auto-upgrading of this file,
-	// and you shouldn't change it.
-	"format_version": 1
-}
-"""
-project_config_optional_contract = {
-	"gamemaker_included_files_export_path" : "",
-}
-project_config_contract = json.loads(strip_comments(frida_template_project_config))
-
-
-def parse_project_dependencies(config: dict[str, str]):
-	issues = []
-	parsed_dependencies = []
-	for dependency in config["dependencies"]:
-		if dependency.strip() == "":
-			continue
-		parts = dependency.split(':', 1)
-		if len(parts) == 1:
-			issues.append(f"Dependency {dependency} does not have a prefix. You need to specify a prefix, like \"path:\", or \"github-tag:\".")
-			continue
-		
-		arg_parts = parts[1].rsplit('?', 1)
-		args = dict()
-		if len(arg_parts) == 2:
-			assignments = arg_parts[1].split('&')
-			for assignment in assignments:
-				lr = dependency.split('=', 1)
-				if len(lr) != 2:
-					issues.append(f"Dependency {dependency} has invalid argument assignment: {assignment}")
-					continue
-				args[lr[0]] = lr[1]
-		
-		
-		prefix = parts[0]
-		if prefix == "path":
-			path = parts[1]
-			parsed_dependencies.append(PathDependency(path))
-		if prefix == "github-tag":
-			subparts = parts[1].split('/')
-			
-			if len(subparts) == 2:
-				user = subparts[0]
-				repo = subparts[1]
-				parsed_dependencies.append(GitHubTagDependency(user, repo, args.get("frida_root", ""), args.get("tag")))
-			else:
-				issues.append(f"Dependency {dependency}'s content should be of the form \"user/repo\"")
-				continue
-		if prefix == "github":
-			subparts = parts[1].split('/')
-			if len(subparts) == 3:
-				user = subparts[0]
-				repo = subparts[1]
-				branch = subparts[2]
-
-				parsed_dependencies.append(GitHubCommitDependency(user, repo, branch, args.get("frida_root", ""), args.get("commit")))
-			else:
-				issues.append(f"Dependency {dependency}'s content should be of the form \"user/repo/branch\"")
-				continue
-	return parsed_dependencies, issues
-
-def validate_project_dict(frida_root, dict):
-	issues = []
-	compare_dict_to_contract(dict, project_config_contract, issues)
-	compare_dict_to_contract_assign_if_missing(dict, project_config_optional_contract, issues)
-	
-	if len(issues) != 0:
-		return (issues, [])
+def construct_project_config_with_issues(frida_root, dict) -> tuple[ProjectConfig | None, Issues]:
+	critical_issues = []
+	config: ProjectConfig = construct_with_issues(dict, ProjectConfig, critical_issues)
+	if len(critical_issues) != 0:
+		return (None, Issues(critical_issues, [])) 
 	warnings = []
-	gamemaker_project_path = dict["gamemaker_project_path"]
-	if os.path.isabs(gamemaker_project_path):
-		absolute_gamemaker_project_path = gamemaker_project_path
-	else:
-		absolute_gamemaker_project_path = os.path.abspath(f"{frida_root}/{gamemaker_project_path}")
-	
-	if gamemaker_project_path != "":
-		if not os.path.exists(gamemaker_project_path):
-			issues.append(f"The provided folder path \"gamemaker_project_path\" (\"{gamemaker_project_path}\") does not exist")
+	if config.build is not None and type(config.build.options) is ProjectConfig.Build.GMS2Options:
+		options = config.build.options
+		project_path = options.project_path
+		if os.path.isabs(project_path):
+			absolute_project_path = project_path
 		else:
-			yyp_filename = get_yyp_filename(absolute_gamemaker_project_path)
+			absolute_project_path = os.path.abspath(f"{frida_root}/{project_path}")
+
+		if not os.path.exists(project_path):
+			critical_issues.append(f"The provided folder path \"build.options.project_path\" (\"{project_path}\") does not exist")
+		else:
+			yyp_filename = get_yyp_filename(absolute_project_path)
 			if yyp_filename == "":
-				issues.append(f"Could not find any .yyp file in \"gamemaker_project_path\" (value: \"{gamemaker_project_path}\")")
+				critical_issues.append(f"Could not find any .yyp file in \"build.options.project_path\" (value: \"{project_path}\")")
+			if os.path.isabs(project_path):
+				warnings.append(f"build.options.project_path is currently set to \"{project_path}\", which is NOT a relative path!"
+							+ f"\n(frida suggests: use the relative version \"{os.path.relpath(start=".", path=project_path)}\" instead)")
 		
-		
-		for field in ["gamemaker_runtime_version", "gamemaker_configuration", "gamemaker_datafile_export_path"]:
-			if dict[field] == "":
-				issues.append(f"\"gamemaker_project_path\" is set, but \"{field}\" is blank")
-	if os.path.isabs(gamemaker_project_path):
-		warnings.append(f"gamemaker_project_path is currently set to \"{gamemaker_project_path}\", which is NOT a relative path!"
-					+ f"\nFrida suggests: use \"{os.path.relpath(start=".", path=gamemaker_project_path)}\" instead")
-
-	if os.path.exists(f"{frida_root}/base") and not (os.path.exists(f"{frida_root}/base/profile.json") and "profile.json" not in dict["zip_exclude"]):
-		unaccounted = [dir for dir in os.listdir(f"{frida_root}/base") if dir not in dict["mod_order"] and os.path.isdir(f"{frida_root}/base/{dir}")]
+	if os.path.exists(f"{frida_root}/base"):
+		unaccounted = [dir for dir in os.listdir(f"{frida_root}/base") if dir not in config.profile.mod_order and os.path.isdir(f"{frida_root}/base/{dir}")]
 		if len(unaccounted) != 0:
-			warnings.append(f"\"mod_order\" is missing some mods that exist in the \"base\" folder: {unaccounted}. g3man will go over these last.")
-	return (issues, warnings)
+			warnings.append(f"\"package.profile.mod_order\" is missing some mods that exist in the \"base\" folder: {unaccounted}. g3man will go over these last.")
+	return (config, Issues(critical_issues, warnings))
 	
-
-
-frida_template_user_config = """
-// This file is the user config. This file is personal to your computer, and shouldn't be shared.
-// 
-// You *can* use backslashes when filling out paths, but they must be escaped, i.e. you have to write "\\\\" instead of "\\" every time.
-// Save yourself the hassle and use forward slashes.
-//
-// Frida wiki entry: https://github.com/skirlez/frida/wiki/User-Config
-{
-	// The path to g3man's executable file.
-	// https://github.com/skirlez/g3man/releases
-	"g3man_path": "",
-	
-	// Path to the game's clean/unmodified/vanilla datafile.
-	// You can't just put the path to the game's datafile here. It needs to be a separate copy,
-	// because the game's datafile gets overridden after applying your mod.
-	"clean_datafile_path": "",
-	
-	// Path to the folder of the game this project is modding
-	"game_path": "",
-	
-	// This'll be data.win for windows, or game.unx for example on Linux.
-	// Note that if you are using Proton on Steam for example, this will use the windows name.
-	"game_datafile_name": "",
-	
-	// (REQUIRED FOR BUILDING GAMEMAKER PROJECTS ONLY)
-	// Linux: Likely is /home/USER/.local/share/GameMakerStudio-Beta/Cache
-	// Windows: Likely is C:/ProgramData/GameMakerStudio2/Cache
-	"gamemaker_cache_path": "",
-	
-	// (REQUIRED FOR BUILDING GAMEMAKER PROJECTS ONLY)
-	// The user directory contains your license file, which is required to build GameMaker projects.
-	// Linux: Likely is /home/USER/.config/GameMakerStudio2-Beta/user_somenumbers
-	// Windows: Likely is C:/Users/USER/AppData/Roaming/GameMakerStudio2/user_somenumbers
-	"gamemaker_user_directory_path": "",
-	
-	// Whether or not this script should check for updates every once in a while.
-	// If set to true, it will occasionally do this after the operation you've chosen.
-	"check_for_updates": true,
-	
-	// This number is used for potential auto-upgrading of this file,
-	// and you shouldn't change it.
-	"format_version": 1
-}
-"""
-frida_user_config_optional = {
-	"gamemaker_hash_exclude" : ["g3man", ".gitattributes", ".git", ".gitignore", ".frida"],
-	"start_game_command" : ""
-}
-user_config_contract = json.loads(strip_comments(frida_template_user_config))
-
-def validate_user_dict(dict):
-	issues = []
-	compare_dict_to_contract(dict, user_config_contract, issues)
-	compare_dict_to_contract_assign_if_missing(dict, frida_user_config_optional, issues)
-	if len(issues) != 0:
-		return (issues, [])
-	
-	file_paths = ["g3man_path", "clean_datafile_path"]
-	for path in file_paths:
-		if not os.path.isfile(dict[path]):
-			issues.append(f"The provided file path \"{path}\" (\"{dict[path]}\") does not exist")
-
-	folderpaths = ["gamemaker_cache_path", "gamemaker_user_directory_path", "game_path"]
-	for path in folderpaths:
-		if not os.path.exists(dict[path]):
-			issues.append(f"The provided folder path \"{path}\" (\"{dict[path]}\") does not exist")
-	
-	if os.path.exists(dict["gamemaker_cache_path"]) and not os.path.exists(f"{dict["gamemaker_cache_path"]}/runtimes"):
-		issues.append(f"\"gamemaker_cache_path\" is set to \"{dict["gamemaker_cache_path"]}\", but that folder does not have a \"runtime\" subfolder.")
-	
-	if os.path.exists(dict["game_path"]) and not os.path.isfile(f"{dict["game_path"]}/{dict["game_datafile_name"]}"):
-		valid_suffixes = [".win", ".unx", ".ios", ".droid"]
-		valid_datafile_names = []
-		for filename in os.listdir(dict["game_path"]):
-			if any(filename.endswith(suffix) for suffix in valid_suffixes):
-				valid_datafile_names.append(filename)
-				
-		issue = f"\"game_path\" seems to be a folder, but no file with name \"game_datafile_name\" {dict["game_datafile_name"]} was found there."
-
-		if len(valid_datafile_names) == 0:
-			issue += "\nNo valid datafile files were found in that folder as well. Are you sure this is the game folder?"
-		else:
-			issue += f"\nValid datafile names found in that folder: {valid_datafile_names}"
-	return (issues, [])
-
-def validate_combination(user_dict, project_dict):
-	issues = []
-	if (project_dict["gamemaker_runtime_version"] != ""
-		and os.path.exists(f"{user_dict["gamemaker_cache_path"]}/runtimes") 
-		and not os.path.exists(f"{user_dict["gamemaker_cache_path"]}/runtimes/runtime-{project_dict["gamemaker_runtime_version"]}")):
-		issues.append(f"You are missing the \"{project_dict["gamemaker_runtime_version"]}\" runtime, which is required by one of the projects. Please download it from the IDE.")
-	return (issues, [])
-		
-def validation_routine(frida_root, project_dict, validate_user = False) -> ProjectConfig:
-	if validate_user:
-		user_issues, user_warnings = validate_user_dict(user_dict)
-	project_issues, project_warnings = validate_project_dict(frida_root, project_dict)
-	combination_issues, combination_warnings = validate_combination(user_dict, project_dict)
-	
-	parsed_dependencies, dependency_issues = parse_project_dependencies(project_dict)
-	project_issues += dependency_issues
-	
-	printed = False
-	leave = False
-	def print_issues_found():
-		nonlocal printed
-		if not printed:
-			print("Configuration issue(s) found!")
-			printed = True
-	def set_leave():
-		nonlocal leave
-		if not leave:
-			leave = True
-	
-	if len(project_issues) != 0:
-		print_issues_found()
-		set_leave()
-		print_issues(project_issues + project_warnings, "frida-project-config.jsonc")
-	elif len(project_warnings) != 0:
-		print_issues_found()
-		print_issues(project_warnings, "frida-project-config.jsonc")
-	
-	if validate_user:
-		if len(user_issues) != 0:
-			print_issues_found()
-			set_leave()
-			print_issues(user_issues + user_warnings, "frida-user-config.jsonc")
-		elif len(user_warnings) != 0:
-			print_issues_found()
-			print_issues(user_warnings, "frida-user-config.jsonc")
-		
-	if len(combination_issues) != 0:
-		print_issues_found()
-		set_leave()
-		print_issues(combination_issues + combination_warnings, "Combination of user and project configs")
-	elif len(combination_warnings) != 0:
-		print_issues_found()
-		print_issues(combination_warnings, "Combination of user and project configs")
-	
-	if leave:
-		print("Irreconcilable issues encountered.")
-		exit()
-	if printed:
-		print("Issues are not critical. Proceeding.")
-	
-	return ProjectConfig(project_dict, parsed_dependencies)
-
+def construct_user_config_with_issues(dict) -> tuple[UserConfig | None, Issues]:
+	critical_issues = []
+	config: UserConfig = construct_with_issues(dict, UserConfig, critical_issues)
+	if (len(critical_issues) != 0):
+		return (None, Issues(critical_issues, []))
+	def validate_file_paths(keys, inst, prefix):
+		for key in keys:
+			if not os.path.isfile(getattr(inst, key)):
+				critical_issues.append(f"The provided file path \"{prefix}{key}\" (\"{getattr(inst, key)}\") does not exist")
+	def validate_folder_paths(keys, inst, prefix):
+		for key in keys:
+			if not os.path.exists(getattr(inst, key)):
+				critical_issues.append(f"The provided folder path \"{prefix}{key}\" (\"{getattr(inst, key)}\") does not exist")
+	if config.apply is not None:
+		validate_file_paths(["g3man_path", "clean_datafile_path"], config.apply, "apply.")
+		validate_folder_paths(["game_path"], config.apply, "apply.")
+	if config.gms2 is not None:
+		validate_folder_paths(["cache_path"], config.gms2, "gms2.")
+		if os.path.exists(config.gms2.cache_path) and not os.path.exists(f"{config.gms2.cache_path}/runtimes"):
+			critical_issues.append(f"\"gms2.cache_path\" is set to \"{config.gms2.cache_path}\", but that folder does not have a \"runtime\" subfolder.")
+	return (config, Issues(critical_issues, []))
 
 timestamp_filename = "update-timestamp.txt"
 
-def should_check_for_update():
+def should_check_for_update(dotfrida):
 	if not os.path.isfile(f"{dotfrida}/{timestamp_filename}"):
 		return True
 	try:
@@ -1032,16 +1100,16 @@ def check_update(manual = False):
 			content = json.loads(response.read().decode('utf-8'))
 			tag_name = ''.join(c for c in content["tag_name"] if c.isdigit())
 			tag_number = int(tag_name)
-	except Exception as e:
+	except Exception:
 		print("Error occured while checking for updates. You should probably check manually. See you tomorrow!")
 		save_update_timestamp(86400)
 		return
 
-	if tag_number > frida_version:
-		print(f"Update found! You are on version {frida_version}, and the latest version is {tag_name}.")
+	if tag_number > FRIDA_VERSION:
+		print(f"Update found! You are on version {FRIDA_VERSION}, and the latest version is {tag_name}.")
 		print("You can update by going to https://github.com/skirlez/frida/releases/latest, downloading the script, and replacing this script with the downloaded one.")
-	elif tag_number < frida_version:
-		print(f"You are on a future version: Current is version {frida_version}, and the latest version is {tag_name}.")
+	elif tag_number < FRIDA_VERSION:
+		print(f"You are on a future version: Current is version {FRIDA_VERSION}, and the latest version is {tag_name}.")
 	else:
 		print("You are on the latest version.")
 	if not manual:
@@ -1063,19 +1131,13 @@ def python_version_routine():
 		print("Frida requires Python 3.6 at least to run. Your python version: " + str(sys.version_info.major) + "." + str(sys.version_info.minor) + "." + str(sys.version_info.micro))
 		exit()
 
-def print_issues(issues, filename):
-	if len(issues) == 0:
-		print(f"{filename} is valid")
-	else:
-		print(f"{filename}:")
-		for i in range(len(issues)):
-			print(f"{i + 1}. {issues[i]}")
-		print()
-
-def fetch_dependencies(frida_root, project_config: ProjectConfig):
-	for dependency in project_config.dependencies:
-		print(f"Fetching: \"{dependency}\"... ", end="", flush=True)
-		path = dependency.get_path()
+def fetch_routine(cli_frida_root, name, obtain_fetch_config):
+	dotfrida = f"{cli_frida_root}/.frida"
+	fetch_config: ProjectConfig.Fetch = obtain_fetch_config()
+	
+	for dependency in fetch_config.dependencies:
+		print(f"Fetching: \"{dependency}\"... ")
+		path = dependency.get_path(dotfrida)
 		if dependency.needs_download():
 			if os.path.exists(path):
 				
@@ -1086,7 +1148,7 @@ def fetch_dependencies(frida_root, project_config: ProjectConfig):
 				shutil.rmtree(path)
 			os.makedirs(path, exist_ok=True)
 			try:
-				zip_url = dependency.get_zip_url()
+				zip_url = dependency.get_zip_url(cli_frida_root)
 				urllib.request.urlretrieve(zip_url, f"{dotfrida}/tmp.zip")
 				with zipfile.ZipFile(f"{dotfrida}/tmp.zip", "r") as f:
 					f.extractall(path)
@@ -1102,173 +1164,199 @@ def fetch_dependencies(frida_root, project_config: ProjectConfig):
 				os.remove(f"{dotfrida}/tmp.zip")
 			except:
 				pass
-			print("Done")
-			
-		if project_config.recursive_dependencies:
-			paths = dependency.get_frida_root_candidate_paths(path)
-			frida_root = check_frida_root_candidates(paths)
-			dependency_project_dict = get_project_config(frida_root)
-			dependency_project_config = validation_routine(frida_root, dependency_project_dict)
-			fetch_dependencies(frida_root, dependency_project_config)
-
+		
+		if fetch_config.recursive:
+			try:
+				paths = dependency.get_frida_root_candidate_paths(path)
+				frida_root = check_frida_root_candidates(paths)
+				dependency_project_dict = get_project_dict(frida_root)
+				dependency_project_config, issues = construct_project_config_with_issues(frida_root, dependency_project_dict)
+				if (dependency_project_config is None or issues.has_critical_issues()):
+					raise FridaException(issues.issues_as_string("frida-project-config.jsonc"))
+				fetch_routine(cli_frida_root, f"{dependency}", obtain_fetch_config)
+			except FridaException as e:
+				e.add_unwind_action(f"While fetching dependencies of \"{name}\"")
 
 if __name__ == "__main__":
 	python_version_routine()
 	# Let me Ctrl+C in peace
 	signal.signal(signal.SIGINT, lambda a, b: exit())
-	
-	old_setup_routine()
-	
-	create = "--createconfig" in sys.argv
-	
-	project_dict, cli_frida_root = project_config_routine(create)
-	dotfrida = f"{cli_frida_root}/.frida"
-	user_dict = user_config_routine(create)
-	
-	if project_dict is None or user_dict is None:
-		if not create:
-			print("Configuration files are missing in this directory. You can run \"frida.py --createconfig\" to create them.")
-			exit()
-		print("Configuration file(s) have been created.")
-		print("You can run \"frida.py validate\" in order to validate your config(s), after filling them.")
-		exit()
-	
-	if (len(sys.argv) < 2):
-		bad_usage()
-	argument = sys.argv[1]
-	if argument == "--version" or argument == "-v":
-		print(f"Frida version {frida_version}")
-		exit()
-	if argument == "--help" or argument == "-h":
-		print(usage)
-		print("Perform ACTION in accordance to frida-project-config.jsonc and frida-user-config.jsonc in the same directory.")
-		print()
-		print("Actions list:")
-		print("    fetch")
-		print("    build")
-		print("    package [--zip]")
-		print("    apply [--linkbase] [--startgame]")
-		print("    validate")
-		print("    check_updates")
-		print()
-		print("You can use '--help' on each of the actions to learn more about them and their options.")
-		exit()
 
-	subarguments = sys.argv[2:]
-	opname = argument
-	if argument == "fetch":
-		if is_help(subarguments):
-			print("frida.py fetch - Fetches the mod's dependencies.")
-			exit()
-		project_config = validation_routine(cli_frida_root, project_dict, validate_user=True)
-		fetch_dependencies(cli_frida_root, project_config)
-		exit()
-	if argument == "build":
-		if is_help(subarguments):
-			print("frida.py build - Builds the mod's and dependencies' GameMaker projects.")
-			print()
-			print("This action will attempt to build the projects regardless of the previous builds' hashes.")
-			print()
-			print("The output artifacts will be in .frida/igor.")
-			print()
-			exit()
-		project_config = validation_routine(cli_frida_root, project_dict, validate_user=True)
-		build_routine(cli_frida_root, project_config, force_build=True)
+	def all_valid_or_print_and_exit(project_config, project_issues, user_config, user_issues):
+		if (project_config is None or user_config is None or project_issues.has_critical_issues() or user_issues.has_critical_issues()):
+			if project_issues.has_critical_issues():
+				project_issues.print_issues("frida-project-config.jsonc")
+			elif project_config is None:
+				print("Project config is missing!")
+			if user_issues.has_critical_issues():
+				user_issues.print_issues("frida-user-config.jsonc")
+			elif user_config is None:
+				print("User config is missing!")
+			exit(1)
+
+	parser = argparse.ArgumentParser(prog='frida.py', description='Build and package management tool for g3man projects', epilog
+		=
+		"""Run 'frida.py [ACTION] -h' to learn about a specific action's arguments.
+		For more documentation: https://github.com/skirlez/frida/wiki"""
+	)
+	parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
+	subparsers = parser.add_subparsers(title="Actions list", metavar="")
+
+	def init(_):
+		if (os.path.exists("frida-project-config.jsonc")):
+			print("Project config already exists, skipping...")
+		else:
+			with (open("frida-project-config.jsonc", "w") as f):
+				f.write(project_config_template)
+		if (os.path.exists("frida-user-config.jsonc")):
+			print("User config already exists, skipping...")
+		else:
+			with (open("frida-user-config.jsonc", "w") as f):
+				f.write(user_config_template)
 		
-		if (should_check_for_update()):
-			check_update()
-		exit()
-	if argument == "package":
-		if is_help(subarguments):
-			print("frida.py package - Packages this mod.")
-			print()
-			print("This action will build the GameMaker project(s) if necessary, and package this")
-			print("mod and its dependencies as a profile folder \"out\", for distribution or application.")
-			print()
-			print("Arguments:")
+	parser_init = subparsers.add_parser("init", help="Create blank user and project configs")
+	parser_init.set_defaults(func=init)
+	
+	parser_fetch = subparsers.add_parser("fetch", help="Fetch this project's dependencies")
+
+	def fetch(_):
+		project_dict, cli_frida_root = get_project_dict(".")
+		config, issues = construct_project_config_with_issues(cli_frida_root, project_dict)
+		if (config is None or issues.has_critical_issues()):
+			issues.print_issues("frida-project-config.jsonc")
+			return
+		fetch_routine(cli_frida_root, config.name, lambda: config.fetch)
+	parser_fetch.set_defaults(func=fetch)
+	
+	parser_build = subparsers.add_parser("build", help="Build this project and dependencies")
+	parser_build.add_argument("-f", "--force", action="store_true", help="Build regardless of last build's hash")
+
+	def build(namespace : argparse.Namespace):
+		project_dict, cli_frida_root = get_project_dict(".")
+		user_dict = get_user_dict(cli_frida_root)
+		project_config, project_issues = construct_project_config_with_issues(cli_frida_root, project_dict)
+		user_config, user_issues = construct_user_config_with_issues(user_dict)
+		all_valid_or_print_and_exit(project_config, project_issues, user_config, user_issues)
+		assert project_config is not None
+		assert user_config is not None
+
+		graph = generate_dependency_graph(cli_frida_root, project_config)
+		
+		build_routine(cli_frida_root, cli_frida_root,
+			project_config, 
+			user_config,
+			graph,
+			project_config.fetch.recursive, 
+			force_build=namespace.force,
+			verbose=namespace.verbose)
+	parser_build.set_defaults(func=build)
+
+	parser_package = subparsers.add_parser("pack", help="Pack this project and dependencies to a folder")
+	def pack(_ : argparse.Namespace):
+		project_dict, cli_frida_root = get_project_dict(".")
+		user_dict = get_user_dict(cli_frida_root)
+		project_config, project_issues = construct_project_config_with_issues(cli_frida_root, project_dict)
+		user_config, user_issues = construct_user_config_with_issues(user_dict)
+		all_valid_or_print_and_exit(project_config, project_issues, user_config, user_issues)
+		
+		assert project_config is not None
+		assert user_config is not None
+
+		graph = generate_dependency_graph(cli_frida_root, project_config)
+		
+		build_routine(cli_frida_root, cli_frida_root,
+		 	project_config, 
+			user_config, 
+			graph,
+			project_config.fetch.recursive)
 			
-			print("  -z, --zip      After creating the \"out\" folder, compress it into a ZIP (as \"out.zip\")")
-			indent = "                   "
-			print(f"{indent}This will exclude any files found in the project config's \"zip_exclude\" field.")
-			print(f"{indent}Additionally, if \"profile.json\" isn't excluded, the ZIP will have a root folder,")
-			print(f"{indent}with the same name as the profile's ID.")
-			exit()
-		project_config = validation_routine(cli_frida_root, project_dict, validate_user=True)
-		build_routine(cli_frida_root, project_config)
-		recreate_out_folder(cli_frida_root)
-		package_routine(cli_frida_root, project_config, linkbase=False)
-		zip = "-z" in subarguments or "--zip" in subarguments 
-		if zip:
-			zip_out_folder(cli_frida_root, project_config)
-		print(f"Done!")
-		if (should_check_for_update()):
-			check_update()
-		exit()
-	if argument == "apply":
-		if is_help(subarguments):
-			print("frida.py apply [ARGUMENTS] - Applies this mod.")
-			print()
-			print("This action will build the GameMaker project(s) if necessary, package the mod and its dependencies,")
-			print("And then call g3man to apply it on a GameMaker game.")
-			print()
-			print("Arguments:")
+		pack_routine(cli_frida_root, project_config, graph)
+
+		
+	#parser_package.add_argument("-z", "--zip", action="store_true", help="After creating the \"out\" folder, compress it into a ZIP (as \"out.zip\")")
+	parser_package.set_defaults(func=pack)
+
+	parser_publish = subparsers.add_parser("publish", help="Publish this project and dependencies as a .zip")
+	
+	def publish(_):
+		project_dict, cli_frida_root = get_project_dict(".")
+		user_dict = get_user_dict(cli_frida_root)
+		project_config, project_issues = construct_project_config_with_issues(cli_frida_root, project_dict)
+		user_config, user_issues = construct_user_config_with_issues(user_dict)
+		all_valid_or_print_and_exit(project_config, project_issues, user_config, user_issues)
+		
+		assert project_config is not None
+		assert user_config is not None
+
+		graph = generate_dependency_graph(cli_frida_root, project_config)
+		
+		build_routine(cli_frida_root, cli_frida_root,
+		 	project_config, 
+			user_config, 
+			graph,
+			project_config.fetch.recursive)
 			
-			print("  -l, --linkbase      When packaging, link files in \"out\" to \"base\" instead of copying")
-			indent = "                        "
-			print(f"{indent}This is useful if your mod has included files it reads from at runtime,")
-			print(f"{indent}as this argument effectively makes it so any changes to files in \"base\"")
-			print(f"{indent}are visible to the modded game immediately.")
-			print(f"{indent}Note: This argument uses hard links on Windows")
-			print(f"{indent}and symlinks everywhere else.")
-			print()
-			print("  -s, --startgame     After applying, attempt to launch the game")
+		pack_routine(cli_frida_root, project_config, graph)
+
+		print("Publishing...")
+		relative_path = publish_as_zip(cli_frida_root, project_config)
+		print(f"Done! Output file is: {relative_path}")
+		
+	parser_publish.set_defaults(func=publish)
+
+	def apply(namespace : argparse.Namespace):
+		project_dict, cli_frida_root = get_project_dict(".")
+		user_dict = get_user_dict(cli_frida_root)
+		project_config, project_issues = construct_project_config_with_issues(cli_frida_root, project_dict)
+		user_config, user_issues = construct_user_config_with_issues(user_dict)
+		all_valid_or_print_and_exit(project_config, project_issues, user_config, user_issues)
+		
+		assert project_config is not None
+		assert user_config is not None
+
+		if (user_config.apply is None):
+			print("Apply config is not defined! TODO")
+			exit(1)
+
+		graph = generate_dependency_graph(cli_frida_root, project_config)
+		
+		build_routine(cli_frida_root, cli_frida_root,
+		 	project_config, 
+			user_config, 
+			graph,
+			project_config.fetch.recursive)
 			
-			print(f"{indent}Frida will try to open any executable found in the game's folder.")
-			print(f"{indent}If Frida cannot determine which executable to launch,")
-			print(f"{indent}you must set \"start_game_command\" in frida-user-config.jsonc")
-			print(f"{indent}which Frida will execute in the game's folder.")
-			exit()
-		linkbase = "-l" in subarguments or "--linkbase" in subarguments 
-		project_config = validation_routine(cli_frida_root, project_dict, validate_user=True)
-		build_routine(cli_frida_root, project_config)
-		recreate_out_folder(cli_frida_root)
-		package_routine(cli_frida_root, project_config, linkbase=linkbase)
-		apply_mod(cli_frida_root, user_dict)
+		pack_routine(cli_frida_root, project_config, graph, linkbase=namespace.linkbase)
 		
-		startgame = "-s" in subarguments or "--startgame" in subarguments 
-		if startgame:
-			try_starting_game()
-		print("Done! Your mod has been applied.")
-		if (should_check_for_update()):
-			check_update()
-		exit()
-	if argument == "validate":
-		if is_help(subarguments):
-			print("frida.py validate - Validates config files in the current directory.")
-			print()
-			print("This action will go over some of the fields in frida-user-config.jsonc and frida-project-config.jsonc,")
-			print("and will let you know if there's anything wrong with them.")
-			exit()
-		project_issues, project_warnings = validate_project_dict(cli_frida_root, project_dict)
-		user_issues, user_warnings = validate_user_dict(user_dict)
-		combination_issues, combination_warnings = validate_combination(user_dict, project_dict)
+		apply_routine(cli_frida_root, user_config.apply, launch=namespace.startgame)
+
 		
-		_, dependency_issues = parse_project_dependencies(project_dict)
-		project_issues += dependency_issues
-		
-		print_issues(project_issues + project_warnings, "frida-project-config.jsonc")
-		print_issues(user_issues + user_warnings, "frida-user-config.jsonc")
-		print_issues(combination_issues + combination_warnings, "Combination of user and project configs")
-		exit()
-	if argument == "check_updates":
-		if is_help(subarguments):
-			print("frida.py check_updates - Checks for updates to Frida.")
-			print()
-			print("This action will check https://github.com/skirlez/frida/releases,")
-			print("And print a message if there's a newer version.")
-			exit()
+	parser_apply = subparsers.add_parser("apply", help="Apply this project and dependencies, and launch the game")
+	parser_apply.add_argument("-l", "--linkbase", action="store_true", help="Symbolically link files to the \"base\" folder instead of copying. On Windows, this uses hard links.")
+	parser_apply.add_argument("-s", "--startgame", action="store_true", help="Start the game after applying.")
+	parser_apply.set_defaults(func=apply)
+	
+	def validate(_):
+		project_dict, cli_frida_root = get_project_dict(".")
+		user_dict = get_user_dict(cli_frida_root)
+		project_config, project_issues = construct_project_config_with_issues(cli_frida_root, project_dict)
+		user_config, user_issues = construct_user_config_with_issues(user_dict)
+		all_valid_or_print_and_exit(project_config, project_issues, user_config, user_issues)
+		print("No issues found!")
+	
+	parser_validate = subparsers.add_parser("validate", help="Validate config files")
+	parser_validate.set_defaults(func=validate)
+
+
+	def check_updates():
 		check_update(manual=True)
-		exit()
-
-
-	bad_usage()
+	parser_check_updates = subparsers.add_parser("check_updates", help="")
+	parser_check_updates.set_defaults(func=check_update)
+	
+	try:
+		args = parser.parse_args()
+		args.func(args)	
+	except FridaException as e:
+		print("*Frida error!*")
+		print(e.message)
+		exit(1)
