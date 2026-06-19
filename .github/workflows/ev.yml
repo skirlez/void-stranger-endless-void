@@ -69,12 +69,12 @@ jobs:
         uses: actions/cache@v5
         with:
           path: g3man/g3man-executable.zip
-          key: g3man-6
+          key: g3man-9
       - name: Download g3man
         if: steps.cache-g3man.outputs.cache-hit != 'true'
         run: |
           cd g3man
-          curl -L -o g3man-executable.zip https://github.com/skirlez/g3man/releases/download/6/g3man-windows-amd64.zip
+          curl -L -o g3man-executable.zip https://github.com/skirlez/g3man/releases/download/9/g3man-windows-amd64.zip
 
       - uses: actions/setup-python@v6
         with:

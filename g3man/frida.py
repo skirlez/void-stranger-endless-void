@@ -13,7 +13,6 @@ import subprocess
 from typing import *
 import urllib.request
 from dataclasses import *
-from datetime import datetime
 
 FRIDA_VERSION = 6
 
@@ -304,7 +303,7 @@ class ProjectConfig:
 	
 	@dataclass
 	class Publish:
-		archive_exclude: list[str] = field(default_factory=list, metadata={"optional": True})
+		exclude: list[str] = field(default_factory=list, metadata={"optional": True})
 		as_profile: bool = field(default=False, metadata={"optional": True})
 	publish: Publish = field(default_factory=lambda: ProjectConfig.Publish(), metadata={"contract": Publish, "optional": True})
 	
@@ -365,7 +364,7 @@ user_config_template = """// This file is the user config. This file is personal
 		"cache_path": "",
 	},
 
-	// Fill this part out if you want to be able to apply your mod to the game using Frida.
+	// Fill this part out if you want to be able to apply your mod to the game using Frida. Or delete this whole block if you don't want that.
 	"apply": {
 		// The path to g3man's executable file.
 		// https://github.com/skirlez/g3man/releases		
@@ -680,6 +679,9 @@ def build_gamemaker_project(
 				"/zpex", # "enable zp mode" (tries loading kernel32 otherwise?)
 				"/cins", # case insensitive
 				"/nru", # NoRemoveUnused
+				# "target mask". I found documentation for it in https://github.com/YAL-GMEdit/builder/blob/master/BuilderCompile.js, (thanks YAL)
+				# 1<<6 is windows, which is what we'll leave it at for now
+				f"/tgt={1<<6}",
 				"/mv=1", # "major version"
 				"/iv=0", # "minor version"
 				"/rv=0", # "release version"
@@ -837,7 +839,7 @@ def publish_as_zip(cli_frida_root, project_config: ProjectConfig):
 	
 	if os.path.exists(f"{cli_frida_root}/out.zip"):
 		os.remove(f"{cli_frida_root}/out.zip")
-	normalized_zip_exclude = [os.path.normpath(path) for path in project_config.publish.archive_exclude]
+	normalized_zip_exclude = [os.path.normpath(path) for path in project_config.publish.exclude]
 	
 	if project_config.publish.as_profile:
 		with open(f"{out_folder}/jsons/profile.json", "rt") as f:
@@ -908,7 +910,10 @@ def apply_routine(cli_frida_root, apply_config: UserConfig.Apply, launch: bool):
 	print("Applying the mod(s)")
 
 	bonus_launch_arguments = []
+	
 	if launch:
+		if apply_config.launch_options is None:	
+			raise FridaException("Cannot launch without \"apply.launch_options\" being defined in the user config.")
 		bonus_launch_arguments.append("--launch")
 		if type(apply_config.launch_options) is UserConfig.Apply.SteamLaunchOptions:
 			bonus_launch_arguments.append("--steam")
@@ -1127,8 +1132,8 @@ def is_help(arguments):
 	return "-h" in arguments or "--help" in arguments
 
 def python_version_routine():
-	if sys.version_info.major < 3 or sys.version_info.minor < 6:
-		print("Frida requires Python 3.6 at least to run. Your python version: " + str(sys.version_info.major) + "." + str(sys.version_info.minor) + "." + str(sys.version_info.micro))
+	if sys.version_info.major < 3 or sys.version_info.minor < 12:
+		print("Frida requires Python 3.12 at least to run. Your python version: " + str(sys.version_info.major) + "." + str(sys.version_info.minor) + "." + str(sys.version_info.micro))
 		exit()
 
 def fetch_routine(cli_frida_root, name, obtain_fetch_config):
@@ -1315,7 +1320,7 @@ if __name__ == "__main__":
 		assert user_config is not None
 
 		if (user_config.apply is None):
-			print("Apply config is not defined! TODO")
+			print("Cannot apply without \"apply\" being filled in the user config.")
 			exit(1)
 
 		graph = generate_dependency_graph(cli_frida_root, project_config)
@@ -1331,7 +1336,7 @@ if __name__ == "__main__":
 		apply_routine(cli_frida_root, user_config.apply, launch=namespace.startgame)
 
 		
-	parser_apply = subparsers.add_parser("apply", help="Apply this project and dependencies, and launch the game")
+	parser_apply = subparsers.add_parser("apply", help="Apply this project and dependencies, and (optionally) launch the game")
 	parser_apply.add_argument("-l", "--linkbase", action="store_true", help="Symbolically link files to the \"base\" folder instead of copying. On Windows, this uses hard links.")
 	parser_apply.add_argument("-s", "--startgame", action="store_true", help="Start the game after applying.")
 	parser_apply.set_defaults(func=apply)
