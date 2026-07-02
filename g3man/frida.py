@@ -314,7 +314,7 @@ class ProjectConfig:
 				"pass_through_initial_type": list[str], 
 				"pass_through": parse_project_dependencies}
 			)
-			recursive: bool = field(default=False, metadata={"optional": True})
+			recursive: bool = field(default=True, metadata={"optional": True})
 
 	fetch : Fetch = field(default_factory=lambda: ProjectConfig.Fetch(), metadata={"contract": Fetch, "optional": True})
 
@@ -604,7 +604,6 @@ def build_routine(cli_frida_root: str, frida_root: str, project_config: ProjectC
 		if (user_config.gms2 is None):
 			raise FridaException("Tried to build gms2 project, but gms2 user config is missing.")
 		build_gamemaker_project(cli_frida_root, frida_root, build_config.options, user_config.gms2, force_build=force_build, verbose=verbose)
-
 	if not should_build_dependencies:
 		return
 	for dependency in dependency_graph[project_config]:
@@ -799,10 +798,10 @@ def pack_project(cli_frida_root: str, out_mods_folder: str, frida_root: str, pro
 				export_path += "/mod_data.win"
 			shutil.copy(f"{gmac_results}/datafile", export_path)
 			if options.included_files_export_path is not None:
-				if (f"{gmac_results}/included_files"):
+				if not os.path.exists(f"{gmac_results}/included_files"):
 					raise FridaException(f"Cannot package this project: Included files folder is missing")
-				export_path = f"{out_mods_folder}/{options.included_files_export_path}"
-				shutil.copytree(f"{gmac_results}/included_files", f"{out_mods_folder}/{export_path}", dirs_exist_ok=True, copy_function=required_symlink_copy_func)
+				shutil.copytree(f"{gmac_results}/included_files", f"{out_mods_folder}/{options.included_files_export_path}", dirs_exist_ok=True, copy_function=required_symlink_copy_func)
+
 
 def pack_subroutine(cli_frida_root: str, out_profile_folder : str, frida_root: str, project_config: ProjectConfig, 
 		dependency_graph: dict[ProjectConfig, list[Project]], linkbase=False):
@@ -1251,13 +1250,13 @@ if __name__ == "__main__":
 			project_config, 
 			user_config,
 			graph,
-			project_config.fetch.recursive, 
+			should_build_dependencies=True, 
 			force_build=namespace.force,
 			verbose=namespace.verbose)
 	parser_build.set_defaults(func=build)
 
 	parser_package = subparsers.add_parser("pack", help="Pack this project and dependencies to a folder")
-	def pack(_ : argparse.Namespace):
+	def pack(namespace : argparse.Namespace):
 		project_dict, cli_frida_root = get_project_dict(".")
 		user_dict = get_user_dict(cli_frida_root)
 		project_config, project_issues = construct_project_config_with_issues(cli_frida_root, project_dict)
@@ -1273,7 +1272,8 @@ if __name__ == "__main__":
 		 	project_config, 
 			user_config, 
 			graph,
-			project_config.fetch.recursive)
+			should_build_dependencies=True,
+			verbose=namespace.verbose)
 			
 		pack_routine(cli_frida_root, project_config, graph)
 

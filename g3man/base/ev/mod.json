@@ -1,18 +1,18 @@
 {
-    "mod_id" : "ev",
-    "display_name" : "Endless Void",
-    "description" : "A level builder for Void Stranger",
-    "version" : "0.9.98",
-    "target_g3man_version" : 9,
-    "depends" : [],
-    "breaks" : [],
+	"mod_id": "ev",
+	"display_name": "Endless Void",
+	"description": "A level builder for Void Stranger",
+	"version": "0.9.98",
+	"target_g3man_version": 9,
+	"depends": [],
+	"breaks": [],
 
-    "patches" : [
-        {
-            "path" : "patches",
-            "type" : "gmlp"
-        }
-    ],
-    "datafile_path" : "mod_data.win",
-    "post_merge_script_path" : "post_merge.csx"
+	"patches": [
+		{
+			"type": "gmlp",
+			"path": "patches"
+		}
+	],
+	"datafile_path": "mod_data.win",
+	"post_merge_script_path": "post_merge.csx"
 }
