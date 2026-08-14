@@ -5,8 +5,10 @@ if (global.level.name == "") {
 	ev_notify("Cannot save a level\nwithout a name.")
 	exit;
 }
-if save_level(global.level)
+if save_level(global.level) {
 	ev_notify("Level saved!")
+	global.level_dirty = false;
+}
 else
 	ev_notify("Error saving level!")
 

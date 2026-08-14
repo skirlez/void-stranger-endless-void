@@ -32,6 +32,7 @@ save_button = instance_create_layer(30, 20, "WindowElements", agi("obj_ev_execut
 		if save_pack(global.pack) {
 			ev_notify("Pack saved!")
 			global.pack_editor.save_timestamp = current_time;	
+			global.pack_editor.pack_dirty = false;
 		}
 		else
 			ev_notify("Error saving pack!")	
@@ -40,14 +41,26 @@ save_button = instance_create_layer(30, 20, "WindowElements", agi("obj_ev_execut
 	base_scale_y : 0.7
 })
 
-quit_button = instance_create_layer(70, 20, "WindowElements", agi("obj_ev_main_menu_button"), 
+quit_button = instance_create_layer(70, 20, "WindowElements", agi("obj_ev_executing_button"), 
 {
 	txt : "Quit",
 	base_scale_x : 1.2,
 	base_scale_y : 0.7,
-	room_name : "rm_ev_pack_select"
+	func : function() {
+		if !global.pack_editor.pack_dirty {
+			room_goto(agi("rm_ev_pack_select"))
+			return;
+		}
+		global.mouse_layer++;
+		new_window(11, 6, agi("obj_ev_are_you_sure_window"), {
+			on_confirm : function() {
+				room_goto(agi("rm_ev_pack_select{"));
+			},
+			layer_num : global.mouse_layer,
+			layer : layer_get_id("Windows2")
+		})
+	}
 })
-add_child(quit_button)
 
 name_textbox = instance_create_layer(54, 42, "WindowElements", agi("obj_ev_textbox"), 
 {
@@ -74,6 +87,7 @@ description_textbox = instance_create_layer(70, 60, "WindowElements", agi("obj_e
 
 
 add_child(save_button)
+add_child(quit_button)
 add_child(name_textbox)
 add_child(description_textbox)
 

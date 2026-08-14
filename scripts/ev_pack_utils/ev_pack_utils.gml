@@ -53,7 +53,7 @@ function get_pack_line_arrow_progress() {
 	var bpm = ev_get_track_bpm(global.music_file, audio_sound_get_track_position(global.music_inst));
 	
 	var t;
-	if ev_is_music_playing(global.music_file) {
+	if bpm != -1 && ev_is_music_playing(global.music_file) {
 		var beat = 480 / bpm
 		var seconds = audio_sound_get_track_position(global.music_inst);
 		var fake_seconds = ev_get_real_track_start(seconds);

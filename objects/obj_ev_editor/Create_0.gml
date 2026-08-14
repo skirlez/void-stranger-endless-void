@@ -1549,12 +1549,14 @@ function copy_tile_data(tiles) {
 
 // computers have infinite memory.
 function add_undo() {
+	global.level_dirty = true
 	array_push(history, copy_tile_data(global.level.tiles), copy_tile_data(global.level.objects))
 	if array_length(history) > 500 // will remember 250 changes before removing
 		array_delete(history, 0, 2)
 }
 
 function undo() {
+	global.level_dirty = true
 	static undo_sound = agi("snd_voidrod_place")
 	if array_length(history) != 0 {
 		array_copy(global.level.objects, 0, array_pop(history), 0, array_length(global.level.objects))
@@ -1900,3 +1902,4 @@ function flatten_memory_surface_buffers() {
 	}
 	memory_surface_buffers = arr
 }
+

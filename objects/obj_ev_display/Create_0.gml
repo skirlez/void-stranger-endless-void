@@ -18,6 +18,7 @@ if display_context == display_contexts.level_editor {
 	zed_sound = agi("snd_ev_zed")
 	pluck_sound = agi("snd_ev_pluck")
 	pick_sound = agi("snd_ev_pick")
+	
 }
 
 function switch_held_tile(tile_state) {

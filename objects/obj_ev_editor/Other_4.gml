@@ -14,6 +14,7 @@ if room == agi("rm_ev_menu") || room == agi("rm_ev_level_select") || room == agi
 }
 
 if room == agi("rm_ev_editor") {
+	global.level_dirty = false
 	draw_set_circle_precision(48)
 	if (!ev_is_music_playing(agi(global.level.music))) {
 		ev_play_music(agi(global.level.music))

@@ -89,12 +89,25 @@ save_button = instance_create_layer(112 - 65, 72 - 34, "WindowElements", agi("ob
 	base_scale_y : 0.7
 })
 
-quit_button = instance_create_layer(112 - 20, 72 - 34, "WindowElements", agi("obj_ev_main_menu_button"), 
+quit_button = instance_create_layer(112 - 20, 72 - 34, "WindowElements", agi("obj_ev_executing_button"), 
 {
 	txt : "Quit",
 	base_scale_x : 1.2,
 	base_scale_y : 0.7,
-	room_name : "rm_ev_level_select"
+	func : function() {
+		if !global.level_dirty {
+			room_goto(agi("rm_ev_level_select"));
+			return;	
+		}
+		global.mouse_layer++;
+		new_window(11, 6, agi("obj_ev_are_you_sure_window"), {
+			on_confirm : function() {
+				room_goto(agi("rm_ev_level_select"));
+			},
+			layer_num : global.mouse_layer,
+			layer : layer_get_id("Windows2")
+		})
+	}
 })
 add_child(quit_button)
 var textbox_scale = 5;

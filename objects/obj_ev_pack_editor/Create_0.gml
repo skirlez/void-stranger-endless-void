@@ -482,7 +482,7 @@ reset_global_pack();
 
 global.pack_zoom_gain = 1;
 
-
+pack_dirty = false;
 
 // NID/node ID used to identify nodes for undos, this keeps track of the last node ID
 last_nid = -1;
@@ -493,6 +493,7 @@ node_id_to_instance_map = ds_map_create()
 node_state_to_id_map = ds_map_create()
 
 function add_undo_action(func, args) {
+	pack_dirty = true;
 	array_push(undo_actions, {
 		func : func,
 		args : args,
@@ -502,6 +503,7 @@ function add_undo_action(func, args) {
 undo_actions = []
 
 function undo() {
+	pack_dirty = true;
 	static undo_sound = agi("snd_voidrod_place")
 	if array_length(undo_actions) != 0 {
 		var action = array_pop(undo_actions)

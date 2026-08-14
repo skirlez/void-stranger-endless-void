@@ -430,6 +430,7 @@
     {"id":{"name":"msc_ending2","path":"sounds/msc_ending2/msc_ending2.yy",},},
     {"id":{"name":"spr_ev_bee_gblink_u","path":"sprites/spr_ev_bee_gblink_u/spr_ev_bee_gblink_u.yy",},},
     {"id":{"name":"spr_ev_menu_continue_lily","path":"sprites/spr_ev_menu_continue_lily/spr_ev_menu_continue_lily.yy",},},
+    {"id":{"name":"obj_ev_are_you_sure_window","path":"objects/obj_ev_are_you_sure_window/obj_ev_are_you_sure_window.yy",},},
     {"id":{"name":"obj_ev_dpad","path":"objects/obj_ev_dpad/obj_ev_dpad.yy",},},
     {"id":{"name":"ev_draw_tis_eyecatch","path":"scripts/ev_draw_tis_eyecatch/ev_draw_tis_eyecatch.yy",},},
     {"id":{"name":"spr_ev_window","path":"sprites/spr_ev_window/spr_ev_window.yy",},},

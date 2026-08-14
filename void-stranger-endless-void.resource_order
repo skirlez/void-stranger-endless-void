@@ -394,6 +394,7 @@
     {"name":"msc_ending2","order":17,"path":"sounds/msc_ending2/msc_ending2.yy",},
     {"name":"spr_ev_bee_gblink_u","order":11,"path":"sprites/spr_ev_bee_gblink_u/spr_ev_bee_gblink_u.yy",},
     {"name":"spr_ev_menu_continue_lily","order":38,"path":"sprites/spr_ev_menu_continue_lily/spr_ev_menu_continue_lily.yy",},
+    {"name":"obj_ev_are_you_sure_window","order":123,"path":"objects/obj_ev_are_you_sure_window/obj_ev_are_you_sure_window.yy",},
     {"name":"obj_ev_dpad","order":90,"path":"objects/obj_ev_dpad/obj_ev_dpad.yy",},
     {"name":"ev_draw_tis_eyecatch","order":50,"path":"scripts/ev_draw_tis_eyecatch/ev_draw_tis_eyecatch.yy",},
     {"name":"spr_ev_window","order":11,"path":"sprites/spr_ev_window/spr_ev_window.yy",},

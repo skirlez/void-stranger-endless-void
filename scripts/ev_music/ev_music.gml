@@ -22,6 +22,7 @@ function ev_play_music(track, looping = true, dont_subt_ex_track = false) {
 		}
 		var start = ev_get_real_track_start(track);
 		global.music_inst = audio_play_sound(track, 10, looping, 1, start)
+		global.music_file = track
 		global.music_is_looping = looping
 		/* function doesn't exist in VS and fixing that would be annoying
 		if looping {
