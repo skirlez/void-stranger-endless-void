@@ -1,0 +1,61 @@
+{
+  "nodes": {
+    "gamemaker-flake": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1786655603,
+        "narHash": "sha256-LYDXM3is8wl9mWnd8i/cl2AhZiAVZfJ9u3BlHhRVDSM=",
+        "owner": "skirlez",
+        "repo": "gamemaker-flake",
+        "rev": "87191a2edd6fe1abf62446df80729f2ebc577621",
+        "type": "github"
+      },
+      "original": {
+        "owner": "skirlez",
+        "repo": "gamemaker-flake",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1786599213,
+        "narHash": "sha256-yNJd40f11EzXBjSByCB7IPpeFFAdeoSKKM67dGkfFoU=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "0e251e24a4f24e036a084b6b4b2d2491af4167f4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "gamemaker-flake": "gamemaker-flake",
+        "nixpkgs": "nixpkgs",
+        "vs": "vs"
+      }
+    },
+    "vs": {
+      "flake": false,
+      "locked": {
+        "path": "dummy",
+        "type": "path"
+      },
+      "original": {
+        "path": "dummy",
+        "type": "path"
+      },
+      "parent": []
+    }
+  },
+  "root": "root",
+  "version": 7
+}

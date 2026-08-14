@@ -96,6 +96,11 @@ foreach (string spriteName in sprites) {
         UndertaleBackground tileset = Data.Backgrounds.ByName(spriteName.Substring(4));
         string name = (string)frames[0]["name"];
         exportSpriteTexture(tileset.Texture, spriteDir, name, layerName);
+
+        // the IDE itself is responsible for generating tileset output files (very dumb)
+        // to make sure this works with the nix flake we also export the tileset texture as the tileset output
+        string tilesetDir = $"{endlessVoidPath}/tilesets/{tileset.Name.Content}";
+        worker.ExportAsPNG(tileset.Texture, $"{tilesetDir}/output_tileset.png", null, true);
         continue;
     }
 
