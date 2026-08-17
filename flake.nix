@@ -32,19 +32,24 @@
               mkdir -p $out
               cp -r $src/* $out
               chmod -R u+w $out
-
               cd $out/g3man
               UndertaleModCli load ${vs}/data.win --scripts copy-game-assets.csx
             '';
             strictDeps = true;
           };
 
-      endless-void = gamemaker-flake.packages.x86_64-linux.buildGameMakerProject {
-        runtimeVersion = "2023.4.0.113";
+      ev = gamemaker-flake.packages.x86_64-linux.buildGameMakerProject {
         src = srcWithAssets;
+        runtimeVersion = "2023.4.0.113";
+      };
+      ev-no-vs-assets-very-cursed = gamemaker-flake.packages.x86_64-linux.buildGameMakerProject {
+        src = ./.;
+        runtimeVersion = "2023.4.0.113";
+        configuration = "NoVoidStrangerGroups";
       };
     in
     {
-      packages.x86_64-linux.default = endless-void;
+      packages.x86_64-linux.default = ev;
+      packages.x86_64-linux.no-vs-assets-very-cursed = ev-no-vs-assets-very-cursed;
     };
 }

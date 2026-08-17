@@ -54,7 +54,7 @@ quit_button = instance_create_layer(70, 20, "WindowElements", agi("obj_ev_execut
 		global.mouse_layer++;
 		new_window(11, 6, agi("obj_ev_are_you_sure_window"), {
 			on_confirm : function() {
-				room_goto(agi("rm_ev_pack_select{"));
+				room_goto(agi("rm_ev_pack_select"));
 			},
 			layer_num : global.mouse_layer,
 			layer : layer_get_id("Windows2")
