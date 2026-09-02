@@ -423,7 +423,7 @@ oob_node.play_evaluate_immediate = function (node_state) {
 	return first_or_error(node_state.exits);
 }
 
-global.palette_node_palettes = ["GRAY", "R***", "O***", "Y***", "G***", "B***", "I***", "V***"]
+global.palette_node_palettes = ["GRAY", "R***", "O***", "Y***", "G***", "B***", "I***", "V***", "MELLOW"]
 palette_node = new node_struct("pl", "obj_ev_pack_palette_node");
 palette_node.properties_generator = function () {
 	return { palette_number : 0 }	

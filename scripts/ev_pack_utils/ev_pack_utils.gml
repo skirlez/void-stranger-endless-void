@@ -1,3 +1,32 @@
+/*
+function line_intersects_horizontal(x1, y1, x2, y2, x3, y3, line_length) {
+	var slope = (y2 - y1) / (x2 - x1)
+	var ix = (y3 - y1) / slope + x1
+	return x3 <= ix && ix <= x3
+}
+function line_intersects_vertical(x1, y1, x2, y2, x3, y3, line_length) {
+	var slope = (y2 - y1) / (x2 - x1)
+	var iy = slope * (x3 - x1) + y1
+	return y3 <= iy && iy <= y3 + line_length
+}
+*/
+
+function should_draw_pack_line(x1, y1, x2, y2) {
+	var cam_x = camera_get_view_x(view_camera[0])
+	var cam_y = camera_get_view_y(view_camera[0])
+	
+	var cam_width = camera_get_view_width(view_camera[0])
+	var cam_height = camera_get_view_width(view_camera[0])
+	
+	if (point_in_rectangle(x1, y1, cam_x, cam_y, cam_x + cam_width, cam_y + cam_height) || point_in_rectangle(x2, y2, cam_x, cam_y, cam_x + cam_width, cam_y + cam_height))
+		return true;
+		
+	static obj = agi("obj_camera_hitbox")
+	return collision_line(x1, y1, x2, y2, obj, false, false)
+}
+
+
+
 function ev_draw_pack_line(x1, y1, x2, y2, number = 0) {
 	draw_set_color(c_black)
 	draw_line_width(x1, y1,	x2, y2, 2)

@@ -40,11 +40,9 @@
 
       ev = gamemaker-flake.packages.x86_64-linux.buildGameMakerProject {
         src = srcWithAssets;
-        runtimeVersion = "2023.4.0.113";
       };
       ev-no-vs-assets-very-cursed = gamemaker-flake.packages.x86_64-linux.buildGameMakerProject {
         src = ./.;
-        runtimeVersion = "2023.4.0.113";
         configuration = "NoVoidStrangerGroups";
       };
     in

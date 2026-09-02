@@ -39,7 +39,6 @@ if state == selector_states.animating {
 		animation_elements_progress = 0;
 		bounces = 0;
 		bounce_text = ""
-		global.mouse_layer--;
 		exit;
 	}
 	

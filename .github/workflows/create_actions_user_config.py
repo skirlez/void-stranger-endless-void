@@ -21,7 +21,7 @@ if __name__ == "__main__":
 				"g3man_path": abspath("g3man/g3man-executable/g3man/g3man.exe"),
 				"game_path": abspath("g3man/vs"),
 				"clean_datafile_path": abspath("g3man/vs/data.win"),
-				"output_datafile_name": "final_data.win",		
+				"datafile_name": "final_data.win",		
 			},
 			"check_for_updates": True,  
 			"format_version": 1

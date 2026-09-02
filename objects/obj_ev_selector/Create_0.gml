@@ -27,6 +27,7 @@ function start_return_sequence(index) {
 	array_delete(element_objects, index, 1)
 	array_push(element_objects, instance)
 	selected_element = index;
+	global.mouse_layer--;
 	state = selector_states.animating;
 }
 

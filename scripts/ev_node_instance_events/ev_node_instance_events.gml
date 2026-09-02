@@ -427,7 +427,7 @@ function create_falling_arrow_and_number(node_instance, other_node_instance, ind
 	instance_create_layer(
 		lerp(node_instance.center_x, other_node_instance.center_x, t),
 		lerp(node_instance.center_y, other_node_instance.center_y, t),
-		"ConnectingLines",
+		"Debris",
 		agi("obj_ev_falling_pack_arrow"))
 	var more_than_one_exit = (total_exits > 1)
 	var number = (index + 1) * more_than_one_exit
@@ -437,7 +437,7 @@ function create_falling_arrow_and_number(node_instance, other_node_instance, ind
 	instance_create_layer(
 		lerp(node_instance.center_x, other_node_instance.center_x, t2),
 		lerp(node_instance.center_y, other_node_instance.center_y, t2),
-		"ConnectingLines",
+		"Debris",
 		agi("obj_ev_falling_pack_number"), {
 			number : number	
 		})

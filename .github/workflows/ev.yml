@@ -16,13 +16,13 @@ jobs:
         uses: actions/cache@v5
         with:
           path: g3man/UndertaleModCli.zip
-          key: undertalemodcli-0.8.4.1
+          key: undertalemodcli-0.9.2.0
           
       - name: Download UndertaleModCli
         if: steps.cache-undertalemodcli.outputs.cache-hit != 'true'
         run: |
           cd g3man
-          curl -L -o UndertaleModCli.zip https://github.com/UnderminersTeam/UndertaleModTool/releases/download/0.8.4.1/UTMT_CLI_v0.8.4.1-Windows.zip
+          curl -L -o UndertaleModCli.zip https://github.com/UnderminersTeam/UndertaleModTool/releases/download/0.9.2.0/UTMT_CLI_v0.9.2.0-Windows.zip
           
         # According to the docs the cache is publically accessible
         # so alongside the game files being stored in a secret link, I've also encrypted them
@@ -69,12 +69,12 @@ jobs:
         uses: actions/cache@v5
         with:
           path: g3man/g3man-executable.zip
-          key: g3man-9
+          key: g3man-10
       - name: Download g3man
         if: steps.cache-g3man.outputs.cache-hit != 'true'
         run: |
           cd g3man
-          curl -L -o g3man-executable.zip https://github.com/skirlez/g3man/releases/download/9/g3man-windows-amd64.zip
+          curl -L -o g3man-executable.zip https://github.com/skirlez/g3man/releases/download/10.1.0/g3man-windows-amd64.zip
 
       - uses: actions/setup-python@v6
         with:

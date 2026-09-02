@@ -359,7 +359,7 @@ user_config_template = """// This file is the user config. This file is personal
 {
 	// Fill this part out if you want to build GameMaker (gms2 and above) projects.
 	"gms2": {
-		// Linux: Likely is /home/USER/.local/share/GameMakerStudio-Beta/Cache
+		// Linux: Likely is /home/USER/.local/share/GameMakerStudio2-Beta/Cache
 		// Windows: Likely is C:/ProgramData/GameMakerStudio2/Cache
 		"cache_path": "",
 	},
@@ -370,19 +370,33 @@ user_config_template = """// This file is the user config. This file is personal
 		// https://github.com/skirlez/g3man/releases		
 		"g3man_path": "",
 		
+		// The path to the folder of the game you're modding.
 		"game_path": "",
 
-		// The name of the new datafile g3man will put in the game folder, with mods applied to it.
-		"output_datafile_name": "data.win",
-		
-		// Path to the game's clean/unmodified/vanilla datafile.
-		// Take notice: It is recommended to not just put the game's datafile (data.win) here, it can easily get modified
-		// by accident. It's better to copy the clean version of it elsewhere, and provide the path to that location.
+		// The relative path to the datafile from the game's folder.
+		// For Windows games, this is just "data.win".
+		"datafile_name": "data.win",
+
+		// Path to a clean/unmodified/vanilla copy of the game's datafile.
+		// Take notice: If you put the game's datafile here directly, you need to make sure it won't get
+		// modified by anything else. It's better to copy the clean version of it elsewhere, and provide the path to that location.
+		// You can also use g3man's own copy in (path to game)/g3man/clean_data.win
 		"clean_datafile_path": "",
+
+		// If you want, you can set this flag to true,
+		// and then you'll be able to launch the game directly instead of through frida.
+		"overwrite_game_files": false,
+
+		// If overwrite_game_files is false, you must launch the game with frida, using the `-s` flag with `apply`.
+		// The supported types are "executable" or "steam". See https://github.com/skirlez/frida/wiki/User-Config#applylaunch_type
+		"launch_type": "executable",
+		"launch_options" : {
+			"path": "(game exe name)"
+		}
 	},
 
 	"check_for_updates": true,  
-	"format_version": 2
+	"format_version": 3
 }
 """
 
@@ -401,7 +415,8 @@ class UserConfig:
 		g3man_path: str
 		game_path: str
 		clean_datafile_path: str
-		output_datafile_name: str = field(default="g3man_data.win", metadata={"pass_through": non_blank_string, "optional": True})
+		datafile_name: str = field(default="data.win", metadata={"pass_through": non_blank_string, "optional": True})
+		overwrite_game_files: bool = field(default=True, metadata={"optional": True})
 		@dataclass
 		class ExeLaunchOptions:
 			path: str
@@ -729,11 +744,6 @@ def build_gamemaker_project(
 			for entry in outputs:
 				if entry != f"{project_name}.{GMAC_DATAFILE_EXT}":
 					shutil.move(f"{outputs_folder}/{entry}", f"{outputs_folder}/included_files")
-		else:
-			if (build_options.included_files_export_path is not None):
-				raise FridaException(
-									"Build error: Project config has \"build.options.included_files_export_path\" set"
-									f" to {build_options.included_files_export_path}, but the build produced no included files.")
 			
 		shutil.move(f"{outputs_folder}/{project_name}.{GMAC_DATAFILE_EXT}", f"{outputs_folder}/datafile")
 			
@@ -797,23 +807,37 @@ def pack_project(cli_frida_root: str, out_mods_folder: str, frida_root: str, pro
 			if os.path.isdir(export_path):
 				export_path += "/mod_data.win"
 			shutil.copy(f"{gmac_results}/datafile", export_path)
-			if options.included_files_export_path is not None:
-				if not os.path.exists(f"{gmac_results}/included_files"):
-					raise FridaException(f"Cannot package this project: Included files folder is missing")
-				shutil.copytree(f"{gmac_results}/included_files", f"{out_mods_folder}/{options.included_files_export_path}", dirs_exist_ok=True, copy_function=required_symlink_copy_func)
+
+			path_set = options.included_files_export_path is not None
+			included_files_exist = os.path.exists(f"{gmac_results}/included_files")
+
+			if not included_files_exist:
+				if not path_set:
+					return
+				else:
+					print(f"Warning: Project config has \"build.options.included_files_export_path\" set to {options.included_files_export_path}, but the build produced no included files.")
+			else:
+				if not path_set:
+					print(f"Warning: Project config has \"build.options.included_files_export_path\" unset, but the build produced some included files.")
+					print(f"The included files produced are: {os.listdir(f"{gmac_results}/included_files")}")
+					print("Please set the option if you'd like to package these files.")
+				else:
+					shutil.copytree(f"{gmac_results}/included_files", f"{out_mods_folder}/{options.included_files_export_path}", dirs_exist_ok=True, copy_function=required_symlink_copy_func)
+			
 
 
 def pack_subroutine(cli_frida_root: str, out_profile_folder : str, frida_root: str, project_config: ProjectConfig, 
-		dependency_graph: dict[ProjectConfig, list[Project]], linkbase=False):
+		dependency_graph: dict[ProjectConfig, list[Project]], should_pack_dependencies, linkbase=False):
 	print(f"Packing: {project_config.name}")
 	pack_project(cli_frida_root, 
 					out_profile_folder,
 					frida_root,
 					project_config,
 				 	linkbase=linkbase)
-
+	if not should_pack_dependencies:
+		return
 	for dependency in dependency_graph.get(project_config, []):
-		pack_subroutine(cli_frida_root, out_profile_folder, dependency.frida_root, dependency.config, dependency_graph, linkbase=linkbase)
+		pack_subroutine(cli_frida_root, out_profile_folder, dependency.frida_root, dependency.config, dependency_graph, project_config.fetch.recursive, linkbase=linkbase)
 
 
 def pack_routine(cli_frida_root: str, project_config: ProjectConfig, dependency_graph : dict[ProjectConfig, list[Project]], linkbase=False):
@@ -823,7 +847,7 @@ def pack_routine(cli_frida_root: str, project_config: ProjectConfig, dependency_
 	if os.path.isdir(out_folder):
 		shutil.rmtree(out_folder)
 	os.makedirs(out_folder, exist_ok=True)
-	pack_subroutine(cli_frida_root, out_mods_folder, cli_frida_root, project_config, dependency_graph, linkbase=linkbase)
+	pack_subroutine(cli_frida_root, out_mods_folder, cli_frida_root, project_config, dependency_graph, should_pack_dependencies=True, linkbase=linkbase)
 
 	profile_json = make_profile_json_dict(project_config.profile)
 	
@@ -876,16 +900,17 @@ def publish_as_zip(cli_frida_root, project_config: ProjectConfig):
 
 ### applying mod ###
 
+
 def make_game_json_dict(apply: UserConfig.Apply):
 	p = {}
-	p["format_version"] = 2
+	p["format_version"] = 3
 	p["display_name"] = ""
 	p["internal_name"] = ""
-	p["datafile_name"] = ""
-
+	p["datafile_name"] = apply.datafile_name
 	p["executable_type"] = 0
 	p["executable_path"] = ""
 	p["executable_steam_app_id"] = -1
+	p["overwrite_game_files"] = apply.overwrite_game_files
 	match type(apply.launch_options):
 		case UserConfig.Apply.ExeLaunchOptions:
 			assert type(apply.launch_options) is UserConfig.Apply.ExeLaunchOptions
@@ -895,9 +920,7 @@ def make_game_json_dict(apply: UserConfig.Apply):
 			assert type(apply.launch_options) is UserConfig.Apply.SteamLaunchOptions
 			p["executable_type"] = 1
 			p["executable_steam_app_id"] = apply.launch_options.app_id
-	p["output_datafile_name"] = apply.output_datafile_name
 	return p
-
 	
 def apply_routine(cli_frida_root, apply_config: UserConfig.Apply, launch: bool):
 	game_json = make_game_json_dict(apply_config)
