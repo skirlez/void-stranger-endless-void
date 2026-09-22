@@ -505,6 +505,18 @@ enum wall_types {
 	size
 }
 
+
+// previous placed tile for the wall autotiling system
+// 
+// it is reset to noone when mouse button is released so that autotile 
+// only works as long as you're holding the left mouse button
+previous_tile = noone  // {<state>, <row>, <col>}
+
+// direction of the previous placed tile for the wall autotiling system
+// 
+// also reset to noone when mouse button is released
+previous_wall_direction = noone // WallDirection
+
 function make_wall_tile(name, tid, type) {
 	var spr = make_sprite_from_tileset(get_wall_type_tileset(type), 4)
 	var tile = new editor_tile(name, spr, tid, no_obj, "Floor");
@@ -512,12 +524,55 @@ function make_wall_tile(name, tid, type) {
 		draw_set_color(c_white)
 		draw_tile(get_wall_type_tileset(tile_state.tile.wall_type), tile_state.properties.ind, 0, j * 16, i * 16)	
 	}
+
+	// place functions with autotiling system when the left mouse button is held
+	// 
+	// two cases are not handled:
+	// - corners facing outside: because you can't place a tile outside (or on the UI) and a tile is 
+	//   required to be placed to update the previous one
+	// - ending on a corner: the current tile is always a vertical or horizontal wall. 
+	//   In most cases this is not a problem but if you want a wall with only corners (for example, a 2x2 square wall),
+	//   then one of the corners has to be placed manually
+	tile.place_function = function(tile_state, i, j) {
+		var current_tile = {
+			state : tile_state,
+			row : i,
+			col : j,
+		};
+
+		// check if left mouse button is actually held because we don't want
+		// to autotile with the rectangle tool (with right click)
+		//
+		// maybe there is a cleaner way to do it...
+		if previous_tile != noone && ev_mouse_held() {
+			var wall_direction = get_wall_direction(i, j, previous_tile.row, previous_tile.col);
+			if wall_direction != noone {
+
+				// update the previous tile before the tile we're currently trying to place
+				// the current tile needs the updated previous tile before updating itself
+				previous_tile.state.properties.ind = get_previous_wall_tile_ind(previous_tile.state, wall_direction, previous_wall_direction)
+				var new_ind = get_current_wall_tile_ind(current_tile.state, previous_tile.state, wall_direction)	
+				
+				
+				if new_ind != tile_state.properties.ind {
+					tile_state.properties.ind = new_ind;
+					global.held_tile_state = new tile_with_state(tile_state.tile, struct_copy(tile_state.properties));
+				}
+			}
+			previous_wall_direction = wall_direction
+		}
+
+		previous_tile = current_tile;
+		return tile_state;
+	}
+
 	tile.zed_function = function(tile_state) {
 		new_window(10, 4.5, agi("obj_ev_wall_window"), {
 			type : tile_state.tile.wall_type,	
 		})	
 		global.mouse_layer = 1
 	}
+
 	tile.wall_type = type;
 	
 	tile.properties_generator = function() {

@@ -468,6 +468,7 @@
     {"id":{"name":"obj_ev_pack_node","path":"objects/obj_ev_pack_node/obj_ev_pack_node.yy",},},
     {"id":{"name":"msc_dungeongroove","path":"sounds/msc_dungeongroove/msc_dungeongroove.yy",},},
     {"id":{"name":"spr_ev_ls_border","path":"sprites/spr_ev_ls_border/spr_ev_ls_border.yy",},},
+    {"id":{"name":"ev_autotile_wall","path":"scripts/ev_autotile_wall/ev_autotile_wall.yy",},},
     {"id":{"name":"spr_jb","path":"sprites/spr_jb/spr_jb.yy",},},
     {"id":{"name":"ev_log","path":"scripts/ev_log/ev_log.yy",},},
     {"id":{"name":"snd_logo","path":"sounds/snd_logo/snd_logo.yy",},},

@@ -367,6 +367,10 @@ else
 if mouse_check_button_released(mb_left) {
 	global.mouse_held = false;	
 	global.mouse_released = true;
+
+	// release the mouse button -> stop wall autotiling
+	previous_tile = noone
+	previous_wall_direction = noone
 }
 else
 	global.mouse_released = false;
@@ -398,5 +402,4 @@ if global.is_merged {
 if(global.death_count > 0){
 	global.death_frames += 1
 }
-
 

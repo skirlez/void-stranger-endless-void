@@ -429,6 +429,7 @@
     {"name":"obj_ev_pack_node","order":61,"path":"objects/obj_ev_pack_node/obj_ev_pack_node.yy",},
     {"name":"msc_dungeongroove","order":3,"path":"sounds/msc_dungeongroove/msc_dungeongroove.yy",},
     {"name":"spr_ev_ls_border","order":23,"path":"sprites/spr_ev_ls_border/spr_ev_ls_border.yy",},
+    {"name":"ev_autotile_wall","order":59,"path":"scripts/ev_autotile_wall/ev_autotile_wall.yy",},
     {"name":"spr_jb","order":44,"path":"sprites/spr_jb/spr_jb.yy",},
     {"name":"ev_log","order":35,"path":"scripts/ev_log/ev_log.yy",},
     {"name":"snd_logo","order":9,"path":"sounds/snd_logo/snd_logo.yy",},
