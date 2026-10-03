@@ -13,7 +13,10 @@ if global.void_radio_on {
 		ev_play_void_radio()
 	}
 }
-if ((ev_mouse_pressed() && global.instance_touching_mouse == noone) || mouse_check_button_pressed(mb_middle)) 
+var clicked_background = !instance_exists(global.instance_touching_mouse)
+			|| global.instance_touching_mouse.object_index == agi("obj_ev_pack_line_drawer")
+			
+if (ev_mouse_pressed() && clicked_background) || mouse_check_button_pressed(mb_middle) 
 		&& (global.mouse_layer == 0 || selected_thing == pack_things.wrench) {
 	dragging_camera = true;
 	frames_since_drag = -1;
@@ -39,6 +42,7 @@ if dragging_camera {
 	
 	camera_set_view_pos(view_camera[0], target_x, target_y)
 	
+	cull(target_x, target_y, cam_width, cam_height)
 }
 
 
@@ -223,3 +227,39 @@ if placechanger_copying_timer > 0 {
 if pack_arrow_boost <= pack_arrow_boost_max {
 	pack_arrow_boost = lerp(pack_arrow_boost, pack_arrow_boost_max, 0.06)
 }
+
+function get_pack_line_arrow_progress() {
+	var bpm = ev_get_track_bpm(global.music_file, audio_sound_get_track_position(global.music_inst));
+	var t;
+	if bpm != -1 && ev_is_music_playing(global.music_file) {
+		var beat = 480 / bpm
+		var seconds = audio_sound_get_track_position(global.music_inst);
+		var fake_seconds = ev_get_real_track_start(seconds);
+		seconds -= fake_seconds;
+		t = (seconds % beat) / beat;
+	}
+	else {
+		t = global.editor_time % 200 / 200;
+	}
+	
+	t += global.pack_editor.pack_arrow_boost;
+	return t % 1;
+}
+
+function get_pack_line_arrow_scale(t) {
+	// roots of sin x give us a sort of "rectangular" curve from 0-pi, which is what we want -
+	// very quickly going to a near 1 value at the start and very quickly dropping off at the end
+	// t is between 0-1 so we multiply by pi
+	return power(sin(t * pi), 1/3)
+}
+
+
+global.pack_arrow_progress = get_pack_line_arrow_progress()
+global.pack_number_progress = global.pack_arrow_progress - 0.15
+if global.pack_number_progress < 0
+	global.pack_number_progress += 1
+	
+	
+global.pack_arrow_scale = get_pack_line_arrow_scale(global.pack_arrow_progress)
+global.pack_number_scale = get_pack_line_arrow_scale(global.pack_number_progress)
+

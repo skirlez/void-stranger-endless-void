@@ -328,20 +328,20 @@ if brand != 0 {
 if name != "" {
 	if (!surface_exists(name_surface)) {
 		var txt = name;
-		name_surface = surface_create((string_width(txt) + 2), (string_height(txt) + 2));	
+		draw_set_font(global.ev_shadow_font)
+		name_surface = surface_create(string_width(txt) + 1, string_height(txt) + 1);	
 		surface_set_target(name_surface)
 		draw_clear_alpha(c_black, 0)
 		draw_set_halign(fa_left)
 		draw_set_valign(fa_top)
 		draw_set_color(c_white)
-		draw_set_font(global.ev_font)
-		draw_text_shadow(2, 1, txt, c_black)
+		draw_text_shadow(0, 0, txt, c_black)
 		surface_reset_target()
 	}
 
 
 	
-	draw_set_font(global.ev_font)
+	draw_set_font(global.ev_shadow_font)
 	var size = 1
 	var text_width = string_width(name);
 	if (text_width > sprite_width) { 

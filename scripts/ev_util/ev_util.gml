@@ -74,6 +74,13 @@ function ev_array_get_index(arr, value) {
 	}
 	return -1;
 }
+function ev_array_get_first_index(arr, predicate) {
+	for (var i = 0; i < array_length(arr); i++) {
+		if (predicate(arr[@ i]))
+			return i;
+	}
+	return -1;
+}
 function ev_array_remove(arr, value) {
 	for (var i = 0; i < array_length(arr); i++) {
 		if (arr[@ i] == value) {

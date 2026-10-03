@@ -1,13 +1,13 @@
 
 
-function ev_draw_cube(sprite, subimg, draw_x, draw_y, size, spin_h, spin_v) {
+function ev_draw_cube(sprite, subimg, draw_x, draw_y, size, spin_h, spin_v, optimize_opaque = true) {
 	static recycled_sprite_array = array_create(6)
 	static recycled_subimg_array = array_create(6)
 	for (var i = 0; i < 6; i++) {
 		recycled_sprite_array[i] = sprite;
 		recycled_subimg_array[i] = subimg;
 	}
-	ev_draw_cube_multisprite(recycled_sprite_array, recycled_subimg_array, draw_x, draw_y, size, spin_h, spin_v);
+	ev_draw_cube_multisprite(recycled_sprite_array, recycled_subimg_array, draw_x, draw_y, size, spin_h, spin_v, optimize_opaque);
 	
 }
 
@@ -15,7 +15,7 @@ function ev_draw_cube(sprite, subimg, draw_x, draw_y, size, spin_h, spin_v) {
 // modified version of http://www.davetech.co.uk/gamemakercubeoutline to have textures.
 
 // order of sprites/subimgs, when facing forward: front, back, left, right, top, bottom
-function ev_draw_cube_multisprite(sprites, subimgs, draw_x, draw_y, size, spin_h, spin_v) {
+function ev_draw_cube_multisprite(sprites, subimgs, draw_x, draw_y, size, spin_h, spin_v, optimize_opaque) {
 	spin_h %= 1;
 	spin_v %= 1;
 	
@@ -62,13 +62,12 @@ function ev_draw_cube_multisprite(sprites, subimgs, draw_x, draw_y, size, spin_h
 	];
 	
 	array_sort(faces, function (face1, face2) {
-		return (ev_get_average_face_z(face1) < ev_get_average_face_z(face2) ? 1 : -1);
+		return (ev_get_z_sum(face1) < ev_get_z_sum(face2) ? 1 : -1);
 	})
-	for (var i = 0; i < array_length(faces); i++) {
+	for (var i = optimize_opaque * 3; i < array_length(faces); i++) {
 		ev_draw_face(draw_x, draw_y, size, faces[i]);
 		delete faces[i];
 	}
-	
 }
 
 
@@ -86,7 +85,7 @@ function ev_cube_face(p1, p2, p3, p4, sprite, subimg) constructor {
 	self.subimg = subimg;
 }
 
-function ev_get_average_face_z(face) {
-	return (face.p1[2] + face.p2[2] + face.p3[2] + face.p4[2]) / 4
+function ev_get_z_sum(face) {
+	return (face.p1[2] + face.p2[2] + face.p3[2] + face.p4[2])
 }
 

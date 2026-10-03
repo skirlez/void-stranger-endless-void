@@ -11,15 +11,20 @@ if (room == global.pack_editor_room) {
 	else
 		ev_stop_music()
 		
-	zoom = remember_zoom;
-	calculate_zoom()
-	camera_set_view_pos(view_camera[0], remember_camera_x, remember_camera_y)
-
 
 
 	place_pack_into_room(global.pack)
 	ds_map_clear(node_state_to_id_map)
 	selected_thing = pack_things.nothing
+	
+	zoom = remember_zoom;
+	calculate_zoom(false)
+	camera_set_view_pos(view_camera[0], remember_camera_x, remember_camera_y)
+	cull(remember_camera_x, remember_camera_y, 
+		camera_get_view_width(view_camera[0]),
+		camera_get_view_height(view_camera[0]))
+	
+
 	
 	// exit creates this when you use it and it does persist so we Kill It
 	if global.is_merged

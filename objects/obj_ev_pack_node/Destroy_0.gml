@@ -1,1 +1,2 @@
-node_instance_destroy()
+ds_map_delete(global.pack_editor.node_id_to_instance_map, node_id)
+instance_destroy(line_drawer)

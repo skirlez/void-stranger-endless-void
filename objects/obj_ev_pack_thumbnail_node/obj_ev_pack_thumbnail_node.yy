@@ -2,12 +2,12 @@
   "resourceType": "GMObject",
   "resourceVersion": "1.0",
   "name": "obj_ev_pack_thumbnail_node",
-  "eventList": [
-    {"resourceType":"GMEvent","resourceVersion":"1.0","name":"","collisionObjectId":null,"eventNum":0,"eventType":0,"isDnD":false,},
-  ],
+  "eventList": [],
   "managed": true,
   "overriddenProperties": [
     {"resourceType":"GMOverriddenProperty","resourceVersion":"1.0","name":"","objectId":{"name":"obj_ev_pack_node","path":"objects/obj_ev_pack_node/obj_ev_pack_node.yy",},"propertyId":{"name":"text","path":"objects/obj_ev_pack_node/obj_ev_pack_node.yy",},"value":"Thumbnail",},
+    {"resourceType":"GMOverriddenProperty","resourceVersion":"1.0","name":"","objectId":{"name":"obj_ev_pack_node","path":"objects/obj_ev_pack_node/obj_ev_pack_node.yy",},"propertyId":{"name":"max_exits","path":"objects/obj_ev_pack_node/obj_ev_pack_node.yy",},"value":"1",},
+    {"resourceType":"GMOverriddenProperty","resourceVersion":"1.0","name":"","objectId":{"name":"obj_ev_pack_node","path":"objects/obj_ev_pack_node/obj_ev_pack_node.yy",},"propertyId":{"name":"can_connect_to_me","path":"objects/obj_ev_pack_node/obj_ev_pack_node.yy",},"value":"False",},
   ],
   "parent": {
     "name": "Objects",
@@ -30,10 +30,7 @@
   "physicsShape": 1,
   "physicsShapePoints": [],
   "physicsStartAwake": true,
-  "properties": [
-    {"resourceType":"GMObjectProperty","resourceVersion":"1.0","name":"display_inst","filters":[],"listItems":[],"multiselect":false,"rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"value":"noone","varType":0,},
-    {"resourceType":"GMObjectProperty","resourceVersion":"1.0","name":"layer_num","filters":[],"listItems":[],"multiselect":false,"rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"value":"0","varType":0,},
-  ],
+  "properties": [],
   "solid": false,
   "spriteId": {
     "name": "spr_ev_thumbnail_node",

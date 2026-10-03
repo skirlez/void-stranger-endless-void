@@ -39,10 +39,10 @@ function place_pack_into_room(pack) {
 			if node_state.node == global.pack_editor.level_node {
 				// we have to check this as it could change when editing a level from the pack editor
 				if array_length(instance.exit_instances) < level_get_exit_count(node_state.properties.level)
-					array_push(instance.exit_instances, exit_instance)
+					connect_node_instances(instance, exit_instance)
 			}
 			else
-				array_push(instance.exit_instances, exit_instance)
+				connect_node_instances(instance, exit_instance)
 		}
 		return instance;
 	}

@@ -1,57 +1,3 @@
-/*
-Most of the logic for all nodes is in node_instance functions, but it could be taken out into this object's events
-(it's only like this because previously the level node couldn't inherit from the node object
-so this should probably be done now)
-*/
-function node_instance_setup(max_exits = 999, can_connect_to_me = true, center_x_offset = 0, center_y_offset = 0, animate = false) {
-	id.max_exits = max_exits;
-	id.can_connect_to_me = can_connect_to_me;
-	id.center_x_offset = center_x_offset;
-	id.center_y_offset = center_y_offset;
-
-	id.animate = animate;
-	image_speed = 0.1
-	
-	center_x = x + center_x_offset;
-	center_y = y + center_y_offset;
-	mouse_moving = false;
-	connecting_exit = false;
-	exit_instances = [];
-	unselectable = false;
-	being_judged = true;
-	in_menu = false;
-	spawn_picked_up = false;
-	node_type = global.object_node_map[? object_index];
-	shake_seconds = 0;
-	shake_x_offset = 0;
-	
-	spin_time_h = 0;
-	spin_time_v = 0;
-	spin_h = 0
-	spin_v = 0
-	
-	scale_x_start = image_xscale
-	scale_y_start = image_yscale
-	center_x_offset_start = center_x_offset;
-	center_y_offset_start = center_y_offset;
-	
-	no_culling = false;
-	cull_left = 35;
-	cull_right = 35;
-	cull_top = 25;
-	cull_bottom = 25;
-	
-	x_when_started_moving = x;
-	y_when_started_moving = y;
-	
-	if !variable_instance_exists(id, "node_id") {
-		global.pack_editor.last_nid++;
-		node_id = global.pack_editor.last_nid
-	}
-	ds_map_set(global.pack_editor.node_id_to_instance_map, node_id, id)
-
-}
-
 function move_node_to_position(instance, new_x, new_y) {
 	with (instance) {
 		x = new_x
@@ -67,6 +13,11 @@ function move_node_to_position(instance, new_x, new_y) {
 			x = room_width - sprite_width
 		center_x = x + center_x_offset
 		center_y = y + center_y_offset
+		
+		line_drawer.update()
+		for (var i = 0; i < array_length(instance.connected_to_me); i++) {
+			instance.connected_to_me[i].line_drawer.update()
+		}
 	}
 }
 
@@ -160,7 +111,7 @@ function node_instance_step() {
 				else {
 					static start_connect_sound = agi("snd_ev_node_start_connect")
 					audio_play_sound(start_connect_sound, 10, false, global.pack_zoom_gain, 0, random_range(0.9, 1.1));	
-					connecting_exit = true;
+					global.pack_editor.node_instance_connecting = id
 				}
 			}
 		}
@@ -224,13 +175,10 @@ function node_instance_step() {
 							static not_possible_sound = agi("snd_lorddamage")
 							// check if this is a valid swap
 							
-							var connected_to_one = get_nodes_connected_to_node(one)
-							var connected_to_two = get_nodes_connected_to_node(two)
-							
 							if one.max_exits < array_length(two.exit_instances)
 									|| two.max_exits < array_length(one.exit_instances)
-									|| (!one.can_connect_to_me && array_length(connected_to_two) > 0)
-									|| (!two.can_connect_to_me && array_length(connected_to_one) > 0) {
+									|| (!one.can_connect_to_me && array_length(two.connected_to_me) > 0)
+									|| (!two.can_connect_to_me && array_length(one.connected_to_me) > 0) {
 								if do_effects { 
 									one.shake_seconds = 0.5;
 									two.shake_seconds = 0.5;
@@ -239,27 +187,35 @@ function node_instance_step() {
 								return;
 							}
 							
-							// swap outgoing connections
+							function change_world_perception(node, other_node) {
+								for (var i = 0; i < array_length(node.exit_instances); i++) {
+									var exit_instance = node.exit_instances[i]
+									if exit_instance == other_node
+										continue;
+									var index = ev_array_get_index(exit_instance.connected_to_me, node)
+									exit_instance.connected_to_me[index] = other_node
+								}
+								for (var i = 0; i < array_length(node.connected_to_me); i++) {
+									var connected_to_node = node.connected_to_me[i]
+									if connected_to_node == other_node
+										continue;
+									var index = ev_array_get_index(connected_to_node.exit_instances, node)
+									connected_to_node.exit_instances[index] = other_node
+								}
+							}
+							
+							// change how the world perceives us
+							change_world_perception(one, two)
+							change_world_perception(two, one)
+							
+							// change how we perceive the world
 							var temp_exit_instances = two.exit_instances
 							two.exit_instances = one.exit_instances;
 							one.exit_instances = temp_exit_instances;
 							
-
-							// swap incoming connections
-							function swap_incoming_connection(node_instance, old_instance, new_instance) {
-								for (var i = 0; i < array_length(node_instance.exit_instances); i++) {
-									if node_instance.exit_instances[i] == old_instance {
-										node_instance.exit_instances[i] = new_instance
-										return;
-									}
-								}
-							}
-							for (var i = 0; i < array_length(connected_to_one); i++) {
-								swap_incoming_connection(connected_to_one[i], one, two)
-							}
-							for (var i = 0; i < array_length(connected_to_two); i++) {
-								swap_incoming_connection(connected_to_two[i], two, one)
-							}
+							var temp_connected_to_me = two.connected_to_me
+							two.connected_to_me = one.connected_to_me
+							one.connected_to_me = temp_connected_to_me
 							
 							// imagine a situation where a and b are connected to each other, and each other only.
 							// swapping them like how it is done above, where the outgoing nodes are just traded,
@@ -267,7 +223,11 @@ function node_instance_step() {
 							function swap_to_other_if_connected_to_self(me, other_node) {
 								for (var i = 0; i < array_length(me.exit_instances); i++) {
 									if me.exit_instances[i] == me
-										me.exit_instances[@ i] = other_node;
+										me.exit_instances[i] = other_node;;
+								}
+								for (var i = 0; i < array_length(me.connected_to_me); i++) {
+									if me.connected_to_me[i] == me
+										me.connected_to_me[i] = other_node	
 								}
 							}
 							swap_to_other_if_connected_to_self(one, two)
@@ -339,11 +299,11 @@ function node_instance_step() {
 		}
 		spawn_picked_up = false;
 	}
-	if connecting_exit {
+	if global.pack_editor.node_instance_connecting == id {
 		if ev_mouse_held() || global.pack_editor.selected_thing != pack_things.nothing
-			connecting_exit = false;	
+			global.pack_editor.node_instance_connecting = noone;	
 		else if ev_mouse_right_released() {
-			connecting_exit = false
+			global.pack_editor.node_instance_connecting = noone
 			var node_inst = get_node_at_position(mouse_x, mouse_y)
 			if instance_exists(node_inst) {
 				if (!node_inst.can_connect_to_me) {
@@ -356,7 +316,7 @@ function node_instance_step() {
 				}
 				else if (!ev_array_contains(exit_instances, node_inst)) {
 					// connection successful
-					array_push(exit_instances, node_inst)
+					connect_node_instances(id, node_inst)
 					var connect_sound = agi("snd_ev_node_connect")
 					audio_play_sound(connect_sound, 10, false, global.pack_zoom_gain, 0, random_range(0.9, 1.1))
 					
@@ -366,16 +326,12 @@ function node_instance_step() {
 					
 					global.pack_editor.add_undo_action(function (args) {
 						var instance = ds_map_find_value(global.pack_editor.node_id_to_instance_map, args.node_id)
-						for (var i = 0; i < array_length(instance.exit_instances); i++) {
-							var exit_instance = instance.exit_instances[i]
-							if exit_instance.node_id == args.exit_id {
-								array_delete(instance.exit_instances, i, 1)
-								if args.old_bount != noone {
-									exit_instance.properties.level.bount = args.old_bount
-									exit_instance.sync_display_level();
-								}
-								return;
-							}
+						var exit_instance = ds_map_find_value(global.pack_editor.node_id_to_instance_map, args.exit_id)
+						disconnect_node_instances(instance, exit_instance)
+						
+						if args.old_bount != noone {
+							exit_instance.properties.level.bount = args.old_bount
+							exit_instance.sync_display_level();
 						}
 					}, {
 						node_id : node_id,
@@ -412,18 +368,13 @@ function node_instance_step() {
 		shake_seconds -= 1/60;
 		shake_x_offset = sin(16 * shake_seconds * pi) * 3;
 	}
-	visible = no_culling || !(x < camera_get_view_x(view_camera[0]) - cull_left
-		|| x > camera_get_view_x(view_camera[0]) + camera_get_view_width(view_camera[0]) + cull_right
-		|| y < camera_get_view_y(view_camera[0]) - cull_top
-		|| y > camera_get_view_y(view_camera[0]) + camera_get_view_height(view_camera[0]) + cull_bottom)
 }
 
-function node_instance_destroy() {
-	ds_map_delete(global.pack_editor.node_id_to_instance_map, node_id)	
-}
+
+
 
 function create_falling_arrow_and_number(node_instance, other_node_instance, index, total_exits) {
-	var t = get_pack_line_arrow_progress();
+	var t = global.pack_arrow_progress
 	instance_create_layer(
 		lerp(node_instance.center_x, other_node_instance.center_x, t),
 		lerp(node_instance.center_y, other_node_instance.center_y, t),
@@ -433,7 +384,7 @@ function create_falling_arrow_and_number(node_instance, other_node_instance, ind
 	var number = (index + 1) * more_than_one_exit
 	if number == 0
 		exit;
-	var t2 = get_pack_line_number_progress();
+	var t2 = global.pack_number_progress
 	instance_create_layer(
 		lerp(node_instance.center_x, other_node_instance.center_x, t2),
 		lerp(node_instance.center_y, other_node_instance.center_y, t2),
@@ -500,5 +451,21 @@ function add_undo_position_action(node_id, old_x, old_y) {
 		old_x : old_x,
 		old_y : old_y
 	})
+}
+
+function draw_placechanger_highlight() {
+	if global.pack_editor.node_instance_changing_places != id
+		return;
+	gpu_set_fog(true, c_black, 0, 1)
+	var increase = dsin(global.editor_time) / 8 + 0.25;
+	if node_type == global.pack_editor.level_node {
+		var scale = (image_xscale + image_yscale) / 2 + increase / 5;
+		draw_sprite_ext(agi("spr_ev_display"), 0, center_x - 112 * scale, center_y - 72 * scale, scale, scale, 0, c_white, 1)
+	}
+	else {
+		var scale = ((image_xscale + image_yscale) / 2) * 5	
+		ev_draw_cube(sprite_index, 0, x + shake_x_offset, y, scale + increase * 5, spin_h, spin_v)
+	}
+	gpu_set_fog(false, c_black, 0, 1)
 }
 

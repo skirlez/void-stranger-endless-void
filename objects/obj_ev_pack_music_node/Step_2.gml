@@ -1,0 +1,1 @@
+music_index = ds_map_find_value(global.music_names_to_index, properties.music)

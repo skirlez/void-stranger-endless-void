@@ -169,18 +169,20 @@ function create_displays() {
 	var count = 0;
 	
 	filtered_level_indices = get_filtered_level_indices();
-	
+	var selecting_packs = mode == level_selector_modes.packs
 	if array_length(filtered_level_indices) == 0 {
-		global.level_start = 0
+		global.editor.set_level_start(selecting_packs, global.online_mode, 0)
 		return;
 	}
-
-	if (global.level_start <= -1)
-		global.level_start = (array_length(filtered_level_indices) - 1) div 6;
-	else if (global.level_start * 6 >= array_length(filtered_level_indices))
-		global.level_start = 0;
+	var level_start = global.editor.get_level_start(selecting_packs, global.online_mode)
+	if (level_start <= -1)
+		level_start = (array_length(filtered_level_indices) - 1) div 6;
+	else if (level_start * 6 >= array_length(filtered_level_indices))
+		level_start = 0;
+	global.editor.set_level_start(selecting_packs, global.online_mode, level_start)
 	
-	var start = global.level_start * 6
+	
+	var start = level_start * 6
 	for (var i = start; i < array_length(filtered_level_indices) && count < 6; i++) {
 		var level_index = filtered_level_indices[i];
 		var lvl_string = levels[level_index];
@@ -253,19 +255,25 @@ search_box = instance_create_layer(112 - 30, 12, buttons_layer, agi("obj_ev_text
 search_box.depth--;
 add_child(search_box)
 
+function scroll(dir) {
+	var selecting_packs = mode == level_selector_modes.packs
+	var level_start = global.editor.get_level_start(selecting_packs, global.online_mode)
+	global.editor.set_level_start(selecting_packs, global.online_mode, level_start + dir)
+}
+
 var scroll_up = instance_create_layer(194, 61, buttons_layer, agi("obj_ev_executing_scroll_button"), {
 	image_index : 1,
 	func : function () {
-		global.level_start -= 1
-		with (agi("obj_ev_level_select")) {
+		with (window) {
+			scroll(-1)
 			create_displays()	
 		}	
 	},
 })
 var scroll_down = instance_create_layer(194, 95, buttons_layer, agi("obj_ev_executing_scroll_button"), {
 	func : function () {
-		global.level_start += 1
-		with (agi("obj_ev_level_select")) {
+		with (window) {
+			scroll(1)
 			create_displays()	
 		}	
 	},
@@ -275,7 +283,6 @@ add_child(scroll_down)
 
 
 function switch_internet_mode(new_mode) {
-	global.level_start = 0
 	if (new_mode == false) {
 		levels = offline_levels 
 		level_names = offline_level_names

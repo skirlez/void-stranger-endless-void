@@ -1,10 +1,16 @@
+event_inherited()
+
+// this is work that is done twice (unfortunately)
+// gamemaker doesn't provide very good facilities for inheritence
+
 image_xscale = global.level_node_display_scale
 image_yscale = global.level_node_display_scale
+center_x_offset = 112 * image_xscale
+center_y_offset = 72 * image_yscale
+set_scale_and_center_start()
+line_drawer.update()
 
-node_instance_setup(level_get_exit_count(properties.level), true, 112 * image_xscale, 72 * image_yscale)
-// no need
-no_culling = false;
-
+max_exits = level_get_exit_count(properties.level)
 
 display = instance_create_layer(x, y, "PackLevels", global.display_object, 
 { 

@@ -63,6 +63,9 @@ switch (type) {
 		touched_enemy_cube = false;
 		hit_sprite = noone;
 		var stranger = choose(0, 0, 0, 0, irandom_range(1, 2));
+		if room == global.pack_editor_room {
+			stranger = 0	
+		}
 		switch (stranger) {
 			case 0:
 				sprite_index = agi("spr_player_down");

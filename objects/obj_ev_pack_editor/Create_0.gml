@@ -30,8 +30,9 @@ enum pack_things {
 	play,
 	placechanger
 }
-
+node_instance_connecting = noone
 node_instance_changing_places = noone;
+
 placechanger_copying_sound = noone;
 placechanger_copying_timer = 0;
 placechanger_animation_instance = noone;
@@ -58,11 +59,16 @@ function on_menu_create() {
 	menu_remember_x = camera_get_view_x(view_camera[0])
 	menu_remember_y = camera_get_view_y(view_camera[0])
 	camera_set_view_pos(view_camera[0], 0, 0)	
-	camera_set_view_size(view_camera[0], 224, 144)	
+	camera_set_view_size(view_camera[0], 224, 144)
+	// we shouldn't see anything
+	cull(-224 * 10, -144 * 10, 224, 144)
 }
 function on_menu_destroy() {
-	calculate_zoom()
-	camera_set_view_pos(view_camera[0], menu_remember_x, menu_remember_y)	
+	calculate_zoom(false)
+	camera_set_view_pos(view_camera[0], menu_remember_x, menu_remember_y)
+	cull(menu_remember_x, menu_remember_y, 
+		camera_get_view_width(view_camera[0]),
+		camera_get_view_height(view_camera[0]))
 }
 
 global.level_node_display_scale = 0.2;
@@ -79,14 +85,13 @@ zoom_level_needed_to_be_directly_on_level = logn(zoom_factor, global.level_node_
 		
 last_possible_zoom = floor(logn(1.2, 3360 / 224))
 
-function calculate_zoom() {
+function calculate_zoom(do_culling = true) {
 	var mult = power(zoom_factor, zoom);
 	
 	var cam_width = 224 * mult;
 	var cam_height = 144 * mult
 	
 	if (cam_width > room_width || cam_height > room_height) {
-
 		zoom = last_possible_zoom
 		calculate_zoom()
 		return;
@@ -109,6 +114,24 @@ function calculate_zoom() {
 	var target_x = clamp(cam_x - change_x * mouse_uniform_x, 0, room_width - cam_width)
 	var target_y = clamp(cam_y - change_y * mouse_uniform_y, 0, room_height - cam_height)
 	camera_set_view_pos(view_camera[0], target_x, target_y)	
+	if do_culling
+		cull(target_x, target_y, cam_width, cam_height)
+}
+
+
+function cull(cam_x, cam_y, cam_width, cam_height) {
+	instance_deactivate_layer(layer_get_id("Nodes"))
+	instance_deactivate_layer(layer_get_id("PackLevels"))
+	instance_deactivate_layer(layer_get_id("Lines"))
+	instance_activate_object(node_instance_changing_places)
+	instance_activate_object(node_instance_connecting)
+	var margin = 200
+	
+	instance_activate_region(cam_x - margin,
+							cam_y - margin,
+							cam_x + cam_width + margin,
+							cam_y + cam_height + margin, 
+							true)
 }
 
 
@@ -527,4 +550,10 @@ function boost_pack_arrow() {
 	pack_arrow_boost = 0;
 }
 
+global.pack_arrow_progress = 0
+global.pack_number_progress = 0
+global.pack_arrow_scale = 1
+global.pack_number_scale = 1
+
 global.pack_level_preferred_music = global.music_names[1];
+

@@ -1,4 +1,2 @@
-node_instance_setup(1)
-
-
-cull_bottom = 40;
+event_inherited()
+music_index = 0

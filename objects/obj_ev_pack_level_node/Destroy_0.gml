@@ -1,3 +1,3 @@
-node_instance_destroy()
+event_inherited()
 if instance_exists(display)
 	instance_destroy(display)

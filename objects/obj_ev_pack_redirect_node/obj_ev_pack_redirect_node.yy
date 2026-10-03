@@ -2,12 +2,11 @@
   "resourceType": "GMObject",
   "resourceVersion": "1.0",
   "name": "obj_ev_pack_redirect_node",
-  "eventList": [
-    {"resourceType":"GMEvent","resourceVersion":"1.0","name":"","collisionObjectId":null,"eventNum":0,"eventType":0,"isDnD":false,},
-  ],
+  "eventList": [],
   "managed": true,
   "overriddenProperties": [
     {"resourceType":"GMOverriddenProperty","resourceVersion":"1.0","name":"","objectId":{"name":"obj_ev_pack_node","path":"objects/obj_ev_pack_node/obj_ev_pack_node.yy",},"propertyId":{"name":"text","path":"objects/obj_ev_pack_node/obj_ev_pack_node.yy",},"value":"Redirect",},
+    {"resourceType":"GMOverriddenProperty","resourceVersion":"1.0","name":"","objectId":{"name":"obj_ev_pack_node","path":"objects/obj_ev_pack_node/obj_ev_pack_node.yy",},"propertyId":{"name":"max_exits","path":"objects/obj_ev_pack_node/obj_ev_pack_node.yy",},"value":"1",},
   ],
   "parent": {
     "name": "Objects",

@@ -1,8 +1,5 @@
 event_inherited();
 
-max_exits = 1
-can_connect_to_me = false;
-
 function create_brand_sprite(brand) {
 	var brand_surface = surface_create(6, 6)
 	surface_set_target(brand_surface)

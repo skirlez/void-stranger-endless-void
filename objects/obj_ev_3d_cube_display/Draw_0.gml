@@ -79,9 +79,9 @@ if (global.selected_thing == thing_placeable
 		}
 			
 		if cube_type == cube_types.uniform
-			ev_draw_cube(sprite, 0, 27, draw_y, 7, spin_h, spin_v)		
+			ev_draw_cube(sprite, 0, 27, draw_y, 7, spin_h, spin_v, false)		
 		else if cube_type == cube_types.uniform_constant
-			ev_draw_cube(global.held_tile_state.tile.spr_ind, 0, 27, draw_y, 7, spin_h, spin_v)	
+			ev_draw_cube(global.held_tile_state.tile.spr_ind, 0, 27, draw_y, 7, spin_h, spin_v, false)	
 		else {
 			var spr;
 			if cube_type == cube_types.edge
@@ -94,7 +94,7 @@ if (global.selected_thing == thing_placeable
 			var black_bottom_sprite = agi("spr_ev_tile_hitbox");
 			ev_draw_cube_multisprite(
 				[edge_sprite, edge_sprite, edge_sprite, edge_sprite, spr,
-					black_bottom_sprite], [1, 1, 1, 1, 0, 0], 27, draw_y, 7, spin_h, spin_v)			
+					black_bottom_sprite], [1, 1, 1, 1, 0, 0], 27, draw_y, 7, spin_h, spin_v, false)			
 		}
 			
 	}

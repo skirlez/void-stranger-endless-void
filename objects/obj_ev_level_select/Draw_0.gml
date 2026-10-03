@@ -9,7 +9,7 @@ draw_sprite(agi("spr_ev_ls_border"), 0, 0, 0)
 
 var page_string;
 var page_max = (array_length(filtered_level_indices) - 1) div 6;
-var page = global.level_start;
+var page = global.editor.get_level_start(mode == level_selector_modes.packs, global.online_mode);
 page_string = string(page + 1) + "/" + string(page_max + 1);
 		
 draw_set_halign(fa_center)

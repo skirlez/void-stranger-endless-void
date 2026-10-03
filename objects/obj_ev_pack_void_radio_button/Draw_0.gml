@@ -2,6 +2,7 @@
 draw_set_color(c_white)
 draw_set_halign(fa_center)
 draw_set_valign(fa_middle)
+draw_set_font(global.ev_shadow_font)
 var s = 24; 
 // we're using a surface because it looks better for rotation with a shadow
 // (and there was a bug with draw_text_transformed specifically on VS' runtime version?)
@@ -16,34 +17,33 @@ if music_index == -1
 	txt = string_repeat(".", (global.editor_time div 4) % 3 + 1)
 else
 	txt = string(music_index)
-draw_shadow_generic(s div 2, s div 2, function (_x, _y, txt) {
-	var top;
-	var bottom;
-	if draw_get_color() == c_black {
-		top = c_black
-		bottom = c_black
-	}
-	else {
-		/*
-		var song_progress;
+
+var top;
+var bottom;
+if draw_get_color() == c_black {
+	top = c_black
+	bottom = c_black
+}
+else {
+	/*
+	var song_progress;
 	
-		var song_length = ev_get_real_track_end(global.music_file)
-		if song_length == 0
-			song_progress = 1;
-		else
-			song_progress = 
-				(audio_sound_get_track_position(global.music_inst) - ev_get_real_track_start(global.music_file))
-				/ (song_length - ev_get_real_track_start(global.music_file))
-		*/
-		// there was supposed to be an effect here...
-		// where the number would change color, from the bottom up, depending on how close the song is to ending
-		// but i couldn't get it working quite right using this function
-		top = c_white
-		bottom = c_white
-	}
+	var song_length = ev_get_real_track_end(global.music_file)
+	if song_length == 0
+		song_progress = 1;
+	else
+		song_progress = 
+			(audio_sound_get_track_position(global.music_inst) - ev_get_real_track_start(global.music_file))
+			/ (song_length - ev_get_real_track_start(global.music_file))
+	*/
+	// there was supposed to be an effect here...
+	// where the number would change color, from the bottom up, depending on how close the song is to ending
+	// but i couldn't get it working quite right using this function
+	top = c_white
+	bottom = c_white
+}
 		
-	draw_text_color(_x, _y, txt, top, top, bottom, bottom, 1)
-}, txt);
+draw_text_color(s div 2, s div 2, txt, top, top, bottom, bottom, 1)
 surface_reset_target()
 
 
@@ -61,8 +61,8 @@ if (global.void_radio_on) {
 	gpu_set_fog(true, c_white, 0, 1)
 	var increase = (1.1 + (dsin(global.editor_time) + 1) / 16);
 
-	ev_draw_cube(sprite_index, 0, x, y, image_xscale * cube_scale_multiplier * increase, spin_h, spin_v)
+	ev_draw_cube(sprite_index, 0, x, y, image_xscale * cube_scale_multiplier * increase, spin_h, spin_v, false)
 	gpu_set_fog(false, c_white, 0, 1)
 }
-ev_draw_cube(sprite_index, 0, x, y, image_xscale * cube_scale_multiplier, spin_h, spin_v)
+ev_draw_cube(sprite_index, 0, x, y, image_xscale * cube_scale_multiplier, spin_h, spin_v, false)
 

@@ -167,7 +167,7 @@ global.tileset_edge_dis = agi("tile_edges_true")
 global.select_sound = agi("snd_ev_select")
 
 global.ev_font = agi("fnt_text_12")
-
+global.ev_shadow_font = font_add_sprite(agi("spr_ev_shadow_font_temporary_until_shaders_work"), ord(" "), true, -1)
 
 return_tile_state_function = function(tile_state) { 
 	return tile_state 
@@ -1509,6 +1509,12 @@ global.music_names = ["", "msc_001", "msc_dungeon_wings", "msc_beecircle", "msc_
 	"msc_monstrail", "msc_endless", "msc_stg_extraboss", "msc_rytmi2", "msc_test2", "msc_voidpiano", "msc_finalapproach", "msc_universe",
 	"snd_ev_music_judgment_jingle", "snd_ev_music_determined_descent", "snd_ev_music_tamarind",  "snd_ev_music_outer_tamarind", "snd_ev_music_darkroom",
 	"snd_ev_music_hadean"]
+	
+	
+global.music_names_to_index = ds_map_create()
+for (var i = 0; i < array_length(global.music_names); i++) {
+	ds_map_set(global.music_names_to_index, global.music_names[i], i)	
+}
 
 // true when level being edited is from a pack and doesn't have a file
 global.editing_pack_level = false;
@@ -1725,8 +1731,17 @@ function play_back_to_editor_transition() {
 
 
 // used in obj_ev_level_select, is essentially the level/pack "page". we want this to be global so it persists
-global.level_start = 0;
-
+// the first index is for offline mode, the second is for online mode, third index is for packs
+global.level_start = [0, 0, 0];
+function get_level_start_index(pack, online) {
+	return 2 * pack | online
+}
+function set_level_start(pack, online, value) {
+	global.level_start[get_level_start_index(pack, online)] = value
+}
+function get_level_start(pack, online) {
+	return global.level_start[get_level_start_index(pack, online)]
+}
 
 global.online_mode = false;
 

@@ -1,4 +1,2 @@
-node_instance_setup()
+event_inherited()
 sprite_index = agi("spr_voider")
-animate = false;
-max_exits = 999;

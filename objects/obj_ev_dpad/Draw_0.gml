@@ -12,7 +12,7 @@ var draw_offset_x = spin_h * 35
 var draw_offset_y = spin_v * 35
 
 
-ev_draw_cube_multisprite(sprites_array, indices_array, x + draw_offset_x, y + draw_offset_y, scale, spin_h, spin_v)
+ev_draw_cube_multisprite(sprites_array, indices_array, x + draw_offset_x, y + draw_offset_y, scale, spin_h, spin_v, true)
 	
 draw_set_halign(fa_center)
 draw_set_valign(fa_middle)
