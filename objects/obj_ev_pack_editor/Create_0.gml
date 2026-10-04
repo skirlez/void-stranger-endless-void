@@ -83,7 +83,7 @@ zoom_level_needed_to_be_directly_on_level = logn(zoom_factor, global.level_node_
 // 224 * 1.2^zoom = room_width
 // zoom = log1.2(room_width / 224) 
 		
-last_possible_zoom = floor(logn(1.2, 3360 / 224))
+last_possible_zoom = floor(logn(zoom_factor, 3360 / 224))
 
 function calculate_zoom(do_culling = true) {
 	var mult = power(zoom_factor, zoom);

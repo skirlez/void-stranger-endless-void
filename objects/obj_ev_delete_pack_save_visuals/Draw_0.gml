@@ -1,7 +1,6 @@
 timer++;
 bg_alpha += 0.015
 draw_set_alpha(bg_alpha)
-
 draw_set_color(c_white)
 ev_draw_rectangle(0, 0, room_width, room_height, false)
 
@@ -24,6 +23,7 @@ if timer > 100 {
 	draw_set_alpha(text_alpha)
 	draw_set_halign(fa_center)
 	draw_set_halign(fa_middle)
+	draw_set_font(global.ev_font)
 	draw_set_color(c_gray)
 	var txt = "YOUR SAVE IS GETTING DELETED!!!!";
 	draw_text(room_width / 2 + rand[0] * jumparound,

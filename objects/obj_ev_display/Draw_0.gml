@@ -228,7 +228,7 @@ function draw_exit_numbers() {
 		if global.pack_editor.selected_thing = pack_things.hammer 
 		&& array_length(owner_node.exit_instances) > 0 {
 			var exit_number = 1;
-			draw_set_font(global.ev_font)
+			draw_set_font(global.ev_shadow_font)
 			draw_set_halign(fa_center)
 			draw_set_valign(fa_middle)
 			
@@ -259,15 +259,9 @@ function draw_exit_numbers() {
 						}
 						var pos_x = x + (j * 16 + 8) * image_xscale;
 						var pos_y = y + (i * 16 + 8) * image_yscale;
-						var unit_x = image_xscale;
-						var unit_y = image_yscale;
-						draw_set_color(c_black)
-						draw_exit_number(pos_x + unit_x, pos_y, text)
-						draw_exit_number(pos_x - unit_x, pos_y, text)
-						draw_exit_number(pos_x, pos_y + unit_y, text)
-						draw_exit_number(pos_x, pos_y - unit_y, text)
 						draw_set_color(color)
-						draw_exit_number(pos_x, pos_y, text)
+						// TODO: when we switch to shaders for shadows check if +0.3 is necessary
+						draw_exit_number(pos_x, pos_y + 0.3, text)
 					}
 					exit_number += is_tile_exit + is_object_exit
 				}

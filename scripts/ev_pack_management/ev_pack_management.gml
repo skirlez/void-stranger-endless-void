@@ -58,7 +58,7 @@ function place_pack_into_room(pack) {
 function convert_room_nodes_to_structs() {
 	var starting_node_states = []
 	
-	static root = agi("obj_ev_pack_root")
+	
 	
 	// creates and returns a node state struct for this node instance
 	// any nodes this node connects to will also have state structs created and linked.
@@ -83,22 +83,28 @@ function convert_room_nodes_to_structs() {
 		
 		return node_state;
 	}
-	var root_id = noone
-	with (root) {
-		root_id = id;
-		
+	
+	static root = agi("obj_ev_pack_root")
+	
+	var instances = get_all_node_instances()
+	var root_id;
+	for (var i = 0; i < array_length(instances); i++) {
+		if instances[i].object_index == root {
+			root_id = instances[i]
+			break;
+		}
 	}
 	
 	var map = ds_map_create()
-	var node_state = explore_node_and_convert_to_struct(root_id, map)
-	array_push(starting_node_states, node_state)
+	var root_node_state = explore_node_and_convert_to_struct(root_id, map)
+	array_push(starting_node_states, root_node_state)
 	
-	var instances = get_all_node_instances()
+	
 	for (var i = 0; i < array_length(instances); i++) {
 		var node_inst = instances[i];
 		if (ds_map_exists(map, node_inst))
 			continue;
-		node_state = explore_node_and_convert_to_struct(node_inst, map)
+		var node_state = explore_node_and_convert_to_struct(node_inst, map)
 		array_push(starting_node_states, node_state)
 	}
 	

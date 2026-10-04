@@ -17,6 +17,4 @@ ev_draw_rectangle(
 draw_set_color(c_white)
 draw_text_transformed(cam_x + x * scale_x, cam_y + y * scale_y, txt, scale_x, scale_y, 0)
 
-vspeed -= 0.3
-if vspeed < 0
-	vspeed = 0
+

@@ -11,6 +11,8 @@ function line_intersects_vertical(x1, y1, x2, y2, x3, y3, line_length) {
 }
 */
 
+
+// from testing, this function is pretty cheap and in most cases filters out a lot of lines
 function should_draw_pack_line(x1, y1, x2, y2) {
 	static obj = agi("obj_camera_hitbox")
 	return collision_line(x1, y1, x2, y2, obj, false, false)
@@ -19,6 +21,8 @@ function should_draw_pack_line(x1, y1, x2, y2) {
 
 
 function ev_draw_pack_line(x1, y1, x2, y2, number = 0) {
+	if !should_draw_pack_line(x1, y1, x2, y2)
+		return;
 	draw_set_color(c_black)
 	draw_line_width(x1, y1,	x2, y2, 2)
 	static arrow_sprite = agi("spr_ev_pack_arrow")
