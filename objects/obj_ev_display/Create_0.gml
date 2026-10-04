@@ -29,7 +29,7 @@ function switch_held_tile(tile_state) {
 
 
 
-function place_placeable(tile_i, tile_j, new_tile, properties = global.empty_struct, run_place_func = true) {
+function place_placeable(tile_i, tile_j, new_tile, is_batch_operation, properties = global.empty_struct, run_place_func = true) {
 	var arr = global.editor.get_current_placeables();
 	var tile_state = arr[tile_i][tile_j]
 			
@@ -52,7 +52,7 @@ function place_placeable(tile_i, tile_j, new_tile, properties = global.empty_str
 	
 	tile_state = new tile_with_state(new_tile, properties)
 	if (run_place_func)
-		tile_state = new_tile.place_function(tile_state, tile_i, tile_j, lvl);
+		tile_state = new_tile.place_function(tile_state, tile_i, tile_j, lvl, is_batch_operation);
 	arr[@ tile_i][tile_j] = tile_state;
 }
 
@@ -100,7 +100,7 @@ function handle_click_before(tile_i, tile_j) {
 // This function runs second when handling a right click release (drag), or left click.
 // it runs for every single tile affected by the action, unlike the others 
 // (meaning, per tile for each tile dragged, or just 1 if left clicked)
-function handle_click(tile_i, tile_j) {
+function handle_click(tile_i, tile_j, is_batch_operation) {
 	switch (global.selected_thing) {
 		case thing_picker:
 		case thing_plucker: // nearly the same, might as well lump them together and check when needed..
@@ -111,7 +111,7 @@ function handle_click(tile_i, tile_j) {
 					var local_tile_j = tile_j - global.held_tile_offset[1]
 					global.held_tile_array[local_tile_i][local_tile_j] = tile_state
 					if (global.selected_thing == thing_plucker)
-						place_placeable(tile_i, tile_j, global.editor.current_empty_tile)
+						place_placeable(tile_i, tile_j, global.editor.current_empty_tile, is_batch_operation)
 				}
 				
 			}
@@ -134,7 +134,7 @@ function handle_click(tile_i, tile_j) {
 					return;
 				
 				if (global.selected_thing == thing_plucker) {
-					place_placeable(tile_i, tile_j, global.editor.current_empty_tile)
+					place_placeable(tile_i, tile_j, global.editor.current_empty_tile, is_batch_operation)
 					audio_play_sound(pluck_sound, 10, false, 1.2)		
 				}
 				else
@@ -148,12 +148,12 @@ function handle_click(tile_i, tile_j) {
 			}
 			return;
 		case thing_eraser:
-			place_placeable(tile_i, tile_j, global.editor.current_empty_tile)
+			place_placeable(tile_i, tile_j, global.editor.current_empty_tile, is_batch_operation)
 			return;
 		case thing_placeable:
 			if (global.held_tile_state == global.editor.object_empty)
 				return;
-			place_placeable(tile_i, tile_j, global.held_tile_state.tile, struct_copy(global.held_tile_state.properties))
+			place_placeable(tile_i, tile_j, global.held_tile_state.tile, is_batch_operation, struct_copy(global.held_tile_state.properties))
 			return;
 		case thing_multiplaceable:
 			for (var i = 0; i < array_length(global.held_tile_array); i++) {
@@ -168,7 +168,7 @@ function handle_click(tile_i, tile_j) {
 					if new_tile_j >= 14
 						continue;
 						
-					place_placeable(new_tile_i, new_tile_j, tile_state.tile, struct_copy(tile_state.properties), false)
+					place_placeable(new_tile_i, new_tile_j, tile_state.tile, is_batch_operation, struct_copy(tile_state.properties), false)
 				}
 			}
 			return;
@@ -178,7 +178,8 @@ function handle_click(tile_i, tile_j) {
 	}
 }
 
-// This function runs last when handling a right click release (drag), or left click
+// This function runs last when handling a right click release (drag), or left click.
+// like handle_click_before, it only runs one time.
 function handle_click_after(tile_i, tile_j) {
 
 	switch (global.selected_thing) {

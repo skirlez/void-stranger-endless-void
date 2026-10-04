@@ -533,18 +533,15 @@ function make_wall_tile(name, tid, type) {
 	// - ending on a corner: the current tile is always a vertical or horizontal wall. 
 	//   In most cases this is not a problem but if you want a wall with only corners (for example, a 2x2 square wall),
 	//   then one of the corners has to be placed manually
-	tile.place_function = function(tile_state, i, j) {
+	tile.place_function = function(tile_state, i, j, _lvl, is_batch_operation) {
 		var current_tile = {
 			state : tile_state,
 			row : i,
 			col : j,
 		};
 
-		// check if left mouse button is actually held because we don't want
-		// to autotile with the rectangle tool (with right click)
-		//
-		// maybe there is a cleaner way to do it...
-		if previous_tile != noone && ev_mouse_held() {
+		// we don't want to autotile with the rectangle tool (with right click)
+		if previous_tile != noone && !is_batch_operation {
 			var wall_direction = get_wall_direction(i, j, previous_tile.row, previous_tile.col);
 			if wall_direction != noone {
 

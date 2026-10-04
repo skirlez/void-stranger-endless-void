@@ -16,7 +16,7 @@ switch (display_context) {
 					}
 		
 					handle_click_before(tile_i, tile_j)
-					handle_click(tile_i, tile_j)
+					handle_click(tile_i, tile_j, false)
 					handle_click_after(tile_i, tile_j)
 					last_clicked_i = tile_i;
 					last_clicked_j = tile_j;
@@ -102,7 +102,7 @@ switch (display_context) {
 			
 					for (var i = small_tile_i; i <= tile_i; i++) {
 						for (var j = small_tile_j; j <= tile_j; j++)
-							handle_click(i, j)
+							handle_click(i, j, true)
 					}
 			
 					handle_click_after(tile_i, tile_j)
