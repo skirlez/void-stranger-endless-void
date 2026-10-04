@@ -121,7 +121,7 @@ function start_uploading() {
 	reset_window()
 	
 	var lvl_str = export_level(lvl);
-	post_level_id = http_post_string(global.server, lvl_str)
+	post_level_id = http_post_string(global.levels_server, lvl_str)
 }
 
 function start_updating() {

@@ -1729,8 +1729,13 @@ function play_level_transition(lvl, lvl_sha, display_instance) {
 
 play_pack_transition_time = -1
 max_play_pack_transition = 250
-function play_pack_transition(nodeless_pack, display_instance, tis) {
+function play_pack_transition(nodeless_pack, display_instance) {
 	var pack_string = read_pack_string_from_file(nodeless_pack.save_name)
+	play_pack_string_transition(pack_string, display_instance);
+}
+
+
+function play_pack_string_transition(pack_string, display_instance) {
 	global.pack = import_pack(pack_string)
 	if global.pack.version == 1
 		global.pack.save_name = nodeless_pack.save_name;
@@ -1738,8 +1743,6 @@ function play_pack_transition(nodeless_pack, display_instance, tis) {
 	global.mouse_layer = -1
 	display_instance.destroy();
 	play_pack_transition_time = max_play_pack_transition
-
-	//TODO
 }
 
 edit_transition = -1
@@ -1783,8 +1786,8 @@ function play_back_to_editor_transition() {
 
 
 // used in obj_ev_level_select, is essentially the level/pack "page". we want this to be global so it persists
-// the first index is for offline mode, the second is for online mode, third index is for packs
-global.level_start = [0, 0, 0];
+// the first index is for offline mode, the second is for online mode, third index is for packs, fourth is for online packs
+global.level_start = [0, 0, 0, 0];
 function get_level_start_index(pack, online) {
 	return 2 * pack | online
 }
@@ -1799,13 +1802,17 @@ global.online_mode = false;
 
 
 get_levels = noone
+get_packs = noone
 validate_levels = noone
 online_levels_str = noone
+online_packs_str = noone
 get_version = noone
 	
 global.online_levels = []
+global.online_packs = []
 function try_update_online_levels() {
-	get_levels = http_get(global.server);
+	get_levels = http_get(global.levels_server);
+	get_packs = http_get(global.packs_server);
 }
 startup_timeout = -1;
 
@@ -1815,6 +1822,7 @@ function request_version_string() {
 
 global.key_level_map = ds_map_create()
 global.level_key_map = ds_map_create()
+global.downloaded_packs = ds_map_create()
 
 function add_level_key(key, level_save_name) {
 	ds_map_add(global.key_level_map, key, level_save_name)

@@ -550,3 +550,29 @@ function read_pack_string_from_file(save_name, skip_nodes_section = false) {
 	}
 	return read_pack_string_from_file_unbuffered(save_name);
 }
+
+
+function get_pack_date_from_string(pack_string) {
+	var count = 1;
+	var start = string_pos_ext("|", pack_string, 0) + 1;
+	while (count != 5) {
+		start = string_pos_ext("|", pack_string, start) + 1;
+		count++;
+	}
+	var str = string_copy(pack_string, start, string_pos_ext("|", pack_string, start) - start);
+	return str;
+}
+
+function is_online_pack_downloaded(save_name) {
+	return ds_map_exists(global.downloaded_packs, save_name)
+}
+
+function save_online_pack(save_name, pack_string) {
+	ds_map_set(global.downloaded_packs, nodeless_pack.save_name, pack_string)
+	return true
+}
+
+function get_online_pack_string(save_name) {
+	var pack_string = ds_map_find_value(global.downloaded_packs, nodeless_pack.save_name)
+	return pack_string
+}

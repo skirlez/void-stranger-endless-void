@@ -100,6 +100,8 @@ function ev_update_vars() {
 		prefix = global.server_port == 443 ? "https://" : "http://";
 	}
 	global.server = $"{prefix}{global.server_ip}:{global.server_port}/voyager"
+	global.levels_server = global.server
+	global.packs_server = $"{global.server}/packs"
 	
 	var ip_without_http_prefix;
 	if string_starts_with(global.server_ip, "https://") {

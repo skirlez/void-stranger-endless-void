@@ -28,14 +28,31 @@ if deleting {
 		delete_pack_progress(save_name)
 		audio_resume_sound(global.music_inst)
 		ev_stop_music()
-		var file = file_text_open_read(global.packs_directory + save_name + "." + pack_extension)
-		if file == -1 {
-			deleting = false;
-			exit;
+
+		var pack_string;
+
+		if global.online_mode {
+			pack_string = get_online_pack_string(nodeless_pack.save_name)
+			if is_undefined(pack_string) {
+				// it shouldn't happen because the button should not be visible 
+				// if the pack is not downloaded, but just in case something 
+				// unexpected happen...
+				deleting = false;
+				ev_notify("Download the pack before playing it.")
+				exit;
+			}
 		}
-		var str = file_text_read_string(file);
-		file_text_close(file);
-		global.pack = import_pack(str)
+		else 
+		{
+			var file = file_text_open_read(global.packs_directory + save_name + "." + pack_extension)
+			if file == -1 {
+				deleting = false;
+				exit;
+			}
+			pack_string = file_text_read_string(file);
+			file_text_close(file);
+		}
+		global.pack = import_pack(pack_string)
 		global.pack_parameters = create_pack_parameters()
 		room_goto(global.pack_level_room)
 	}

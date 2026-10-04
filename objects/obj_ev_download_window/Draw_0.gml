@@ -1,0 +1,13 @@
+draw_self()
+draw_set_halign(fa_center)
+draw_set_valign(fa_middle)
+draw_set_color(c_white)
+
+if (state == DownloadState.DOWNLOADING)
+	draw_text_shadow(room_width / 2, room_height / 2, "Downloading...", c_black)
+else if (state == DownloadState.SUCCESS)
+	draw_text_shadow(room_width / 2, room_height / 2 - 10, "Pack downloaded!\nGood luck, stranger!", c_black)
+else if (state == DownloadState.ERROR)
+	draw_text_shadow(room_width / 2, room_height / 2 - 10, "Failed to download pack.", c_black)
+else if (state == DownloadState.FAILURE)
+	draw_text_shadow(room_width / 2, room_height / 2 - 20, "Something went wrong. Error:", c_black)

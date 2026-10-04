@@ -284,10 +284,12 @@ add_child(scroll_down)
 
 function switch_internet_mode(new_mode) {
 	if (new_mode == false) {
+		nodeless_packs = offline_nodeless_packs
 		levels = offline_levels 
 		level_names = offline_level_names
 	}
 	else {
+		nodeless_packs = online_nodeless_packs
 		levels = online_levels
 		level_names = online_level_names	
 	}
@@ -300,25 +302,41 @@ function switch_internet_mode(new_mode) {
 
 
 files = []
-nodeless_packs = [];
+nodeless_packs = []
+offline_nodeless_packs = []
+online_nodeless_packs = []
 function read_online_levels() {
-	online_levels = copy_array(global.online_levels)
-	online_level_names = array_create(array_length(online_levels))
-	for (var i = 0; i < array_length(online_levels); i++)
-		online_level_names[i] = get_level_name_from_string(online_levels[i])
+	if mode == level_selector_modes.packs {
+		online_nodeless_packs = array_create(array_length(global.online_packs));
+		online_levels = array_create(array_length(global.online_packs));
+		online_level_names = array_create(array_length(global.online_packs));
+
+		for (var i = 0; i < array_length(global.online_packs) ; i++) {
+			var pack = import_pack_nodeless(global.online_packs[i]);
+			online_nodeless_packs[i] = pack;
+			online_level_names[i] = pack.name;
+			online_levels[i] = pack.thumbnail_level
+		}
+	} else {
+		online_levels = copy_array(global.online_levels)
+		online_level_names = array_create(array_length(online_levels))
+		for (var i = 0; i < array_length(online_levels); i++)
+			online_level_names[i] = get_level_name_from_string(online_levels[i])
+	}
+
 }
 
 function read_offline_levels() {
 	if (mode == level_selector_modes.packs) { 
 		files = get_all_files(global.packs_directory, pack_extension)
-		nodeless_packs = array_create(array_length(files));
+		offline_nodeless_packs = array_create(array_length(files));
 		offline_levels = array_create(array_length(files));
 		offline_level_names = array_create(array_length(files));
 		for (var i = 0; i < array_length(files); i++) {
 			var pack_string = read_pack_string_from_file(files[i], true)
 			if !is_string(pack_string) {
 				array_delete(files, i, 1)
-				array_delete(nodeless_packs, i, 1)
+				array_delete(offline_nodeless_packs, i, 1)
 				array_delete(offline_levels, i, 1)
 				array_delete(offline_level_names, i, 1)
 				i--;
@@ -327,7 +345,7 @@ function read_offline_levels() {
 			var pack = import_pack_nodeless(pack_string);
 			pack.save_name = files[i];
 			
-			nodeless_packs[i] = pack;
+			offline_nodeless_packs[i] = pack;
 			offline_level_names[i] = pack.name;
 			offline_levels[i] = pack.thumbnail_level
 		}
@@ -357,10 +375,11 @@ function on_level_update() {
 }
 
 
-if (mode == level_selector_modes.packs || mode == level_selector_modes.selecting_level_for_pack)
+if (mode == level_selector_modes.selecting_level_for_pack)
 	global.online_mode = false;
 
+
 read_offline_levels()
-if mode != level_selector_modes.selecting_level_for_pack && mode != level_selector_modes.packs
+if mode != level_selector_modes.selecting_level_for_pack
 	read_online_levels()
 switch_internet_mode(global.online_mode)

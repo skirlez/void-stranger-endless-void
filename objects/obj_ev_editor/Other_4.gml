@@ -54,7 +54,7 @@ if (room == agi("rm_ev_startup")) {
 		for (var i = 1; i < array_length(uploaded_levels); i++) {
 			build += "," + uploaded_keys[i]	
 		}
-		validate_levels = http_get(global.server + "/" + build)
+		validate_levels = http_get(global.levels_server + "/" + build)
 	}
 	else
 		startup_actions_count--;

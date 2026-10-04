@@ -1,68 +1,5 @@
 event_inherited()
 
-var play = instance_create_layer(208, 40, "LevelHighlightButtons", agi("obj_ev_play_pack_button"))
-play.layer_num = 1
-play.nodeless_pack = nodeless_pack
-play.display_instance = display_instance
-play.highlighter = id;
-play.image_alpha = 0
-
-
-
-var play_t = instance_create_layer(8, room_height - 10, "LevelHighlightButtons", agi("obj_ev_play_pack_button"))
-play_t.layer_num = 1
-play_t.nodeless_pack = nodeless_pack
-play_t.display_instance = display_instance
-play_t.highlighter = id;
-play_t.tis = true;
-play_t.image_alpha = 0;
-
-if global.tis_pack_button {
-	var scores = instance_create_layer(24, room_height - 10, "LevelHighlightButtons", agi("obj_ev_executing_button"), {
-		sprite_index : agi("spr_ev_score_list"),
-		highlighter : id,
-		layer_num : 1,
-		image_alpha : 0,
-		func : function () {
-			new_window(11, 7, agi("obj_ev_tis_score_window"), {
-				save_name : highlighter.nodeless_pack.save_name,
-				layer_num : 2,
-			})
-			global.mouse_layer++;
-		}
-	})
-	add_child(scores)
-}
-
-var copy = instance_create_layer(192, 40, "LevelHighlightButtons", agi("obj_ev_executing_button"), {
-	layer_num : 1,
-	nodeless_pack : nodeless_pack,
-	image_alpha : 0,
-	sprite_index : agi("spr_ev_copy"),
-	func : function () {
-		var pack_string = read_pack_string_from_file(nodeless_pack.save_name)
-		clipboard_set_text(pack_string)
-		ev_notify("Copied to clipboard!")
-	}
-})
-
-var back = instance_create_layer(200, 16, "LevelHighlightButtons", agi("obj_ev_main_menu_button"), {
-	base_scale_x : 1,
-	base_scale_y : 0.7,
-	txt : "Back",
-	room_name : room_get_name(room),
-	layer_num : 1,
-	image_alpha : 0
-});
-
-
-
-add_child(play_t)
-add_child(play)
-add_child(back)
-add_child(copy)
-
-
 function format_date(date_str) {
 	if string_length(date_str) < 8
 		return "15/05/2015"
@@ -79,6 +16,147 @@ function format_date(date_str) {
 		pos--;
 	}
 	return str;	
+}
+
+function hide_textbox() {
+	textbox_open_depth = layer_get_depth("LevelHighlightButtons")
+}
+
+textbox_depth = layer_get_depth("LevelHighlightButtons")
+textbox_open_depth = layer_get_depth("WindowElements")
+
+
+var back = instance_create_layer(200, 16, "LevelHighlightButtons", agi("obj_ev_main_menu_button"), {
+    base_scale_x : 1,
+    base_scale_y : 0.7,
+    txt : "Back",
+    room_name : room_get_name(room),
+    layer_num : 1,
+    image_alpha : 0
+});
+add_child(back);
+
+if !global.online_mode || is_online_pack_downloaded(nodeless_pack.save_name) {
+    var play = instance_create_layer(208, 40, "LevelHighlightButtons", agi("obj_ev_play_pack_button"));
+    play.layer_num = 1;
+    play.nodeless_pack = nodeless_pack;
+    play.display_instance = display_instance;
+    play.highlighter = id;
+    play.image_alpha = 0;
+    add_child(play);
+
+    var copy = instance_create_layer(192, 40, "LevelHighlightButtons", agi("obj_ev_executing_button"), {
+        layer_num : 1,
+        nodeless_pack : nodeless_pack,
+        image_alpha : 0,
+        sprite_index : agi("spr_ev_copy"),
+        func : function () {
+			var pack_string;
+			
+            if global.online_mode {
+				pack_string = get_online_pack_string(nodeless_pack.save_name)
+                if is_undefined(pack_string) {
+                    ev_notify("Download the pack before!")
+					exit;
+                }
+            } else {
+                pack_string = read_pack_string_from_file(nodeless_pack.save_name)
+            }
+
+			clipboard_set_text(pack_string)
+			ev_notify("Copied to clipboard!")
+        }
+    });
+    add_child(copy)
+}
+
+if global.online_mode {
+    var download_px = 208
+    var download_py = 40
+
+    if is_online_pack_downloaded(nodeless_pack.save_name) {
+        download_px = 192
+        download_py = 60
+
+        if pack_progress_exists(nodeless_pack.save_name){
+            var delete_save_button = instance_create_layer(208, 60, "LevelHighlightButtons", agi("obj_ev_delete_pack_save_button"), {
+                layer_num : 1,
+                level_select : instance_find(agi("obj_ev_level_select"), 0),
+                save_name : nodeless_pack.save_name,
+                display_instance : display_instance,
+                nodeless_pack : nodeless_pack,
+                image_alpha : 0,
+            })
+            add_child(delete_save_button)
+        }
+    }
+
+    var download = instance_create_layer(download_px, download_py, "LevelHighlightButtons", agi("obj_ev_executing_button"), {
+        layer_num : 1,
+        nodeless_pack : nodeless_pack,
+        display_instance: display_instance,
+        highlighter : id,
+        image_alpha : 0,
+        sprite_index : agi("spr_ev_download"),
+        func : function () {
+            global.mouse_layer++;
+            new_window(12, 6, agi("obj_ev_download_window"), {
+                nodeless_pack : nodeless_pack,
+                display_instance : display_instance,
+                layer_num : global.mouse_layer,
+				// Buttons should probably be reset after the pack is downloaded,
+				// but I don't know how to do that
+            })
+        }
+    })
+    add_child(download)
+} else {
+	var deleteb = instance_create_layer(192, 90, "LevelHighlightButtons", agi("obj_ev_delete_button"), {
+		pack_mode : true,
+		layer_num : 1,
+		level_select : instance_find(agi("obj_ev_level_select"), 0),
+		save_name : nodeless_pack.save_name,
+		display_instance : display_instance,
+		image_alpha : 0,
+	})
+    add_child(deleteb)
+
+    if pack_progress_exists(nodeless_pack.save_name) {
+        var delete_save_button = instance_create_layer(208, 90, "LevelHighlightButtons", agi("obj_ev_delete_pack_save_button"), {
+            layer_num : 1,
+            level_select : instance_find(agi("obj_ev_level_select"), 0),
+            save_name : nodeless_pack.save_name,
+            display_instance : display_instance,
+            image_alpha : 0,
+        })
+        add_child(delete_save_button)
+    }
+}
+
+var play_t = instance_create_layer(8, room_height - 10, "LevelHighlightButtons", agi("obj_ev_play_pack_button"))
+play_t.layer_num = 1
+play_t.nodeless_pack = nodeless_pack
+play_t.display_instance = display_instance
+play_t.highlighter = id;
+play_t.tis = true;
+play_t.image_alpha = 0;
+add_child(play_t)
+
+if global.tis_pack_button {
+    var scores = instance_create_layer(24, room_height - 10, "LevelHighlightButtons", agi("obj_ev_executing_button"), {
+        sprite_index : agi("spr_ev_score_list"),
+        highlighter : id,
+        layer_num : 1,
+        image_alpha : 0,
+        func : function () {
+            new_window(11, 7, agi("obj_ev_tis_score_window"), {
+                save_name : highlighter.nodeless_pack.save_name,
+                layer_num : 2,
+            })
+            global.mouse_layer++;
+        }
+    })
+    add_child(scores)
 }
 
 var textbox_offset;
@@ -108,47 +186,11 @@ if (!global.online_mode) {
 			}
 		}
 	})
-	
-
-	
-	var deleteb = instance_create_layer(192, 90, "LevelHighlightButtons", agi("obj_ev_delete_button"), {
-		pack_mode : true,
-		layer_num : 1,
-		level_select : instance_find(agi("obj_ev_level_select"), 0),
-		save_name : nodeless_pack.save_name,
-		display_instance : display_instance,
-		image_alpha : 0,
-	})
-	
-	if pack_progress_exists(nodeless_pack.save_name) {
-		var delete_save_button = instance_create_layer(208, 90, "LevelHighlightButtons", agi("obj_ev_delete_pack_save_button"), {
-			layer_num : 1,
-			level_select : instance_find(agi("obj_ev_level_select"), 0),
-			save_name : nodeless_pack.save_name,
-			display_instance : display_instance,
-			image_alpha : 0,
-		})
-		add_child(delete_save_button)
-	}
-
-	/*
-	var upload = instance_create_layer(208, 90, "LevelHighlightButtons", agi("obj_ev_upload_button"))
-	upload.layer_num = 1
-	upload.lvl = lvl;
-	upload.image_alpha = 0
-	*/
-	
-	
-
-	add_child(deleteb)
-	
-	//add_child(upload)
-
-
 	textbox_offset = 20;
 	add_child(edit)
 }
 else {
+
 	date_textbox = instance_create_layer(201, 130, "LevelDescription", agi("obj_ev_textbox"), 
 	{
 		txt : ("Upload date:\n" 
@@ -196,11 +238,3 @@ author_textbox = instance_create_layer(201, 110 + textbox_offset, "LevelDescript
 
 add_child(description_textbox)
 add_child(author_textbox)
-
-
-function hide_textbox() {
-	textbox_open_depth = layer_get_depth("LevelHighlightButtons")
-}
-
-textbox_depth = layer_get_depth("LevelHighlightButtons")
-textbox_open_depth = layer_get_depth("WindowElements")
