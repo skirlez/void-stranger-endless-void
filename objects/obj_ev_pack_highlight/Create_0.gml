@@ -122,7 +122,7 @@ if global.online_mode {
     add_child(deleteb)
 
     if pack_progress_exists(nodeless_pack.save_name) {
-        var delete_save_button = instance_create_layer(208, 90, "LevelHighlightButtons", agi("obj_ev_delete_pack_save_button"), {
+        var delete_save_button = instance_create_layer(208, 70, "LevelHighlightButtons", agi("obj_ev_delete_pack_save_button"), {
             layer_num : 1,
             level_select : instance_find(agi("obj_ev_level_select"), 0),
             save_name : nodeless_pack.save_name,
@@ -131,6 +131,15 @@ if global.online_mode {
         })
         add_child(delete_save_button)
     }
+
+
+	var upload = instance_create_layer(208, 90, "LevelHighlightButtons", agi("obj_ev_upload_button"), {
+		layer_num: 1,
+		lvl: import_pack(read_pack_string_from_file(nodeless_pack.save_name)),
+		image_alpha: 0,
+		is_pack: true, 
+	});
+	add_child(upload)
 }
 
 var play_t = instance_create_layer(8, room_height - 10, "LevelHighlightButtons", agi("obj_ev_play_pack_button"))

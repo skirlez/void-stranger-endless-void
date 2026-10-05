@@ -1804,6 +1804,7 @@ global.online_mode = false;
 get_levels = noone
 get_packs = noone
 validate_levels = noone
+validate_packs = noone
 online_levels_str = noone
 online_packs_str = noone
 get_version = noone
@@ -1820,20 +1821,25 @@ function request_version_string() {
 	get_version = http_get(global.server + "/version")
 }
 
-global.key_level_map = ds_map_create()
 global.level_key_map = ds_map_create()
+global.pack_key_map = ds_map_create()
 global.downloaded_packs = ds_map_create()
 
 function add_level_key(key, level_save_name) {
-	ds_map_add(global.key_level_map, key, level_save_name)
 	ds_map_add(global.level_key_map, level_save_name, key)
 }
 function remove_level_key(level_save_name) {
 	var key = ds_map_find_value(global.level_key_map, level_save_name)
-	ds_map_delete(global.key_level_map, key)
 	ds_map_delete(global.level_key_map, level_save_name)
 }
-function on_server_validate_startup(valid_str) {
+function add_pack_key(key, pack_save_name) {
+	ds_map_add(global.pack_key_map, pack_save_name, key)
+}
+function remove_pack_key(pack_save_name) {
+	var key = ds_map_find_value(global.pack_key_map, pack_save_name)
+	ds_map_delete(global.pack_key_map, pack_save_name)
+}
+function on_server_validate_levels_startup(valid_str) {
 	ds_map_clear(global.level_key_map)
 	var arr_ind = 0;
 	for (var i = 1; i <= string_length(valid_str); i++) {
@@ -1841,21 +1847,39 @@ function on_server_validate_startup(valid_str) {
 		if (char == "0") {
 			// really no need to do that
 			//file_delete(global.levels_directory + uploaded_levels[arr_ind] + ".key")
-			array_delete(uploaded_keys, arr_ind, 1)
+			array_delete(uploaded_level_keys, arr_ind, 1)
 			array_delete(uploaded_levels, arr_ind, 1)
 		}
 		else
 			arr_ind++;
 	}
-	for (var i = 0; i < array_length(uploaded_keys); i++) {
-		add_level_key(uploaded_keys[i], uploaded_levels[i])	
+	for (var i = 0; i < array_length(uploaded_level_keys); i++) {
+		add_level_key(uploaded_level_keys[i], uploaded_levels[i])	
+	}
+}
+function on_server_validate_packs_startup(valid_str) {
+	ds_map_clear(global.pack_key_map)
+	var arr_ind = 0;
+	for (var i = 1; i <= string_length(valid_str); i++) {
+		var char = string_char_at(valid_str, i)
+		if (char == "0") {
+			array_delete(uploaded_pack_keys, arr_ind, 1)
+			array_delete(uploaded_packs, arr_ind, 1)
+		}
+		else
+			arr_ind++;
+	}
+	for (var i = 0; i < array_length(uploaded_pack_keys); i++) {
+		add_pack_key(uploaded_pack_keys[i], uploaded_packs[i])	
 	}
 }
 
 has_been_to_pretitle = false
 function on_startup_finish() {
 	get_levels = noone;
+	get_packs = noone;
 	validate_levels = noone;
+	validate_packs = noone;
 	startup_timeout = 0;
 	audio_play_sound(agi("snd_ev_mark_placechanger"), 10, false, 1, 0, 1.2)
 	if !has_been_to_pretitle {

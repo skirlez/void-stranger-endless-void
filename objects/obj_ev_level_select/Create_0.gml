@@ -296,8 +296,9 @@ function switch_internet_mode(new_mode) {
 	no_filter = ev_array_create_ext(array_length(levels), function (i) {
 		return i;
 	})
-	if (!instance_exists(agi("obj_ev_level_highlight")))
+	if (!instance_exists(agi("obj_ev_level_highlight")) && !instance_exists(agi("obj_ev_pack_highlight"))) {
 		create_displays();
+	}
 }
 
 

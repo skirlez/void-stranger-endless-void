@@ -37,9 +37,9 @@ else if ds_map_find_value(async_load, "id") == get_packs
 		else
 			global.online_packs = []
 			
-		array_sort(global.online_packs, function (lvl_str_1, lvl_str_2) {
-			var date_1 = int64_safe(get_pack_date_from_string(lvl_str_1), 0)
-			var date_2 = int64_safe(get_pack_date_from_string(lvl_str_2), 0)
+		array_sort(global.online_packs, function (pack_str_1, pack_str_2) {
+			var date_1 = int64_safe(get_pack_date_from_string(pack_str_1), 0)
+			var date_2 = int64_safe(get_pack_date_from_string(pack_str_2), 0)
 			if (date_1 < date_2)
 				return 1
 			else if (date_1 > date_2)
@@ -63,7 +63,18 @@ else if ds_map_find_value(async_load, "id") == validate_levels
 	if ds_map_find_value(async_load, "status") == 0 {
 		var result = ds_map_find_value(async_load, "result");
 
-		on_server_validate_startup(result)
+		on_server_validate_levels_startup(result)
+		if (room == global.startup_room) {
+			startup_actions_count--;
+		}
+	}
+}
+else if ds_map_find_value(async_load, "id") == validate_packs
+{
+	if ds_map_find_value(async_load, "status") == 0 {
+		var result = ds_map_find_value(async_load, "result");
+
+		on_server_validate_packs_startup(result)
 		if (room == global.startup_room) {
 			startup_actions_count--;
 		}

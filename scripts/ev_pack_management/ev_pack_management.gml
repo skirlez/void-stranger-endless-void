@@ -554,12 +554,12 @@ function read_pack_string_from_file(save_name, skip_nodes_section = false) {
 
 function get_pack_date_from_string(pack_string) {
 	var count = 1;
-	var start = string_pos_ext("|", pack_string, 0) + 1;
+	var start = string_pos_ext("&", pack_string, 0) + 1;
 	while (count != 5) {
-		start = string_pos_ext("|", pack_string, start) + 1;
+		start = string_pos_ext("&", pack_string, start) + 1;
 		count++;
 	}
-	var str = string_copy(pack_string, start, string_pos_ext("|", pack_string, start) - start);
+	var str = string_copy(pack_string, start, string_pos_ext("&", pack_string, start) - start);
 	return str;
 }
 

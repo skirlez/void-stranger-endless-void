@@ -2,9 +2,9 @@ event_inherited();
 
 if lvl == noone
 	exit
+
+
 	
-
-
 function can_upload_level(level) {
 	var sha = level_content_sha1(level);
 	if !ds_map_exists(global.beaten_levels_map, sha)
@@ -16,17 +16,85 @@ function can_upload_level(level) {
 	return (value == 1)
 }
 
+function can_upload_pack(pack) {
+	return true;
+}
+
+function can_upload_level_or_pack(level_or_pack) {
+	if (is_pack) {
+		return can_upload_pack(level_or_pack);
+	} else {
+		return can_upload_level(level_or_pack);
+	}
+}
+
+function export_level_or_pack(level_or_pack) {
+	if (is_pack) {
+		return export_pack(level_or_pack);
+	} else {
+		return export_level(level_or_pack);
+	}
+}
+
+function find_key() {
+	if (is_pack) {
+		return ds_map_find_value(global.pack_key_map, lvl.save_name);
+	} else {
+		return ds_map_find_value(global.level_key_map, lvl.save_name);
+	}
+}
+
+function remove_key() {
+	if (is_pack) {
+		return global.editor.remove_pack_key(lvl.save_name);
+	} else {
+		return global.editor.remove_level_key(lvl.save_name);
+	}
+}
+
+function add_key() {
+	if (is_pack) {
+		return global.editor.add_pack_key(verifying_key, lvl.save_name);
+	} else {
+		return global.editor.add_level_key(verifying_key, lvl.save_name);
+	}
+}
+
+function get_mode_name() {
+	if (is_pack) {
+		return "pack";
+	} else {
+		return "level";
+	}
+}
+
+function get_server_path() {
+	if (is_pack) {
+		return global.packs_server;
+	} else {
+ 		return global.levels_server;
+	}
+}
+
+function get_save_directory() {
+	if (is_pack) {
+		return global.packs_directory;
+	} else {
+ 		return global.levels_directory;
+	}
+}
 
 
-are_you_sure_upload_text = "This" + ((irandom($7fffffffffffffff) == 40) ? " stupid " : " ") + "level is not uploaded.\nDo you want to upload it?"
-are_you_sure_delete_text = "Are you sure you want to\n delete this level? It will\nnot be deleted locally."
+
+are_you_sure_upload_text = "This" + ((irandom($7fffffffffffffff) == 40) ? " stupid " : " ") + get_mode_name() + " is not uploaded.\nDo you want to upload it?"
+are_you_sure_delete_text = "Are you sure you want to\n delete this " + get_mode_name() + "? It will\nnot be deleted locally."
 doing_the_thing_text = "Doing the thing..."
 verifying_text = "Verifying upload..."
 done_text = "Done!\nThe thing you tried doing\nwas successful!"
 fail_text = "Something went wrong.\nError message:\n"
-manage_text = "This level is uploaded.\nWhat would you like to do?"
-no_idea_text = "I have no idea whether\nwhether or not this level\nhas uploaded correctly."
-beat_first_text = "Clear the level outside\nthe editor first!"
+manage_text = "This " + get_mode_name() + " is uploaded.\nWhat would you like to do?"
+no_idea_text = "I have no idea whether\nwhether or not this " + get_mode_name() +"\nhas uploaded correctly."
+beat_first_text = "Clear the " + get_mode_name() + " outside\nthe editor first!"
 and_memory_crystal_text = "(and get the Memory Crystal)"
 
 
@@ -36,7 +104,7 @@ delete_level_id = noone
 post_level_verify_id = noone
 
 verifying_key = ""
-if ds_map_exists(global.level_key_map, lvl.save_name) {
+if !is_undefined(find_key()) {
 	state = 4
 	var updateb = instance_create_layer(112 - 60, 72 + 30, "WindowElements", agi("obj_ev_executing_button"), {
 		txt : "Update",
@@ -110,7 +178,7 @@ function reset_window() {
 }
 
 function start_uploading() {
-	if !can_upload_level(lvl) {
+	if !can_upload_level_or_pack(lvl) {
 		state = 8;
 		reset_window()
 		create_finish_buttons("Ah")
@@ -120,12 +188,12 @@ function start_uploading() {
 	upload_timeout = 300
 	reset_window()
 	
-	var lvl_str = export_level(lvl);
-	post_level_id = http_post_string(global.levels_server, lvl_str)
+	var lvl_str = export_level_or_pack(lvl);
+	post_level_id = http_post_string(get_server_path(), lvl_str)
 }
 
 function start_updating() {
-	if !can_upload_level(lvl) {
+	if !can_upload_level_or_pack(lvl) {
 		state = 8;
 		reset_window()
 		create_finish_buttons("Ah")
@@ -136,13 +204,14 @@ function start_updating() {
 	upload_timeout = 300
 	reset_window()
 	
-	var lvl_str = export_level(lvl);
-	var map = ds_map_create();
-	var key = ds_map_find_value(global.level_key_map, lvl.save_name)
+	var lvl_str = export_level_or_pack(lvl);
+	var key = find_key(lvl.save_name);
 
-	update_level_id = http_request(global.server, "PUT", map, lvl_str + "|" + key)
+	var map = ds_map_create();
+	update_level_id = http_request(get_server_path(), "PUT", map, lvl_str + "|" + key)
 	ds_map_destroy(map)
 }
+
 function ask_deleting() {
 	state = 5;
 	reset_window()
@@ -169,16 +238,15 @@ function ask_deleting() {
 	add_child(yes)
 }
 
-
 function start_deleting() {
 	state = 1;
 	upload_timeout = 300
 	reset_window()
 	
-	var map = ds_map_create();
-	var key = ds_map_find_value(global.level_key_map, lvl.save_name)
+	var key = find_key()
 
-	delete_level_id = http_request(global.server, "DELETE", map, key)
+	var map = ds_map_create();
+	delete_level_id = http_request(get_server_path(), "DELETE", map, key)
 	ds_map_destroy(map)
 }
 
@@ -224,14 +292,15 @@ function on_finish_upload(key) {
 	state = 6
 	verify_timeout = 500
 	verifying_key = key;
-	post_level_verify_id = http_post_string(global.server + "/orphanage", key)
+	post_level_verify_id = http_post_string(get_server_path() + "/orphanage", key)
 }
 function on_verify_upload() {
 	state = 2
 	global.editor.try_update_online_levels();
-	global.editor.add_level_key(verifying_key, lvl.save_name)
+
+	add_key(verifying_key, lvl.save_name)
 	
-	var keyfile = file_text_open_write(global.levels_directory + lvl.save_name + ".key")
+	var keyfile = file_text_open_write(get_save_directory() + lvl.save_name + ".key")
 	file_text_write_string(keyfile, verifying_key)
 	file_text_close(keyfile)
 	
@@ -250,8 +319,7 @@ function on_finish_delete() {
 	state = 2
 	create_finish_buttons("Okay thanks") 
 	global.editor.try_update_online_levels();
-	global.editor.remove_level_key(lvl.save_name)
-	
-	file_delete(global.levels_directory + lvl.save_name + ".key")
+	remove_key()
+	file_delete(get_save_directory() + lvl.save_name + ".key")
 }
 

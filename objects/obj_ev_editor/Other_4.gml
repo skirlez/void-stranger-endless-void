@@ -3,6 +3,29 @@ global.mouse_held = false;
 global.mouse_pressed = false;
 
 
+function try_validate_online_levels() {
+	if array_length(uploaded_level_keys) != 0 {
+		var build = uploaded_level_keys[0];
+		for (var i = 1; i < array_length(uploaded_levels); i++) {
+			build += "," + uploaded_level_keys[i]	
+		}
+		validate_levels = http_get(global.levels_server + "/" + build)
+	}
+	else
+		startup_actions_count--;
+
+	
+	if array_length(uploaded_pack_keys) != 0 {
+		var build = uploaded_pack_keys[0];
+		for (var i = 1; i < array_length(uploaded_pack_keys); i++) {
+			build += "," + uploaded_pack_keys[i]	
+		}
+		validate_packs = http_get(global.packs_server + "/" + build)
+	}
+	else
+		startup_actions_count--;
+}
+
 if room == agi("rm_ev_menu") || room == agi("rm_ev_level_select") || room == agi("rm_ev_pack_select") {
 	global.level_sha = "";
 	var music = global.menu_music;
@@ -34,30 +57,42 @@ else {
 if (room == agi("rm_ev_startup")) {
 	read_beaten_levels()
 	
-	uploaded_levels = get_all_files(global.levels_directory, "key")
-	uploaded_keys = array_create(array_length(uploaded_levels), "")
+	global.online_levels = [];
+	global.online_packs = [];
 
+	startup_timeout = 300; // amount of frames before we give up
+
+	// 5 async tasks at startup:
+	// - get EV version
+	// - get levels
+	// - get packs
+	// - validate levels
+	// - validate packs
+	startup_actions_count = 5;
+
+	uploaded_levels = get_all_files(global.levels_directory, "key")
+	uploaded_level_keys = array_create(array_length(uploaded_levels), "")
 	for (var i = 0; i < array_length(uploaded_levels); i++) {
 		var save_name = uploaded_levels[i] 
 		var file = file_text_open_read(global.levels_directory + save_name + ".key")
 		var key = file_text_read_string(file);
-		uploaded_keys[i] = key;
+		uploaded_level_keys[i] = key;
+		file_text_close(file)
+	}
+
+	uploaded_packs = get_all_files(global.packs_directory, "key")
+	uploaded_pack_keys =  array_create(array_length(uploaded_packs), "")
+	for (var i = 0; i < array_length(uploaded_packs); i++) {
+		var save_name = uploaded_packs[i] 
+		var file = file_text_open_read(global.packs_directory + save_name + ".key")
+		var key = file_text_read_string(file);
+		uploaded_pack_keys[i] = key;
 		file_text_close(file)
 	}
 	
-	global.online_levels = []
-	startup_timeout = 300; // amount of frames before we give up
-	startup_actions_count = 3; 
 	try_update_online_levels()
-	if array_length(uploaded_keys) != 0 {
-		var build = uploaded_keys[0];
-		for (var i = 1; i < array_length(uploaded_levels); i++) {
-			build += "," + uploaded_keys[i]	
-		}
-		validate_levels = http_get(global.levels_server + "/" + build)
-	}
-	else
-		startup_actions_count--;
+	try_validate_online_levels()
+	
 	request_version_string()
 }
 
