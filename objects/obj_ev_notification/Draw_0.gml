@@ -1,6 +1,7 @@
 draw_set_halign(fa_left)
 draw_set_valign(fa_top)
 draw_set_color(c_black)
+draw_set_font(global.ev_font)
 
 var cam_x = camera_get_view_x(view_camera[0])
 var cam_y = camera_get_view_y(view_camera[0])

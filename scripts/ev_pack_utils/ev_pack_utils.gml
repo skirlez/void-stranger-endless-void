@@ -132,21 +132,11 @@ function try_level_name_and_rename(lvl, level_nodes) {
 
 
 
-/*
-Removes all connections to a node and returns the list of node instances from which it disconnected.
-*/
-function remove_connections_to_node(target) {
-	var list = copy_array(target.connected_to_me)
-	for (var i = 0; i < array_length(list); i++) {
-		var inst = list[i]
-		var index = disconnect_node_instances(inst, target)
-		create_falling_arrow_and_number(inst, target, index, array_length(inst.exit_instances) + 1);
-	}
-	return list;
-}
-
-function connect_node_instances(from, to) {
-	array_push(from.exit_instances, to);
+function connect_node_instances(from, to, index = -1) {
+	if index == -1
+		array_push(from.exit_instances, to);
+	else
+		array_insert(from.exit_instances, index, to);
 	array_push(to.connected_to_me, from);
 	from.line_drawer.update()
 }

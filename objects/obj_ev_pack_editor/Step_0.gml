@@ -144,7 +144,7 @@ if global.mouse_layer == 0 {
 
 	
 	
-	if keyboard_check(vk_control) && !instance_exists(agi("obj_ev_pack_node_judgment")) {
+	if keyboard_check(vk_control) {
 		if keyboard_check_pressed(ord("Z")) {
 			undo_repeat = undo_repeat_frames_start
 			undo();

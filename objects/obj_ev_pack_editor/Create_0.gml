@@ -526,6 +526,10 @@ function add_undo_action(func, args) {
 undo_actions = []
 
 function undo() {
+	if instance_exists(agi("obj_ev_pack_node_judgment")) {
+		instance_destroy(agi("obj_ev_pack_node_judgment"))
+		judging_node = noone
+	}
 	pack_dirty = true;
 	static undo_sound = agi("snd_voidrod_place")
 	if array_length(undo_actions) != 0 {

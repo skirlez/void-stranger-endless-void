@@ -22,12 +22,19 @@ spawn_picked_up = false;
 node_type = global.object_node_map[? object_index];
 shake_seconds = 0;
 shake_x_offset = 0;
+
+
 	
 spin_time_h = 0;
 spin_time_v = 0;
 spin_h = 0
 spin_v = 0
-	
+update_spin = function() {
+	spin_time_h += 0.45
+	spin_time_v += 0.38
+	spin_h = (dsin(spin_time_h) + 1) / 2;
+	spin_v = (dcos(spin_time_v) + 1) / 2;
+}
 
 line_drawer = instance_create_layer(x, y, "Lines", agi("obj_ev_pack_line_drawer"), {
 	owner: id	

@@ -5,9 +5,19 @@ event_inherited();
 
 switch (judgment_type) {
 	case judgment_types.destroy_node:
-		var nodes_connected_to_me = remove_connections_to_node(node_inst)
+	
+		var instances_connected_to_me = copy_array(node_inst.connected_to_me)
+		var index_in_instances_connected_to_me = array_create(array_length(instances_connected_to_me))
+		for (var i = 0; i < array_length(instances_connected_to_me); i++) {
+			var inst = instances_connected_to_me[i]
+			var index = disconnect_node_instances(inst, node_inst)
+			index_in_instances_connected_to_me[i] = index
+			create_falling_arrow_and_number(inst, node_inst, index, array_length(inst.exit_instances) + 1);
+		}
+
+		var nodes_connected_to_me = array_create(array_length(instances_connected_to_me))
 		for (var i = 0; i < array_length(nodes_connected_to_me); i++)
-			nodes_connected_to_me[i] = nodes_connected_to_me[i].node_id
+			nodes_connected_to_me[i] = instances_connected_to_me[i].node_id
 	
 		
 		for (var i = 0; i < array_length(node_inst.exit_instances); i++) {
@@ -39,7 +49,7 @@ switch (judgment_type) {
 				var instance_previously_connected_to_me = ds_map_find_value(
 					global.pack_editor.node_id_to_instance_map,
 					args.previously_connected_ids[i])
-				connect_node_instances(instance_previously_connected_to_me, instance)
+				connect_node_instances(instance_previously_connected_to_me, instance, args.previously_connected_indices[i])
 			}
 		}, {
 			pos_x : node_inst.x,
@@ -48,6 +58,7 @@ switch (judgment_type) {
 			node_type : node_inst.node_type,
 			node_properties : node_inst.properties,
 			previously_connected_ids : nodes_connected_to_me,
+			previously_connected_indices : index_in_instances_connected_to_me,
 			previous_exit_ids : exit_node_ids
 		})
 		
@@ -56,6 +67,7 @@ switch (judgment_type) {
 
 		node_inst.node_type.on_death(node_inst);
 		instance_destroy(node_inst)
+		global.pack_editor.judging_node = noone
 		break;
 	case judgment_types.close_connection:
 		var index = disconnect_node_instances(node_inst, connection_to_destroy)
@@ -64,10 +76,11 @@ switch (judgment_type) {
 		global.pack_editor.add_undo_action(function (args) {
 			var instance = ds_map_find_value(global.pack_editor.node_id_to_instance_map, args.node_id)
 			var exit_instance = ds_map_find_value(global.pack_editor.node_id_to_instance_map, args.exit_id)
-			connect_node_instances(instance, exit_instance)
+			connect_node_instances(instance, exit_instance, args.index)
 		}, {
 			node_id : node_inst.node_id,
 			exit_id : connection_to_destroy.node_id,
+			index : index
 		})
 			
 		

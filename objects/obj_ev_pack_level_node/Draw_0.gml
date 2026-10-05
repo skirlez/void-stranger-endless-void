@@ -1,1 +1,0 @@
-draw_placechanger_highlight()

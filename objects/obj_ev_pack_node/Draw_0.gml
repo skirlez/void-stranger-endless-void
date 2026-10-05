@@ -1,4 +1,9 @@
 draw_placechanger_highlight()
+if global.pack_editor.node_instance_connecting == id
+	ev_draw_pack_line(center_x, center_y, mouse_x, mouse_y)
+if invisible
+	return;
+
 
 
 var i_imageframe;
@@ -14,8 +19,6 @@ else
 	i_imageframe = 0
 	
 
-if global.pack_editor.node_instance_connecting == id
-	ev_draw_pack_line(center_x, center_y, mouse_x, mouse_y)
 
 var size = ((image_xscale + image_yscale) / 2) * 5
 if unselectable
