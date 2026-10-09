@@ -12,6 +12,7 @@ if ds_map_find_value(async_load, "id") == download_pack
 	}   
     else if status < 0 
     {
+		on_fail("Unknown error")
         state = DownloadState.ERROR
     }
 }

@@ -7,6 +7,8 @@ if deleting && (!ev_is_mouse_on_me() || !mouse_check_button(mb_left)) {
 	deleting = false
 	image_index = 0;
 	image_speed = 0;
+	visual_x = x;
+	visual_y = y;
 	layer = layer_get_id("LevelHighlightButtons")
 	instance_destroy(agi("obj_ev_delete_pack_save_visuals"))
 	audio_stop_sound(agi("snd_punch_anticipation"))
@@ -23,6 +25,10 @@ if deleting {
 		image_index = 0;
 		audio_play_sound(agi("snd_punch_anticipation"), 10, false)
 		instance_create_layer(0, 0, "DeleteSaveVisuals", agi("obj_ev_delete_pack_save_visuals"))
+	}
+	if timer > 120 {
+		visual_x = lerp(visual_x, room_width / 2, 0.05)
+		visual_y = lerp(visual_y, room_height / 2 + 20, 0.05)	
 	}
 	if timer == 580 {
 		delete_pack_progress(save_name)

@@ -573,6 +573,5 @@ function save_online_pack(save_name, pack_string) {
 }
 
 function get_online_pack_string(save_name) {
-	var pack_string = ds_map_find_value(global.downloaded_packs, nodeless_pack.save_name)
-	return pack_string
+	return ds_map_find_value(global.downloaded_packs, nodeless_pack.save_name)
 }

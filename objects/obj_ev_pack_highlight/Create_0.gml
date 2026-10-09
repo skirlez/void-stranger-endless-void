@@ -37,12 +37,14 @@ var back = instance_create_layer(200, 16, "LevelHighlightButtons", agi("obj_ev_m
 add_child(back);
 
 if !global.online_mode || is_online_pack_downloaded(nodeless_pack.save_name) {
-    var play = instance_create_layer(208, 40, "LevelHighlightButtons", agi("obj_ev_play_pack_button"));
-    play.layer_num = 1;
-    play.nodeless_pack = nodeless_pack;
-    play.display_instance = display_instance;
-    play.highlighter = id;
-    play.image_alpha = 0;
+    var play = instance_create_layer(208, 40, "LevelHighlightButtons", agi("obj_ev_play_pack_button"), {
+		layer_num : 1,
+		nodeless_pack : nodeless_pack,
+		display_instance : display_instance,
+		highlighter : id,
+		is_online : global.online_mode,
+		image_alpha : 0
+	});
     add_child(play);
 
     var copy = instance_create_layer(192, 40, "LevelHighlightButtons", agi("obj_ev_executing_button"), {
@@ -110,7 +112,8 @@ if global.online_mode {
         }
     })
     add_child(download)
-} else {
+} 
+else {
 	var deleteb = instance_create_layer(192, 90, "LevelHighlightButtons", agi("obj_ev_delete_button"), {
 		pack_mode : true,
 		layer_num : 1,
@@ -122,7 +125,7 @@ if global.online_mode {
     add_child(deleteb)
 
     if pack_progress_exists(nodeless_pack.save_name) {
-        var delete_save_button = instance_create_layer(208, 70, "LevelHighlightButtons", agi("obj_ev_delete_pack_save_button"), {
+        var delete_save_button = instance_create_layer(208, 73, "LevelHighlightButtons", agi("obj_ev_delete_pack_save_button"), {
             layer_num : 1,
             level_select : instance_find(agi("obj_ev_level_select"), 0),
             save_name : nodeless_pack.save_name,
@@ -135,20 +138,22 @@ if global.online_mode {
 
 	var upload = instance_create_layer(208, 90, "LevelHighlightButtons", agi("obj_ev_upload_button"), {
 		layer_num: 1,
-		lvl: import_pack(read_pack_string_from_file(nodeless_pack.save_name)),
+		level_or_save_name : nodeless_pack.save_name,
 		image_alpha: 0,
 		is_pack: true, 
 	});
 	add_child(upload)
 }
-
-var play_t = instance_create_layer(8, room_height - 10, "LevelHighlightButtons", agi("obj_ev_play_pack_button"))
-play_t.layer_num = 1
-play_t.nodeless_pack = nodeless_pack
-play_t.display_instance = display_instance
-play_t.highlighter = id;
-play_t.tis = true;
-play_t.image_alpha = 0;
+var play_t = instance_create_layer(8, room_height - 10, "LevelHighlightButtons", agi("obj_ev_play_pack_button"), 
+{
+	layer_num : 1,
+	nodeless_pack : nodeless_pack,
+	display_instance : display_instance,
+	highlighter : id,
+	is_online : global.online_mode,
+	tis : true,
+	image_alpha : 0
+});
 add_child(play_t)
 
 if global.tis_pack_button {
@@ -172,7 +177,7 @@ var textbox_offset;
 if (!global.online_mode) {
 	date_textbox = noone
 	
-	var edit = instance_create_layer(192, 73, "LevelHighlightButtons", agi("obj_ev_executing_button"), {
+	var edit = instance_create_layer(191, 73, "LevelHighlightButtons", agi("obj_ev_executing_button"), {
 		layer_num : 1,
 		nodeless_pack : nodeless_pack,
 		display_instance : display_instance,

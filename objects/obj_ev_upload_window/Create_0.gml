@@ -1,10 +1,12 @@
 event_inherited();
 
-if lvl == noone
+if level_or_save_name == noone
 	exit
 
-
-	
+if is_pack
+	subject = import_pack(read_pack_string_from_file(level_or_save_name))
+else
+	subject = level_or_save_name
 function can_upload_level(level) {
 	var sha = level_content_sha1(level);
 	if !ds_map_exists(global.beaten_levels_map, sha)
@@ -38,25 +40,25 @@ function export_level_or_pack(level_or_pack) {
 
 function find_key() {
 	if (is_pack) {
-		return ds_map_find_value(global.pack_key_map, lvl.save_name);
+		return ds_map_find_value(global.pack_key_map, subject.save_name);
 	} else {
-		return ds_map_find_value(global.level_key_map, lvl.save_name);
+		return ds_map_find_value(global.level_key_map, subject.save_name);
 	}
 }
 
 function remove_key() {
 	if (is_pack) {
-		return global.editor.remove_pack_key(lvl.save_name);
+		return global.editor.remove_pack_key(subject.save_name);
 	} else {
-		return global.editor.remove_level_key(lvl.save_name);
+		return global.editor.remove_level_key(subject.save_name);
 	}
 }
 
 function add_key() {
 	if (is_pack) {
-		return global.editor.add_pack_key(verifying_key, lvl.save_name);
+		return global.editor.add_pack_key(verifying_key, subject.save_name);
 	} else {
-		return global.editor.add_level_key(verifying_key, lvl.save_name);
+		return global.editor.add_level_key(verifying_key, subject.save_name);
 	}
 }
 
@@ -178,7 +180,7 @@ function reset_window() {
 }
 
 function start_uploading() {
-	if !can_upload_level_or_pack(lvl) {
+	if !can_upload_level_or_pack(subject) {
 		state = 8;
 		reset_window()
 		create_finish_buttons("Ah")
@@ -188,12 +190,12 @@ function start_uploading() {
 	upload_timeout = 300
 	reset_window()
 	
-	var lvl_str = export_level_or_pack(lvl);
-	post_level_id = http_post_string(get_server_path(), lvl_str)
+	var subject_str = export_level_or_pack(subject);
+	post_level_id = http_post_string(get_server_path(), subject_str)
 }
 
 function start_updating() {
-	if !can_upload_level_or_pack(lvl) {
+	if !can_upload_level_or_pack(subject) {
 		state = 8;
 		reset_window()
 		create_finish_buttons("Ah")
@@ -204,11 +206,11 @@ function start_updating() {
 	upload_timeout = 300
 	reset_window()
 	
-	var lvl_str = export_level_or_pack(lvl);
-	var key = find_key(lvl.save_name);
+	var subject_str = export_level_or_pack(subject);
+	var key = find_key(subject.save_name);
 
 	var map = ds_map_create();
-	update_level_id = http_request(get_server_path(), "PUT", map, lvl_str + "|" + key)
+	update_level_id = http_request(get_server_path(), "PUT", map, subject_str + "|" + key)
 	ds_map_destroy(map)
 }
 
@@ -298,9 +300,9 @@ function on_verify_upload() {
 	state = 2
 	global.editor.try_update_online_levels();
 
-	add_key(verifying_key, lvl.save_name)
+	add_key()
 	
-	var keyfile = file_text_open_write(get_save_directory() + lvl.save_name + ".key")
+	var keyfile = file_text_open_write(get_save_directory() + subject.save_name + ".key")
 	file_text_write_string(keyfile, verifying_key)
 	file_text_close(keyfile)
 	
@@ -320,6 +322,6 @@ function on_finish_delete() {
 	create_finish_buttons("Okay thanks") 
 	global.editor.try_update_online_levels();
 	remove_key()
-	file_delete(get_save_directory() + lvl.save_name + ".key")
+	file_delete(get_save_directory() + subject.save_name + ".key")
 }
 

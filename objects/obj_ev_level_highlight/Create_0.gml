@@ -75,7 +75,7 @@ if (!global.online_mode) {
 
 	var upload = instance_create_layer(208, 90, "LevelHighlightButtons", agi("obj_ev_upload_button"))
 	upload.layer_num = 1
-	upload.lvl = lvl;
+	upload.level_or_save_name = lvl;
 	upload.image_alpha = 0;
 	upload.is_pack = false;
 
