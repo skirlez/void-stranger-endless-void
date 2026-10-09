@@ -87,6 +87,7 @@ if (global.mouse_layer == 0 || selected_thing == pack_things.wrench) {
 			
 			add_undo_action(function (args) {
 				var instance = ds_map_find_value(node_id_to_instance_map, args.node_id)
+				instance_activate_object(instance)
 				instance_destroy(instance)
 			}, {
 				node_id : node_instance.node_id,
@@ -202,8 +203,7 @@ if placechanger_copying_timer > 0 {
 			var node_state = get_node_state_from_instance(node_instance_changing_places);
 			node_state.pos_x = mouse_x - node_instance_changing_places.center_x_offset;
 			node_state.pos_y = mouse_y - node_instance_changing_places.center_y_offset;
-			// funny line. proper way to do this would be implementing copy for every property,
-			// but i don't feel like it
+			
 			node_state.properties = node_state.node.copy_function(node_state.properties)
 			if node_state.node == level_node {
 				try_level_name_and_rename(node_state.properties.level, get_all_level_node_instances())	
@@ -216,6 +216,7 @@ if placechanger_copying_timer > 0 {
 			node_instance_changing_places = noone;
 			add_undo_action(function (args) {
 				var copy = ds_map_find_value(node_id_to_instance_map, args.node_id)
+				instance_activate_object(copy)
 				instance_destroy(copy)
 			}, {
 				node_id : copy.node_id,

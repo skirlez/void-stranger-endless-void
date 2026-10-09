@@ -15,5 +15,5 @@ function ev_draw_tis_eyecatch(grade, pos_x, pos_y) {
 	var spin_v = (dcos(global.editor_time * 0.45) + 1) / 2;
 	var size = 45;
 	var offset = 95
-	ev_draw_cube(spr, global.editor_time % 50 < 25, pos_x + size + offset, pos_y + size, size, spin_h, spin_v)
+	ev_draw_cube(spr, global.editor_time % 50 < 25, pos_x + size + offset, pos_y + size, size, spin_h, spin_v, false)
 }

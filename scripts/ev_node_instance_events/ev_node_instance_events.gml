@@ -1,24 +1,22 @@
 function move_node_to_position(instance, new_x, new_y) {
-	with (instance) {
-		x = new_x
-		y = new_y
-
-		if (y < 0)
-			y = 0
-		if (y > room_height - sprite_height)
-			y = room_height - sprite_height
-		if (x < 0)
-			x = 0
-		if (x > room_width - sprite_width)
-			x = room_width - sprite_width
-		center_x = x + center_x_offset
-		center_y = y + center_y_offset
+	if (new_y < 0)
+		new_y = 0
+	if (new_y > room_height - instance.sprite_height)
+		new_y = room_height - instance.sprite_height
+	if (new_x < 0)
+		new_x = 0
+	if (new_x > room_width - instance.sprite_width)
+		new_x = room_width - instance.sprite_width
+	instance.x = new_x
+	instance.y = new_y
+	instance.center_x = new_x + center_x_offset
+	instance.center_y = new_y + center_y_offset
 		
-		line_drawer.update()
-		for (var i = 0; i < array_length(instance.connected_to_me); i++) {
-			instance.connected_to_me[i].line_drawer.update()
-		}
+	line_drawer.update()
+	for (var i = 0; i < array_length(instance.connected_to_me); i++) {
+		instance.connected_to_me[i].line_drawer.update()
 	}
+	
 }
 
 
@@ -154,7 +152,7 @@ function draw_placechanger_highlight() {
 	}
 	else {
 		var scale = ((image_xscale + image_yscale) / 2) * 5	
-		ev_draw_cube(sprite_index, 0, x + shake_x_offset, y, scale + increase * 5, spin_h, spin_v)
+		ev_draw_cube(sprite_index, 0, x + shake_x_offset, y, scale + increase * 5, spin_h, spin_v, false)
 	}
 	gpu_set_fog(false, c_black, 0, 1)
 }

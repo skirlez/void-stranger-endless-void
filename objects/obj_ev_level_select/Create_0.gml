@@ -108,6 +108,7 @@ function level_clicked(display_inst) {
 		
 		global.pack_editor.add_undo_action(function (args) {
 			var instance = ds_map_find_value(global.pack_editor.node_id_to_instance_map, args.node_id)
+			instance_activate_object(instance)
 			instance_destroy(instance)
 		}, {
 			node_id : instance.node_id,
