@@ -9,10 +9,10 @@ function move_node_to_position(instance, new_x, new_y) {
 		new_x = room_width - instance.sprite_width
 	instance.x = new_x
 	instance.y = new_y
-	instance.center_x = new_x + center_x_offset
-	instance.center_y = new_y + center_y_offset
-		
-	line_drawer.update()
+	instance.center_x = new_x + instance.center_x_offset
+	instance.center_y = new_y + instance.center_y_offset
+	
+	instance.line_drawer.update()
 	for (var i = 0; i < array_length(instance.connected_to_me); i++) {
 		instance.connected_to_me[i].line_drawer.update()
 	}

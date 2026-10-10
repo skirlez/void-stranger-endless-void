@@ -1,9 +1,9 @@
 event_inherited();
 
-
+var clone_button_text = !is_online_collision ? "Clone" : "Do not"
 clone_button = instance_create_layer(x + 50, y + 30, "WindowElements", agi("obj_ev_executing_button"), {
-	txt : "Clone",
-	base_scale_x : 1.3,
+	txt : clone_button_text,
+	base_scale_x : 1.4,
 	base_scale_y : 0.7,
 	func : function () {
 		with (window) {
@@ -25,8 +25,9 @@ clone_button = instance_create_layer(x + 50, y + 30, "WindowElements", agi("obj_
 })
 add_child(clone_button)
 
+var update_text = !is_online_collision ? "Update" : "Share"
 update_button = instance_create_layer(x - 50, y + 30, "WindowElements", agi("obj_ev_executing_button"), {
-	txt : "Update",
+	txt : update_text,
 	base_scale_x : 1.5,
 	base_scale_y : 0.7,
 	func : function () {

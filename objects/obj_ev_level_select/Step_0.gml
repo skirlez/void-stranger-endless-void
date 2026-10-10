@@ -41,25 +41,39 @@ if keyboard_check(vk_control) && keyboard_check_pressed(ord("V")) && !global.onl
 		}
 		else {
 			var pack = import_pack(str);
-			if file_exists(global.packs_directory + pack.save_name + "." + pack_extension) {
-				var old_pack_string;
-				try {
-					var file = file_text_open_read(global.packs_directory + pack.save_name + "." + pack_extension)
-					old_pack_string = file_text_read_string(file)
-					file_text_close(file)
+			var local_pack_exists = file_exists(global.packs_directory + pack.save_name + "." + pack_extension)
+			var online_nodeless_pack_if_exists = noone;
+			if !local_pack_exists {
+				for (var i = 0; i < array_length(global.online_packs); i++) {
+					var nodeless = import_pack_nodeless(global.online_packs[i])
+					if (nodeless.save_name == pack.save_name) {
+						online_nodeless_pack_if_exists = nodeless;
+						break;
+					}
 				}
-				catch (e) {
-					ev_notify("Couldn't paste pack!")
-					exit;
+			}
+			if local_pack_exists || (online_nodeless_pack_if_exists != noone) {
+				var preexisting_nodeless_pack;
+				if local_pack_exists {
+					try {
+						var old_pack_string = read_pack_string_from_file(pack.save_name, true)
+						preexisting_nodeless_pack = import_pack_nodeless(old_pack_string)
+					}
+					catch (e) {
+						ev_notify("Couldn't paste pack!")
+						exit;
+					}
 				}
+				else
+					preexisting_nodeless_pack = online_nodeless_pack_if_exists
 					
 				global.mouse_layer++;
-				new_window(11, 8, agi("obj_ev_update_pack_window"), {
+				new_window(13, 8, agi("obj_ev_update_pack_window"), {
 					layer_num : global.mouse_layer,
-					old_pack : import_pack(old_pack_string),
+					old_nodeless_pack : preexisting_nodeless_pack,
 					new_pack : pack,
-					old_pack_string : old_pack_string,
 					new_pack_string : str,
+					is_online_collision : (online_nodeless_pack_if_exists != noone),
 					level_select : id,
 				})
 			}
