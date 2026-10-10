@@ -1,0 +1,9 @@
+last_active = -1
+image_xscale = scale * width
+image_yscale = scale * height
+x -= scale * max_width / 2 
+y -= scale * max_height / 2
+last_relative_x = -1
+last_relative_y = -1
+drawing = false;
+target_sprite = agi("spr_ev_monogram_target")

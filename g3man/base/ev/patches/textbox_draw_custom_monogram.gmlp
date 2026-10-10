@@ -1,0 +1,202 @@
+meta:
+targets='gml_Object_obj_textbox_Draw_0'
+critical=true
+patch:
+
+// draw a black background when interacting with the monogram
+find_line_with('else if (name == "wallmural3")')
+write_before('
+else if (name == "wallmonogram") {
+	draw_sprite(spr_black_screen, 0, 0, 0)
+	draw_sprite(mood, portrait_index, 0, 0)
+}
+')
+
+
+
+meta:
+targets='gml_Object_obj_mural_Step_0'
+critical=true
+patch:
+
+// textbox dialogues for custom monograms
+find_line_with('if (active_textbox == -4)')
+write_before('
+if (inscription == 20) {
+    text[0] = "[Strange carvings are glowing]"
+    moods = [neutral]
+    speakers = [id]
+}
+')
+
+// add properties of the monogram to the textbox to draw it 
+find_line_with('active_textbox = tbox')
+write('
+if (name == "wallmonogram") {
+	active_textbox.ev_monogram_width = ev_monogram_width
+	active_textbox.ev_monogram_height = ev_monogram_height
+	active_textbox.ev_monogram_tiles = ev_monogram_tiles
+	active_textbox.ev_monogram_hints_col = ev_monogram_hints_col
+	active_textbox.ev_monogram_hints_row = ev_monogram_hints_row
+	active_textbox.ev_monogram_target_col = ev_monogram_target_col
+	active_textbox.ev_monogram_target_row = ev_monogram_target_row
+}
+')
+
+
+meta:
+targets='gml_Object_obj_mural_Step_0'
+critical=true
+patch:
+
+// inscription 20 is for the custom monogram
+// the name "wallmonogram" is used to check whether 
+// we add the glowing monogram animation in obj_textbox
+find_line_with('else if (inscription == 19)')
+move(5)
+write_before('
+else if (inscription == 20) {
+    mural_damage = 0
+    image_speed += 0.05
+    sprite_index = spr_mural_glow
+    neutral = spr_black_screen
+    name = "wallmonogram"
+}
+')
+
+
+meta:
+targets='gml_Object_obj_textbox_Create_0'
+critical=true
+patch:
+
+// initialize variables for the glowing monogram animation
+move_to_end()
+write('
+monogram_counter = 0
+monogram_period = 10
+highlight_color = c_white
+secondary_color = c_white
+')
+
+meta:
+targets='gml_Object_obj_textbox_Step_0'
+critical=true
+patch:
+
+// glow animation for the monogram
+find_line_with('if (!text_move)')
+write_before('
+if (name == "wallmonogram"){
+	monogram_counter += 1;
+	if monogram_counter == monogram_period * 3 {
+		highlight_color = c_white
+		secondary_color = c_ltgray
+	} else if monogram_counter == monogram_period * 4 {
+		highlight_color = c_ltgray
+		secondary_color = c_gray
+	} else if monogram_counter == monogram_period * 5 {
+		highlight_color = c_gray
+		secondary_color = c_black
+	} else if monogram_counter == monogram_period * 8 {
+		highlight_color = c_ltgray
+		secondary_color = c_gray
+	} else if monogram_counter == monogram_period * 9 {
+		highlight_color = c_white
+		secondary_color = c_ltgray
+	} else if monogram_counter == monogram_period * 10 {
+		highlight_color = c_white
+		secondary_color = c_white
+		monogram_counter = 0;
+	}
+}
+')
+
+
+
+meta:
+targets='gml_Object_obj_textbox_Draw_0'
+critical=true
+patch:
+
+// draw the glowing monogram 
+move_to_end()
+write('
+if (name == "wallmonogram") {
+	var start_x = 90;
+	var start_y = 30;
+	var padding = 1;
+	var size = 5;
+
+	// draw squares
+	for (var row = 0; row < ev_monogram_height; row += 1) {
+		for (var col = 0; col < ev_monogram_width; col += 1) {
+			var color = secondary_color;
+			
+			if (
+				row == ev_monogram_target_row && 
+				col == ev_monogram_target_col
+			) {
+				color = highlight_color
+			}
+
+			draw_rectangle_color(
+				start_x + col * (size - 1) + (padding + 1) * col,
+				start_y + row * (size - 1) + (padding + 1) * row,
+				start_x + (col + 1) * (size - 1) + (padding + 1) * col,
+				start_y + (row + 1) * (size - 1) + (padding + 1) * row,
+				color,
+				color,
+				color,
+				color,
+				false
+			)
+		}
+	}
+
+	// draw hints
+    // hints for the rows
+	for (var row = 0; row < ev_monogram_height; row += 1) {
+		var color = secondary_color;
+		if row == ev_monogram_target_row {
+			color = highlight_color
+		}
+
+		for (var hint = 0; hint < array_length(ev_monogram_hints_row[row]); hint += 1) {
+			draw_sprite_ext(
+				spr_ev_monogram_numbers, 
+				ev_monogram_hints_row[row][array_length(ev_monogram_hints_row[row]) - hint - 1],
+				start_x - size * (hint + 1) - (padding * hint + 1),
+				start_y + row * size + padding * row,
+				1, 
+				1, 
+				0,
+				color,
+				1
+			);
+		}
+	}
+
+    // hints for the columns
+	for (var col = 0; col < ev_monogram_width; col += 1) {
+		var color = secondary_color;
+		if col == ev_monogram_target_col {
+			color = highlight_color
+		}
+
+		for (var hint = 0; hint < array_length(ev_monogram_hints_col[col]); hint += 1) {
+			draw_sprite_ext(
+				spr_ev_monogram_numbers, 
+				ev_monogram_hints_col[col][array_length(ev_monogram_hints_col[col]) - hint - 1],
+				start_x + col * size + padding * col,
+				start_y - size * (hint + 1) - padding * (hint + 1),
+				1, 
+				1, 
+				0,
+				color,
+				1
+			);
+		}
+	}
+}
+')

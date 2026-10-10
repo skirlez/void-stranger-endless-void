@@ -1529,6 +1529,68 @@ object_mural.zed_function = function(tile_state) {
 }
 
 
+object_monogram = new editor_object("Monogram", agi("spr_ev_monogram"), "mg", "obj_mural")
+object_monogram.iostruct = {
+	read : function(tile_id, lvl_str, pos) {
+		var encoded_monogram = read_string_until(lvl_str, pos, PROPERTY_END_CHAR);
+		var properties = decode_monogram(encoded_monogram.substr);
+		var tile = new tile_with_state(tile_id, properties)
+		return {
+			value: tile,
+			offset: encoded_monogram.offset + 1,
+		}
+	},
+	write : function(tile_state) {
+		var encoded_monogram = encode_monogram(tile_state.properties)
+		return $"{tile_state.tile.tile_id}{encoded_monogram}{PROPERTY_END_CHAR}"
+	},
+	place : function(tile_state, i, j) {
+		var inst = instance_create_layer(j * 16 + 8, i * 16 + 8, tile_state.tile.obj_layer, agi(tile_state.tile.obj_name));
+		inst.inscription = 20;
+		inst.ev_mural_brand = 0;
+		inst.ev_mural_text = "";
+		inst.ev_monogram_width = tile_state.properties.width
+		inst.ev_monogram_height = tile_state.properties.height
+		inst.ev_monogram_tiles = tile_state.properties.tiles
+		inst.ev_monogram_hints_col = get_monogram_columns_hints(
+			tile_state.properties.tiles,
+			tile_state.properties.width,
+			tile_state.properties.height,
+		);
+		inst.ev_monogram_hints_row = get_monogram_rows_hints(
+			tile_state.properties.tiles,
+			tile_state.properties.width,
+			tile_state.properties.height,
+		);
+		inst.ev_monogram_target_col = tile_state.properties.target_col
+		inst.ev_monogram_target_row = tile_state.properties.target_row
+	}
+}
+object_monogram.properties_generator = function () {
+	var initial_width = 7;
+	var initial_height = 7;
+	return {
+		// `type` unused for now, but this value could be used to display 
+		// something on the top left of the monogram (to indicate if
+		// if it's for a gem or a secret exit for example)
+		// 
+		// 0 should be an empty sprite 
+		type : 0, 
+		width: initial_width,
+		height: initial_height,
+		tiles : array_create(initial_width * initial_height, 0),
+		target_col: 0,
+		target_row: 0,
+	}
+}
+object_monogram.zed_function = function(tile_state) {
+	new_window(10, 8, agi("obj_ev_monogram_window"), {
+		monogram_properties : tile_state.properties
+	})	
+	global.mouse_layer = 1
+}
+
+
 global.player_tiles = array_create(7)
 global.player_objects = array_create(7)
 for (var i = 0; i < 7; i++) {
@@ -1544,7 +1606,7 @@ tiles_list = [tile_default, tile_glass, tile_bomb, tile_explo, tile_floorswitch,
 
 objects_list = [object_player, object_leech, object_maggot, object_bull, object_gobbler, object_hand, 
 	object_mimic, object_diamond, object_hungry_man, object_add, object_cif, object_bee, object_tan, object_lev, object_mon, object_eus, object_gor, 
-	object_jukebox, object_egg, object_hologram, object_tree, object_memory_crystal, object_secret_exit, object_mural,
+	object_jukebox, object_egg, object_hologram, object_tree, object_memory_crystal, object_secret_exit, object_mural, object_monogram,
 	object_spider, object_scaredeer, object_orb, object_tis]
 
 #endregion
