@@ -55,10 +55,10 @@ function get_monogram_rows_hints(tiles, width, height) {
  * - tiles (bitarray of u8): read the documentation of `buffer_write_bitarray` to learn more
  */
 function encode_monogram(properties) {
+	var array_size = properties.width * properties.height
 	var buffer_size = 
-		6 + // type, width, height, target_col, target_width, bitarray length
-		((properties.width * properties.height) div 8) + // complete chunks
-		((properties.width * properties.height) mod 8 > 0 ? 1 : 0); // incomplete chunk
+		5 + // type, width, height, target_col, target_width
+		(array_size + 7) div 8; // +7 to take into account an incomplete chunk
 		
 	var buffer = buffer_create(buffer_size, buffer_fixed, 1);
 	buffer_write(buffer, buffer_u8, properties.type);
@@ -66,7 +66,7 @@ function encode_monogram(properties) {
 	buffer_write(buffer, buffer_u8, properties.height);
 	buffer_write(buffer, buffer_u8, properties.target_col);
 	buffer_write(buffer, buffer_u8, properties.target_row);
-	buffer_write_bitarray(buffer, properties.tiles)
+	buffer_write_bitarray(buffer, properties.tiles);
 
 	var monogram_str = buffer_base64_encode(buffer, 0, buffer_get_size(buffer));
 	buffer_delete(buffer);
@@ -85,7 +85,7 @@ function decode_monogram(monogram_str) {
 	var height = buffer_read(buffer, buffer_u8);
 	var target_col = buffer_read(buffer, buffer_u8);
 	var target_row = buffer_read(buffer, buffer_u8);
-	var tiles = buffer_read_bitarray(buffer);
+	var tiles = buffer_read_bitarray(buffer, width * height);
 
 	buffer_delete(buffer);
 

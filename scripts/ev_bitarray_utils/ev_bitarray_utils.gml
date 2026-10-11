@@ -1,19 +1,18 @@
 
 /**
- * Add a array of boolean to a buffer
+ * Write an array of booleans to a buffer
  * 
- * First, the array's length is written to the buffer as u8.
- * Then, the array is split into chunks of 8 bits, and each chunk
- * is turned into an 8-bits integer (u8) and written to the buffer.
+ * The array is split into chunks of 8 elements, and each chunk
+ * is turned into an 8-bits integer and written to the buffer.
  */
-function buffer_write_bitarray(buffer, bitarray) {
-	buffer_write(buffer, buffer_u8, array_length(bitarray))
+function buffer_write_bitarray(buffer, array) {
+	var size = array_length(array);
 
 	var byte = 0;
-	for (var i = 0; i < array_length(bitarray); i += 1) {
-		if bitarray[i] { byte |= (1 << (i & 7)); }
+	for (var i = 0; i < size; i += 1) {
+		if array[i] { byte |= (1 << (i & 7)); }
 
-		if ((i & 7) == 7 || i == array_length(bitarray) - 1) {
+		if ((i & 7) == 7 || i == size - 1) {
 			buffer_write(buffer, buffer_u8, byte);
 			byte = 0
 		}
@@ -21,20 +20,18 @@ function buffer_write_bitarray(buffer, bitarray) {
 }
 
 /**
- * Returns an array of boolean from a buffer.
+ * Reads an array of booleans from a buffer.
  * 
- * Read `buffer_write_bitarray` to learn how a bitarray is encoded.
+ * Documentation for `buffer_write_bitarray`' explain how a bitarray is encoded.
  */
-function buffer_read_bitarray(buffer) {
-	var bitarray_length = buffer_read(buffer, buffer_u8);
-	var bitarray = array_create(bitarray_length, 0);
+function buffer_read_bitarray(buffer, size) {
+	var array = array_create(size, 0);
 
 	var byte = 0;
-	for (var i = 0; i < bitarray_length; i++) {
-		show_debug_message(i)
+	for (var i = 0; i < size; i++) {
 		if ((i & 7) == 0) { byte = buffer_read(buffer, buffer_u8); }
-		bitarray[i] = ((byte >> (i & 7)) & 1) == 1;
+		array[i] = ((byte >> (i & 7)) & 1) == 1;
 	}
 
-	return bitarray;
+	return array;
 }
