@@ -43,43 +43,6 @@ if grube_mode {
 	exit
 }
 
-
-
-
-
-/*
-var long_text = 
-@"Development:
-Skirlez
-KyuuMetis
-Pyredrid - Branefuck functions
-Meepster99 - GBAStranger export
-gullwingdoors - Pencil icon
-juliascythe - Helping with 3D cube rendering and the Grube
-cyrelouyea - Endless void rod option in chests
-
-Music Credits:
-Sunday - crappyblue - astra_jam (...ad astra)
-Monday - Skirlez - Monsday (Greedy Groove)
-Tuesday - 8bitavo - Tail's Lullaby (Tail, Affection Air, Void)
-Wednesday - gooeyPhantasm - Blossom (Dancing lesson, Blossom chime)
-Friday - gooeyPhantasm - Endless Void (Voided)
-Thursday/Saturday - eebrozgi - Stealie Feelies (slowed down) 
-
-SFX Credits:
-
-Clicking Seatbelt.wav by fatboy94 -- https://freesound.org/s/535807/ 
--- License: Creative Commons 0
-toy rattle 2.aiff by SubUnit_FieldRec -- https://freesound.org/s/262380/ 
--- License: Attribution NonCommercial 4.0
-Glass bottle Sounds by Snake16547 -- https://freesound.org/s/433990/ 
--- License: Creative Commons 0
-Glass breaking by Ruben_Uitenweerde -- https://freesound.org/s/486166/ 
--- License: Attribution 3.0
-";
-*/
-
-
 if !surface_exists(credits_surface) {
 	credits_surface = surface_create(credits_surface_width, 144)	
 }

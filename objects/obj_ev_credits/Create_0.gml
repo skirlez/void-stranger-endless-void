@@ -178,6 +178,7 @@ credits = [
 		new ev_credits_spacing(),
 		new ev_credits_header("Server Development"),
 		new ev_credits_text("hexfae"),
+		new ev_credits_text("cyrelouyea"),
 	],
 	[
 		new ev_credits_header("Music"),
@@ -274,7 +275,6 @@ function load_credits_page(page_index) {
 	}
 	
 	if (page_index == CREDITS_COMMUNITY_PAGE) {
-		// TODO handle offline
 		var level_string = get_random_level_string();
 		var lvl = import_level(level_string);
 		community_display = instance_create_layer(20, room_height - 80, "Instances", agi("obj_ev_display"), {
