@@ -7,7 +7,6 @@ else
 	sprite_index = tile.spr_ind
 
 
-
 if (selected) {
 	if (global.tile_mode) {
 		var color = c_black
@@ -25,6 +24,6 @@ if (selected) {
 }
 
 
-draw_sprite_ext(sprite_index, 0, x, y, scale_x, scale_y, 0, c_white, 1)
+draw_sprite_ext(sprite_index, tile.img_ind, x, y, scale_x, scale_y, 0, c_white, 1)
 	
 	

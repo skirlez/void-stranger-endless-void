@@ -30,11 +30,11 @@ if ev_mouse_released() {
 }
 
 if ev_mouse_right_pressed() {
-	var relative_x = (mouse_x - x) div (scale)
-	var relative_y = (mouse_y - y) div (scale)
+	var relative_x = (mouse_x - x) div scale
+	var relative_y = (mouse_y - y) div scale
 
-    if (relative_x < width && relative_y < height) {
-		audio_play_sound(agi("snd_ev_place"), 10, false)
+    if (relative_x < width && relative_y < height && relative_x >= 0 && relative_y >= 0) {
+		audio_play_sound(agi("snd_ev_place"), 10, false, 1, 0, random_range(0.9, 1.1))
         target_col = relative_x
         target_row = relative_y
     }

@@ -174,12 +174,17 @@ return_tile_state_function = function(tile_state) {
 };
 
 default_draw_function = function(tile_state, i, j/*, preview, lvl, no_spoilers*/) {
-	draw_sprite(tile_state.tile.spr_ind, 0, j * 16 + 8, i * 16 + 8)	
+	draw_sprite(tile_state.tile.spr_ind, tile_state.tile.img_ind, j * 16 + 8, i * 16 + 8)	
 }
 music_draw_function = function(tile_state, i, j) {
 	var spr = tile_state.tile.spr_ind
 	draw_sprite(spr, ev_strobe_integer(sprite_get_number(spr)), j * 16 + 8, i * 16 + 8)	
 }
+/*
+default_copy_function = function(properties) {
+	return struct_copy(properties)	
+}
+*/
 
 default_reader = function(tile /*, lvl_str, pos, version*/ ) {
 	var t = new tile_with_state(tile)
@@ -216,11 +221,13 @@ global.placeable_name_map = ds_map_create()
 function editor_tile(display_name, spr_ind, tile_id, obj_name, obj_layer = "Floor", flags = 0) constructor {
 	self.display_name = display_name
 	self.spr_ind = spr_ind
+	self.img_ind = 0
 	self.obj_name = obj_name
 	self.obj_layer = obj_layer
 	self.flags = flags
 	self.draw_function = global.editor.default_draw_function
 	self.place_function = global.editor.return_tile_state_function
+//	self.copy_function = global.editor.default_copy_function
 	self.zed_function = noone
 	self.tile_id = tile_id;
 	self.properties_generator = return_noone;
@@ -553,7 +560,7 @@ function make_wall_tile(name, tid, type) {
 				
 				if new_ind != tile_state.properties.ind {
 					tile_state.properties.ind = new_ind;
-					global.held_tile_state = new tile_with_state(tile_state.tile, struct_copy(tile_state.properties));
+					global.held_tile_state = copy_tile_state(tile_state)
 				}
 			}
 			previous_wall_direction = wall_direction
@@ -1529,7 +1536,9 @@ object_mural.zed_function = function(tile_state) {
 }
 
 
-object_monogram = new editor_object("Monogram", agi("spr_ev_monogram"), "mg", "obj_mural")
+#macro MONOGRAM_FULL_BRIGHT_INDEX 6
+
+object_monogram = new editor_object("Monogram", agi("spr_mural_glow"), "mg", "obj_mural")
 object_monogram.iostruct = {
 	read : function(tile_id, lvl_str, pos) {
 		var encoded_monogram = read_string_until(lvl_str, pos, PROPERTY_END_CHAR);
@@ -1564,6 +1573,8 @@ object_monogram.iostruct = {
 		);
 		inst.ev_monogram_target_col = tile_state.properties.target_col
 		inst.ev_monogram_target_row = tile_state.properties.target_row
+		// void stranger uses image_speed like image_index
+		inst.image_speed = MONOGRAM_FULL_BRIGHT_INDEX
 	}
 }
 object_monogram.properties_generator = function () {
@@ -1583,13 +1594,20 @@ object_monogram.properties_generator = function () {
 		target_row: 0,
 	}
 }
+/*
+object_monogram.copy_function = function(properties) {
+	var copy = struct_copy(properties)
+	copy.tiles = copy_array(properties.tiles)
+	return copy
+}
+*/
 object_monogram.zed_function = function(tile_state) {
 	new_window(10, 8, agi("obj_ev_monogram_window"), {
 		monogram_properties : tile_state.properties
 	})	
 	global.mouse_layer = 1
 }
-
+object_monogram.img_ind = MONOGRAM_FULL_BRIGHT_INDEX
 
 global.player_tiles = array_create(7)
 global.player_objects = array_create(7)
@@ -1661,7 +1679,7 @@ function copy_tile_data(tiles) {
 		tiles[i] = copy_array(tiles[i])
 		for (var j = 0; j < array_length(tiles[i]); j++) {
 			var tile_state = tiles[i][j]
-			tiles[i][j] = new tile_with_state(tile_state.tile, struct_copy(tile_state.properties))
+			tiles[i][j] = copy_tile_state(tile_state)
 		}
 	}
 	return tiles;

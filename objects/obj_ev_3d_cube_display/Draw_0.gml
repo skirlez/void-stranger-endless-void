@@ -81,7 +81,7 @@ if (global.selected_thing == thing_placeable
 		if cube_type == cube_types.uniform
 			ev_draw_cube(sprite, 0, 27, draw_y, 7, spin_h, spin_v, false)		
 		else if cube_type == cube_types.uniform_constant
-			ev_draw_cube(global.held_tile_state.tile.spr_ind, 0, 27, draw_y, 7, spin_h, spin_v, false)	
+			ev_draw_cube(global.held_tile_state.tile.spr_ind, global.held_tile_state.tile.img_ind, 27, draw_y, 7, spin_h, spin_v, false)	
 		else {
 			var spr;
 			if cube_type == cube_types.edge

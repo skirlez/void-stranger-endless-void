@@ -4,6 +4,17 @@ function tile_with_state(tile, properties = tile.properties_generator()) constru
 	self.properties = properties
 }
 
+function copy_tile_state(tile_state) {
+	return new tile_with_state(
+		tile_state.tile, 
+		struct_copy(tile_state.properties)
+	);
+}
+function copy_tile_state_properties(tile_state) {
+	return struct_copy(tile_state.properties)
+}
+
+
 // https://forum.gamemaker.io/index.php?threads/copy-struct.93707/ 
 // gamemaker is dumb for not having this
 function struct_copy(SS) {

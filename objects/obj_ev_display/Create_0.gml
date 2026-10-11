@@ -141,7 +141,7 @@ function handle_click(tile_i, tile_j, is_batch_operation) {
 					audio_play_sound(pick_sound, 10, false, 1.2)
 				
 				global.selected_thing = thing_placeable
-				switch_held_tile(new tile_with_state(final_state.tile, struct_copy(final_state.properties)))
+				switch_held_tile(copy_tile_state(final_state))
 				global.mouse_held = false;
 				
 
@@ -153,7 +153,8 @@ function handle_click(tile_i, tile_j, is_batch_operation) {
 		case thing_placeable:
 			if (global.held_tile_state == global.editor.object_empty)
 				return;
-			place_placeable(tile_i, tile_j, global.held_tile_state.tile, is_batch_operation, struct_copy(global.held_tile_state.properties))
+			place_placeable(tile_i, tile_j, global.held_tile_state.tile, is_batch_operation, 
+				copy_tile_state_properties(global.held_tile_state))
 			return;
 		case thing_multiplaceable:
 			for (var i = 0; i < array_length(global.held_tile_array); i++) {
@@ -168,7 +169,8 @@ function handle_click(tile_i, tile_j, is_batch_operation) {
 					if new_tile_j >= 14
 						continue;
 						
-					place_placeable(new_tile_i, new_tile_j, tile_state.tile, is_batch_operation, struct_copy(tile_state.properties), false)
+					place_placeable(new_tile_i, new_tile_j, tile_state.tile, is_batch_operation, 
+						copy_tile_state_properties(tile_state), false)
 				}
 			}
 			return;

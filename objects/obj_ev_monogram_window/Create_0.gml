@@ -11,7 +11,7 @@ center_y = 76;
 
 
 draw_monogram = instance_create_layer(center_x, center_y, "WindowElements", agi("obj_ev_make_monogram"), {
-	tiles : monogram_properties.tiles,
+	tiles : copy_array(monogram_properties.tiles),
     width : monogram_properties.width,
     height : monogram_properties.height,
     target_col: monogram_properties.target_col,
@@ -56,8 +56,12 @@ remove_column = instance_create_layer(center_x - 20, center_y - 54, "WindowEleme
             var rrow = draw_monogram.height - row - 1;
             array_delete(draw_monogram.tiles, draw_monogram.width * rrow + draw_monogram.width - 1, 1)
         }
+		
 		draw_monogram.width -= 1
+		if (draw_monogram.target_col == draw_monogram.width)
+			draw_monogram.target_col -= 1
         draw_monogram.image_xscale = draw_monogram.scale * draw_monogram.width
+		
 	}
 });
 add_child(remove_column)
@@ -95,6 +99,8 @@ remove_row = instance_create_layer(center_x - 74, center_y - 20, "WindowElements
         array_resize(draw_monogram.tiles, draw_monogram.width * (draw_monogram.height - 1))
 
 		draw_monogram.height -= 1
+		if (draw_monogram.target_row == draw_monogram.height)
+			draw_monogram.target_row -= 1
         draw_monogram.image_yscale = draw_monogram.scale * draw_monogram.height
 	}
 });

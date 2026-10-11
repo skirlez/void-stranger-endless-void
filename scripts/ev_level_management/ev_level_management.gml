@@ -267,7 +267,7 @@ function import_process_tiles(tile_string, level, height, failsafe_tile, version
 				return;
 		}
 		repeat (mult - 1) {
-			arr[@ i][j] = new tile_with_state(state.tile, struct_copy(state.properties))
+			arr[@ i][j] = copy_tile_state(state)
 			j++;
 			if (j >= 14) {
 				j = 0;
