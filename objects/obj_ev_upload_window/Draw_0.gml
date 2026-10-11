@@ -22,7 +22,7 @@ else if (state == 7)
 	draw_text_shadow(room_width / 2, room_height / 2 - 10, no_idea_text)
 else if (state == 8) {
 	var str = beat_first_text
-	if level_contains_crystal_memory(lvl)
+	if level_contains_crystal_memory(level_or_save_name)
 		str += "\n" + and_memory_crystal_text
 	draw_text_shadow(room_width / 2, room_height / 2 - 10, str)
 }
