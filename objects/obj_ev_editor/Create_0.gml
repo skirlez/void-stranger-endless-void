@@ -1890,7 +1890,7 @@ online_packs_str = noone
 get_version = noone
 	
 global.online_levels = []
-global.online_packs = []
+global.online_nodeless_packs = []
 function try_update_online_levels() {
 	get_levels = http_get(global.levels_server);
 	get_packs = http_get(global.packs_server);

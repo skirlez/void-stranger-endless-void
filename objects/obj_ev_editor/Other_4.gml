@@ -58,7 +58,7 @@ if (room == agi("rm_ev_startup")) {
 	read_beaten_levels()
 	
 	global.online_levels = [];
-	global.online_packs = [];
+	global.online_nodeless_packs = [];
 
 	startup_timeout = 300; // amount of frames before we give up
 

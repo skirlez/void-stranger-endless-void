@@ -9,9 +9,7 @@ var allowed_to_connect =
 		&& global.mouse_layer == 0
 	
 	
-if (ev_is_mouse_on_me()) {
-	if unselectable
-		return;
+if (ev_is_mouse_on_me() && !unselectable) {
 	if in_menu && global.pack_editor.selected_thing == pack_things.selector {
 		if ev_mouse_pressed() {
 			var node_button = agi("obj_ev_pack_node_button")

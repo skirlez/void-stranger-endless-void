@@ -19,12 +19,12 @@
     {"name":"Bee","order":1,"path":"folders/Sprites/Bee.yy",},
     {"name":"Items","order":3,"path":"folders/Sprites/Items.yy",},
     {"name":"Lily","order":2,"path":"folders/Sprites/Lily.yy",},
+    {"name":"Monogram","order":83,"path":"folders/Sprites/Monogram.yy",},
     {"name":"Orb Thing","order":74,"path":"folders/Sprites/Orb Thing.yy",},
     {"name":"Tileset Sprites","order":4,"path":"folders/Sprites/Tileset Sprites.yy",},
     {"name":"Void Stranger Sprites","order":5,"path":"folders/Sprites/Void Stranger Sprites.yy",},
     {"name":"Tile Sets","order":11,"path":"folders/Tile Sets.yy",},
     {"name":"Timelines","order":12,"path":"folders/Timelines.yy",},
-    {"name":"Monogram","order":83,"path":"folders/Sprites/Monogram.yy",},
   ],
   "ResourceOrderSettings": [
     {"name":"rm_ev_pack_level","order":7,"path":"rooms/rm_ev_pack_level/rm_ev_pack_level.yy",},

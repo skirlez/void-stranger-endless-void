@@ -31,6 +31,8 @@ function on_success(pack_string)
 	});
 	add_child(play);
 	add_x_button();
+	
+	highlighter.destroy_and_create_actions();
 }
 
 function on_fail(error_str = "") 

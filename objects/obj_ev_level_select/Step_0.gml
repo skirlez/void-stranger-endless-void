@@ -44,8 +44,8 @@ if keyboard_check(vk_control) && keyboard_check_pressed(ord("V")) && !global.onl
 			var local_pack_exists = file_exists(global.packs_directory + pack.save_name + "." + pack_extension)
 			var online_nodeless_pack_if_exists = noone;
 			if !local_pack_exists {
-				for (var i = 0; i < array_length(global.online_packs); i++) {
-					var nodeless = import_pack_nodeless(global.online_packs[i])
+				for (var i = 0; i < array_length(global.online_nodeless_packs); i++) {
+					var nodeless = import_pack_nodeless(global.online_nodeless_packs[i])
 					if (nodeless.save_name == pack.save_name) {
 						online_nodeless_pack_if_exists = nodeless;
 						break;

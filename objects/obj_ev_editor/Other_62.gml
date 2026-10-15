@@ -33,11 +33,11 @@ else if ds_map_find_value(async_load, "id") == get_packs
 	if ds_map_find_value(async_load, "status") == 0 {
 		online_packs_str = ds_map_find_value(async_load, "result");
 		if (online_packs_str != "" && !is_undefined(online_packs_str))
-			global.online_packs = ev_string_split_buffer(online_packs_str, "\n", 512)
+			global.online_nodeless_packs = ev_string_split_buffer(online_packs_str, "\n", 512)
 		else
-			global.online_packs = []
+			global.online_nodeless_packs = []
 			
-		array_sort(global.online_packs, function (pack_str_1, pack_str_2) {
+		array_sort(global.online_nodeless_packs, function (pack_str_1, pack_str_2) {
 			var date_1 = int64_safe(get_pack_date_from_string(pack_str_1), 0)
 			var date_2 = int64_safe(get_pack_date_from_string(pack_str_2), 0)
 			if (date_1 < date_2)

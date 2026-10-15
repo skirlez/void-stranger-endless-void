@@ -309,12 +309,12 @@ offline_nodeless_packs = []
 online_nodeless_packs = []
 function read_online_levels() {
 	if mode == level_selector_modes.packs {
-		online_nodeless_packs = array_create(array_length(global.online_packs));
-		online_levels = array_create(array_length(global.online_packs));
-		online_level_names = array_create(array_length(global.online_packs));
+		online_nodeless_packs = array_create(array_length(global.online_nodeless_packs));
+		online_levels = array_create(array_length(global.online_nodeless_packs));
+		online_level_names = array_create(array_length(global.online_nodeless_packs));
 
-		for (var i = 0; i < array_length(global.online_packs) ; i++) {
-			var pack = import_pack_nodeless(global.online_packs[i]);
+		for (var i = 0; i < array_length(global.online_nodeless_packs) ; i++) {
+			var pack = import_pack_nodeless(global.online_nodeless_packs[i]);
 			online_nodeless_packs[i] = pack;
 			online_level_names[i] = pack.name;
 			online_levels[i] = pack.thumbnail_level

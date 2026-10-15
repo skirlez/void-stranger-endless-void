@@ -18,6 +18,9 @@ function format_date(date_str) {
 	return str;	
 }
 
+
+
+
 function hide_textbox() {
 	textbox_open_depth = layer_get_depth("LevelHighlightButtons")
 }
@@ -36,181 +39,211 @@ var back = instance_create_layer(200, 16, "LevelHighlightButtons", agi("obj_ev_m
 });
 add_child(back);
 
-if !global.online_mode || is_online_pack_downloaded(nodeless_pack.save_name) {
-    var play = instance_create_layer(208, 40, "LevelHighlightButtons", agi("obj_ev_play_pack_button"), {
+
+
+actions = []
+function destroy_and_create_actions(alpha = 1) {
+	selected_element = noone
+	for (var i = 0; i < array_length(actions); i++) {
+		remove_child(actions[i])
+		instance_destroy(actions[i])	
+	}
+	actions = []
+	
+	function add_action(inst) {
+		array_push(actions, inst);
+		add_child(inst)
+	}
+	
+	if !global.online_mode || is_online_pack_downloaded(nodeless_pack.save_name) {
+	    var play = instance_create_layer(208, 40, "LevelHighlightButtons", agi("obj_ev_play_pack_button"), {
+			layer_num : 1,
+			nodeless_pack : nodeless_pack,
+			display_instance : display_instance,
+			highlighter : id,
+			is_online : global.online_mode,
+			image_alpha : alpha
+		});
+	    add_action(play);
+
+	    var copy = instance_create_layer(192, 40, "LevelHighlightButtons", agi("obj_ev_executing_button"), {
+	        layer_num : 1,
+	        nodeless_pack : nodeless_pack,
+	        image_alpha : alpha,
+	        sprite_index : agi("spr_ev_copy"),
+	        func : function () {
+				var pack_string;
+			
+	            if global.online_mode {
+					pack_string = get_online_pack_string(nodeless_pack.save_name)
+	                if is_undefined(pack_string) {
+	                    ev_notify("Download the pack before!")
+						exit;
+	                }
+	            } else {
+	                pack_string = read_pack_string_from_file(nodeless_pack.save_name)
+	            }
+
+				clipboard_set_text(pack_string)
+				ev_notify("Copied to clipboard!")
+	        }
+	    });
+	    add_action(copy)
+	}
+
+	if global.online_mode {
+	    var download_px = 208
+	    var download_py = 40
+
+	    if is_online_pack_downloaded(nodeless_pack.save_name) {
+	        download_px = 192
+	        download_py = 60
+
+	        if pack_progress_exists(nodeless_pack.save_name){
+	            var delete_save_button = instance_create_layer(208, 60, "LevelHighlightButtons", agi("obj_ev_delete_pack_save_button"), {
+	                layer_num : 1,
+	                level_select : instance_find(agi("obj_ev_level_select"), 0),
+	                save_name : nodeless_pack.save_name,
+	                display_instance : display_instance,
+	                nodeless_pack : nodeless_pack,
+	                image_alpha : alpha,
+	            })
+	            add_action(delete_save_button)
+	        }
+	    }
+
+	    var download = instance_create_layer(download_px, download_py, "LevelHighlightButtons", agi("obj_ev_executing_button"), {
+	        layer_num : 1,
+	        nodeless_pack : nodeless_pack,
+	        display_instance: display_instance,
+	        image_alpha : alpha,
+	        sprite_index : agi("spr_ev_download"),
+	        func : function () {
+	            global.mouse_layer++;
+	            new_window(13.5, 6, agi("obj_ev_download_window"), {
+	                nodeless_pack : nodeless_pack,
+	                display_instance : display_instance,
+					highlighter : window,
+	                layer_num : global.mouse_layer,
+	            })
+	        }
+	    })
+	    add_action(download)
+	} 
+	else {
+		var deleteb = instance_create_layer(192, 90, "LevelHighlightButtons", agi("obj_ev_delete_button"), {
+			pack_mode : true,
+			layer_num : 1,
+			level_select : instance_find(agi("obj_ev_level_select"), 0),
+			save_name : nodeless_pack.save_name,
+			display_instance : display_instance,
+			image_alpha : alpha,
+		})
+	    add_action(deleteb)
+
+	    if pack_progress_exists(nodeless_pack.save_name) {
+	        var delete_save_button = instance_create_layer(208, 73, "LevelHighlightButtons", agi("obj_ev_delete_pack_save_button"), {
+	            layer_num : 1,
+	            level_select : instance_find(agi("obj_ev_level_select"), 0),
+	            save_name : nodeless_pack.save_name,
+	            display_instance : display_instance,
+	            image_alpha : alpha,
+	        })
+	        add_action(delete_save_button)
+	    }
+
+
+		var upload = instance_create_layer(208, 90, "LevelHighlightButtons", agi("obj_ev_upload_button"), {
+			layer_num: 1,
+			level_or_save_name : nodeless_pack.save_name,
+			image_alpha: alpha,
+			is_pack: true, 
+		});
+		add_action(upload)
+	}
+	var play_t = instance_create_layer(8, room_height - 10, "LevelHighlightButtons", agi("obj_ev_play_pack_button"), 
+	{
 		layer_num : 1,
 		nodeless_pack : nodeless_pack,
 		display_instance : display_instance,
 		highlighter : id,
 		is_online : global.online_mode,
-		image_alpha : 0
+		tis : true,
+		image_alpha : alpha
 	});
-    add_child(play);
+	add_action(play_t)
 
-    var copy = instance_create_layer(192, 40, "LevelHighlightButtons", agi("obj_ev_executing_button"), {
-        layer_num : 1,
-        nodeless_pack : nodeless_pack,
-        image_alpha : 0,
-        sprite_index : agi("spr_ev_copy"),
-        func : function () {
-			var pack_string;
-			
-            if global.online_mode {
-				pack_string = get_online_pack_string(nodeless_pack.save_name)
-                if is_undefined(pack_string) {
-                    ev_notify("Download the pack before!")
-					exit;
-                }
-            } else {
-                pack_string = read_pack_string_from_file(nodeless_pack.save_name)
-            }
+	if global.tis_pack_button {
+	    var scores = instance_create_layer(24, room_height - 10, "LevelHighlightButtons", agi("obj_ev_executing_button"), {
+	        sprite_index : agi("spr_ev_score_list"),
+	        highlighter : id,
+	        layer_num : 1,
+	        image_alpha : alpha,
+	        func : function () {
+	            new_window(11, 7, agi("obj_ev_tis_score_window"), {
+	                save_name : highlighter.nodeless_pack.save_name,
+	                layer_num : 2,
+	            })
+	            global.mouse_layer++;
+	        }
+	    })
+	    add_action(scores)
+	}
 
-			clipboard_set_text(pack_string)
-			ev_notify("Copied to clipboard!")
-        }
-    });
-    add_child(copy)
-}
-
-if global.online_mode {
-    var download_px = 208
-    var download_py = 40
-
-    if is_online_pack_downloaded(nodeless_pack.save_name) {
-        download_px = 192
-        download_py = 60
-
-        if pack_progress_exists(nodeless_pack.save_name){
-            var delete_save_button = instance_create_layer(208, 60, "LevelHighlightButtons", agi("obj_ev_delete_pack_save_button"), {
-                layer_num : 1,
-                level_select : instance_find(agi("obj_ev_level_select"), 0),
-                save_name : nodeless_pack.save_name,
-                display_instance : display_instance,
-                nodeless_pack : nodeless_pack,
-                image_alpha : 0,
-            })
-            add_child(delete_save_button)
-        }
-    }
-
-    var download = instance_create_layer(download_px, download_py, "LevelHighlightButtons", agi("obj_ev_executing_button"), {
-        layer_num : 1,
-        nodeless_pack : nodeless_pack,
-        display_instance: display_instance,
-        highlighter : id,
-        image_alpha : 0,
-        sprite_index : agi("spr_ev_download"),
-        func : function () {
-            global.mouse_layer++;
-            new_window(12, 6, agi("obj_ev_download_window"), {
-                nodeless_pack : nodeless_pack,
-                display_instance : display_instance,
-                layer_num : global.mouse_layer,
-				// Buttons should probably be reset after the pack is downloaded,
-				// but I don't know how to do that
-            })
-        }
-    })
-    add_child(download)
-} 
-else {
-	var deleteb = instance_create_layer(192, 90, "LevelHighlightButtons", agi("obj_ev_delete_button"), {
-		pack_mode : true,
-		layer_num : 1,
-		level_select : instance_find(agi("obj_ev_level_select"), 0),
-		save_name : nodeless_pack.save_name,
-		display_instance : display_instance,
-		image_alpha : 0,
-	})
-    add_child(deleteb)
-
-    if pack_progress_exists(nodeless_pack.save_name) {
-        var delete_save_button = instance_create_layer(208, 73, "LevelHighlightButtons", agi("obj_ev_delete_pack_save_button"), {
-            layer_num : 1,
-            level_select : instance_find(agi("obj_ev_level_select"), 0),
-            save_name : nodeless_pack.save_name,
-            display_instance : display_instance,
-            image_alpha : 0,
-        })
-        add_child(delete_save_button)
-    }
-
-
-	var upload = instance_create_layer(208, 90, "LevelHighlightButtons", agi("obj_ev_upload_button"), {
-		layer_num: 1,
-		level_or_save_name : nodeless_pack.save_name,
-		image_alpha: 0,
-		is_pack: true, 
-	});
-	add_child(upload)
-}
-var play_t = instance_create_layer(8, room_height - 10, "LevelHighlightButtons", agi("obj_ev_play_pack_button"), 
-{
-	layer_num : 1,
-	nodeless_pack : nodeless_pack,
-	display_instance : display_instance,
-	highlighter : id,
-	is_online : global.online_mode,
-	tis : true,
-	image_alpha : 0
-});
-add_child(play_t)
-
-if global.tis_pack_button {
-    var scores = instance_create_layer(24, room_height - 10, "LevelHighlightButtons", agi("obj_ev_executing_button"), {
-        sprite_index : agi("spr_ev_score_list"),
-        highlighter : id,
-        layer_num : 1,
-        image_alpha : 0,
-        func : function () {
-            new_window(11, 7, agi("obj_ev_tis_score_window"), {
-                save_name : highlighter.nodeless_pack.save_name,
-                layer_num : 2,
-            })
-            global.mouse_layer++;
-        }
-    })
-    add_child(scores)
-}
-
-var textbox_offset;
-if (!global.online_mode) {
-	date_textbox = noone
+	var textbox_offset;
+	if (!global.online_mode) {
+		date_textbox = noone
 	
-	var edit = instance_create_layer(191, 73, "LevelHighlightButtons", agi("obj_ev_executing_button"), {
-		layer_num : 1,
-		nodeless_pack : nodeless_pack,
-		display_instance : display_instance,
-		highlighter : id,
-		sprite_index : agi("spr_ev_edit_level"),
-		image_alpha : 0,
-		func : function () {				
-			if nodeless_pack.password_brand == 0 
-			|| load_pack_password(nodeless_pack) == nodeless_pack.password_brand {
-				highlighter.hide_textbox();
-				global.editor.edit_level_pack_transition(nodeless_pack, display_instance);
-			}
-			else {
-				global.mouse_layer++
-				new_window(8, 7, agi("obj_ev_pack_password_window"), { 
-					nodeless_pack : nodeless_pack,
-					layer_num : global.mouse_layer,
-				})
+		var edit = instance_create_layer(191, 73, "LevelHighlightButtons", agi("obj_ev_executing_button"), {
+			layer_num : 1,
+			nodeless_pack : nodeless_pack,
+			display_instance : display_instance,
+			highlighter : id,
+			sprite_index : agi("spr_ev_edit_level"),
+			image_alpha : alpha,
+			func : function () {				
+				if nodeless_pack.password_brand == 0 
+				|| load_pack_password(nodeless_pack) == nodeless_pack.password_brand {
+					highlighter.hide_textbox();
+					global.editor.edit_level_pack_transition(nodeless_pack, display_instance);
+				}
+				else {
+					global.mouse_layer++
+					new_window(8, 7, agi("obj_ev_pack_password_window"), { 
+						nodeless_pack : nodeless_pack,
+						layer_num : global.mouse_layer,
+					})
 				
+				}
 			}
-		}
-	})
-	textbox_offset = 20;
-	add_child(edit)
-}
-else {
+		})
+		textbox_offset = 20;
+		add_action(edit)
+	}
+	else {
 
-	date_textbox = instance_create_layer(201, 130, "LevelDescription", agi("obj_ev_textbox"), 
+		date_textbox = instance_create_layer(201, 130, "LevelDescription", agi("obj_ev_textbox"), 
+		{
+			txt : ("Upload date:\n" 
+				+ format_date(nodeless_pack.upload_date) 
+				+ "\nLast edited date:\n" 
+				+ format_date(nodeless_pack.last_edit_date)),
+			base_scale_x : 2,
+			base_scale_y : 1,
+			layer_num : 1,
+			allow_deletion : false,
+			char_limit : 0,	
+			opened_x : room_width / 2,
+			opened_y : room_height / 2,
+			image_alpha : alpha
+		})
+		textbox_offset = 0;
+		add_action(date_textbox)
+	}
+
+	description_textbox = instance_create_layer(201, 90 + textbox_offset, "LevelDescription", agi("obj_ev_textbox"), 
 	{
-		txt : ("Upload date:\n" 
-			+ format_date(nodeless_pack.upload_date) 
-			+ "\nLast edited date:\n" 
-			+ format_date(nodeless_pack.last_edit_date)),
+		txt : (nodeless_pack.description == "" ? "No description provided." : "Description:\n" + nodeless_pack.description),
 		base_scale_x : 2,
 		base_scale_y : 1,
 		layer_num : 1,
@@ -218,37 +251,24 @@ else {
 		char_limit : 0,	
 		opened_x : room_width / 2,
 		opened_y : room_height / 2,
-		image_alpha : 0
+		image_alpha : alpha
 	})
-	textbox_offset = 0;
-	add_child(date_textbox)
+
+	author_textbox = instance_create_layer(201, 110 + textbox_offset, "LevelDescription", agi("obj_ev_textbox"), 
+	{
+		txt : ev_make_author_textbox_text(nodeless_pack.author),
+		base_scale_x : 2,
+		base_scale_y : 1,
+		layer_num : 1,
+		allow_deletion : false,
+		char_limit : 0,	
+		opened_x : room_width / 2,
+		opened_y : room_height / 2,
+		image_alpha : alpha
+	})
+
+	add_action(description_textbox)
+	add_action(author_textbox)
+	
 }
-
-description_textbox = instance_create_layer(201, 90 + textbox_offset, "LevelDescription", agi("obj_ev_textbox"), 
-{
-	txt : (nodeless_pack.description == "" ? "No description provided." : "Description:\n" + nodeless_pack.description),
-	base_scale_x : 2,
-	base_scale_y : 1,
-	layer_num : 1,
-	allow_deletion : false,
-	char_limit : 0,	
-	opened_x : room_width / 2,
-	opened_y : room_height / 2,
-	image_alpha : 0
-})
-
-author_textbox = instance_create_layer(201, 110 + textbox_offset, "LevelDescription", agi("obj_ev_textbox"), 
-{
-	txt : ev_make_author_textbox_text(nodeless_pack.author),
-	base_scale_x : 2,
-	base_scale_y : 1,
-	layer_num : 1,
-	allow_deletion : false,
-	char_limit : 0,	
-	opened_x : room_width / 2,
-	opened_y : room_height / 2,
-	image_alpha : 0
-})
-
-add_child(description_textbox)
-add_child(author_textbox)
+destroy_and_create_actions(0);
