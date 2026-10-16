@@ -189,13 +189,17 @@ function create_displays() {
 		var lvl_string = levels[level_index];
 		var lvl_struct = import_level(lvl_string)
 		
+		
+			
 		if mode == level_selector_modes.packs {
 			var nodeless_pack = nodeless_packs[level_index];
+			var is_uploaded = ds_map_exists(global.pack_key_map, nodeless_pack.save_name);
 			var display = instance_create_layer(20 + pos * 50, 40 + line * 50, "Levels", global.display_object, {
 				lvl : lvl_struct,
 				name : nodeless_pack.name,
 				brand : nodeless_pack.author_brand,
 				nodeless_pack : nodeless_pack,
+				is_uploaded : is_uploaded,
 				layer_num : layer_num,
 				display_context : display_contexts.level_select,
 				no_spoiling : true,
@@ -214,6 +218,7 @@ function create_displays() {
 				beat_value = ds_map_find_value(global.beaten_levels_map, sha)
 			else
 				beat_value = 0;
+			var is_uploaded = ds_map_exists(global.level_key_map, lvl_struct.save_name);
 			
 			var display = instance_create_layer(20 + pos * 50, 40 + line * 50, "Levels", global.display_object, {
 				lvl : lvl_struct,
@@ -222,6 +227,7 @@ function create_displays() {
 				brand : lvl_struct.author_brand,
 				layer_num : layer_num,
 				draw_beaten : beat_value,
+				is_uploaded : is_uploaded,
 				display_context : display_contexts.level_select,
 				no_spoiling : true,
 				image_xscale : 0.2,

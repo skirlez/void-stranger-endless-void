@@ -249,8 +249,6 @@ draw_set_font(global.ev_font)
 
 game_surface = noone
 name_surface = noone
-brand_surface = noone
-cached_author_brand = lvl.author_brand;
 
 highlighted = false
 
@@ -292,3 +290,22 @@ function delete_cached_name_surface() {
 	if surface_exists(name_surface)
 		surface_free(name_surface)
 }
+
+badges = []
+
+if brand != 0 {
+	array_push(badges, new brand_badge(brand))	
+}
+if draw_beaten == 1 {
+	array_push(badges, new sprite_badge(agi("spr_ev_checkmark_badge")))	
+}
+else if draw_beaten == 2 {
+	array_push(badges, new memory_badge())	
+}
+if draw_beaten == 2 {
+	array_push(badges, new memory_badge())	
+}
+if is_uploaded {
+	array_push(badges, new sprite_badge(agi("spr_ev_uploaded_badge")))
+}
+

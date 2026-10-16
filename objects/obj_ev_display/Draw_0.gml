@@ -295,30 +295,6 @@ gpu_set_blendenable(true)
 draw_exit_numbers()
 draw_sprite_ext(border_sprite, 0, draw_x, y, image_xscale, image_yscale, 0, c_white, 1)
 
-
-if brand != 0 {
-	if !surface_exists(brand_surface) || cached_author_brand != lvl.author_brand {
-		brand_surface = surface_create(8, 8)
-		surface_set_target(brand_surface)
-		draw_clear_alpha(c_black, 1)
-		
-		draw_set_color(c_grey)
-		ev_draw_rectangle(0, 0, 7, 7, true)
-		
-		draw_set_color(c_white)
-		
-		ev_draw_brand(1, 1, brand)
-		
-		surface_reset_target()
-		cached_author_brand = lvl.author_brand
-	}	
-	var size = 1;
-	draw_surface_ext(brand_surface, x + sprite_width - 4 * size,
-		y + sprite_height - 4 * size, size, size, 0, c_white, image_alpha)
-}
-
-
-
 if name != "" {
 	if (!surface_exists(name_surface)) {
 		var txt = name;
@@ -342,18 +318,26 @@ if name != "" {
 		size = sprite_width / text_width
 	}
 	draw_surface_ext(name_surface, x + sprite_width / 2 - (surface_get_width(name_surface) / 2) * size,
-		y + sprite_height + 2, size, size, 0, c_white, image_alpha)
+		y + sprite_height + 5, size, size, 0, c_white, image_alpha)
 }
 
-if draw_beaten == 1 {
-	draw_sprite(agi("spr_ev_checkmark"), 0, x + sprite_width - 9, y + sprite_height)
-}
-else if draw_beaten == 2 {
-	var time = (global.editor_time / 2) % 80
-	var spr = agi("spr_ev_memory_collected")
-	if time > sprite_get_number(spr) - 1
-		time = 0;
-	draw_sprite(spr, time, x + sprite_width - 9, y + sprite_height)
+
+var badge_surface = surface_create(6, 6)
+for (var i = 0; i < array_length(badges); i++) {
 	
+	surface_set_target(badge_surface)
+	draw_clear_alpha(c_black, 1)
+	badges[i].draw_func(lvl)
+	surface_reset_target()
+	
+	
+	var size = 1;
+	
+	var bx = x + sprite_width - 4 * size - i * 9
+	var by = y + sprite_height - 4 * size
+	draw_set_color(c_grey)
+	ev_draw_rectangle(bx, by, bx + 7 * size, by + 7 * size, true)
+	draw_surface_ext(badge_surface, bx + 1, by + 1, size, size, 0, c_white, image_alpha)
 }
+surface_free(badge_surface)
 
