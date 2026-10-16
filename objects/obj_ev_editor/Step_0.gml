@@ -25,8 +25,11 @@ var list = ds_list_create()
 var length = instance_position_list(mouse_x, mouse_y, all, list, false)
 var min_depth = infinity
 var min_inst = noone
+var unclickable = agi("obj_unclickable")
 for (var i = 0; i < length; i++) {
 	var inst = list[| i]
+	if object_is_ancestor(inst.object_index, unclickable)
+		continue;
 	if (inst.depth < min_depth && inst.visible) {
 		min_inst = inst.id;
 		min_depth = inst.depth	

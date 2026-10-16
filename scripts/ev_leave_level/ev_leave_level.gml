@@ -26,16 +26,17 @@ function ev_clear_level() {
 		var exists = ds_map_exists(global.beaten_levels_map, sha)
 		if exists {
 			var current = ds_map_find_value(global.beaten_levels_map, sha)
-			if current == 2 || (current == 1 && !gotten_crystal) {
+			if current == beaten_states.beaten_with_crystal 
+					|| (current == beaten_states.beaten && !gotten_crystal) {
 				ev_leave_level();
 				return;
 			}
 		}
 		
 		if gotten_crystal
-			ds_map_set(global.beaten_levels_map, sha, 2)
+			ds_map_set(global.beaten_levels_map, sha, beaten_states.beaten_with_crystal)
 		else 
-			ds_map_set(global.beaten_levels_map, sha, 1)
+			ds_map_set(global.beaten_levels_map, sha, beaten_states.beaten)
 		global.editor.save_beaten_levels();
 	}
 	ev_leave_level();

@@ -291,21 +291,28 @@ function delete_cached_name_surface() {
 		surface_free(name_surface)
 }
 
+enum beaten_states {
+	not_beaten,
+	beaten,
+	beaten_with_crystal,
+	uploaded
+}
+
 badges = []
 
 if brand != 0 {
 	array_push(badges, new brand_badge(brand))	
 }
-if draw_beaten == 1 {
-	array_push(badges, new sprite_badge(agi("spr_ev_checkmark_badge")))	
+switch (beaten_state) {
+	case beaten_states.beaten:
+		array_push(badges, new sprite_badge(agi("spr_ev_checkmark_badge")));
+		break
+	case beaten_states.beaten_with_crystal:
+		array_push(badges, new memory_badge())	
+		break
+	case beaten_states.uploaded:
+		array_push(badges, new sprite_badge(agi("spr_ev_uploaded_badge")))
+		break
 }
-else if draw_beaten == 2 {
-	array_push(badges, new memory_badge())	
-}
-if draw_beaten == 2 {
-	array_push(badges, new memory_badge())	
-}
-if is_uploaded {
-	array_push(badges, new sprite_badge(agi("spr_ev_uploaded_badge")))
-}
+
 

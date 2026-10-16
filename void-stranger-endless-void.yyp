@@ -92,6 +92,7 @@
     {"id":{"name":"obj_ev_logo","path":"objects/obj_ev_logo/obj_ev_logo.yy",},},
     {"id":{"name":"obj_ev_claim_pack_window","path":"objects/obj_ev_claim_pack_window/obj_ev_claim_pack_window.yy",},},
     {"id":{"name":"spr_ev_lily_gblink_u","path":"sprites/spr_ev_lily_gblink_u/spr_ev_lily_gblink_u.yy",},},
+    {"id":{"name":"obj_unclickable","path":"objects/obj_unclickable/obj_unclickable.yy",},},
     {"id":{"name":"ev_got_any_burdens","path":"scripts/ev_got_any_burdens/ev_got_any_burdens.yy",},},
     {"id":{"name":"obj_ev_upload_button","path":"objects/obj_ev_upload_button/obj_ev_upload_button.yy",},},
     {"id":{"name":"tile_bg_void","path":"tilesets/tile_bg_void/tile_bg_void.yy",},},

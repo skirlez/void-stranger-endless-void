@@ -14,7 +14,6 @@ if global.void_radio_on {
 	}
 }
 var clicked_background = !instance_exists(global.instance_touching_mouse)
-			|| global.instance_touching_mouse.object_index == agi("obj_ev_pack_line_drawer")
 			
 if (ev_mouse_pressed() && clicked_background) || mouse_check_button_pressed(mb_middle) 
 		&& (global.mouse_layer == 0 || selected_thing == pack_things.wrench) {

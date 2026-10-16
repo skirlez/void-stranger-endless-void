@@ -1802,8 +1802,7 @@ function play_level_transition(lvl, lvl_sha, display_instance) {
 	play_transition = max_play_transition
 	play_transition_display = display_instance
 	play_transition_surface = display_instance.game_surface;
-	display_instance.brand = 0;
-	display_instance.draw_beaten = 0;
+	display_instance.badges = [];
 	global.mouse_layer = -1
 }
 
@@ -1834,8 +1833,7 @@ function edit_level_transition(lvl, display_instance) {
 	ev_stop_music()
 	edit_transition = max_edit_transition
 	edit_transition_display = display_instance
-	display_instance.brand = 0;
-	display_instance.draw_beaten = 0;
+	display_instance.badges = [];
 	global.mouse_layer = -1
 }
 
@@ -1852,7 +1850,7 @@ function edit_level_pack_transition(nodeless_pack, display_instance) {
 	global.pack = pack;
 	edit_pack_transition = max_edit_pack_transition
 	edit_pack_transition_display = display_instance
-	display_instance.draw_beaten = 0;
+	display_instance.badges = [];
 	global.mouse_layer = -1
 }
 
@@ -1863,6 +1861,8 @@ function play_back_to_editor_transition() {
 	back_to_editor_transition = max_back_to_editor_transition
 	global.mouse_layer = -1
 }
+
+
 
 
 // used in obj_ev_level_select, is essentially the level/pack "page". we want this to be global so it persists
