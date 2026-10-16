@@ -217,6 +217,15 @@ credits = [
 		new ev_credits_text("by B. Spaghettini"),
 	],
 	[
+		new ev_credits_header("Music"),
+		new ev_credits_text("27 - Siren_room,"),
+		new ev_credits_text("28 - Indisious Ignorance,"),
+		new ev_credits_text("29 - Faded Fjord,"),
+		new ev_credits_text("30 - Wreakless Whirlwind,"),
+		new ev_credits_text("31 - Sleep_room,"),
+		new ev_credits_text("by Kayile Midwright"),
+	],
+	[
 		new ev_credits_header("SFX"),
 		new ev_credits_text("The BFXR Program"),
 		new ev_credits_text("fatboy94"),
@@ -259,7 +268,7 @@ community_display = noone;
 time_until_next_level_max = 60;
 time_until_next_level = time_until_next_level_max;
 
-#macro CREDITS_COMMUNITY_PAGE 8
+#macro CREDITS_COMMUNITY_PAGE 9
 
 function load_credits_page(page_index) {
 	for (var i = 0; i < array_length(current_page); i++) {
