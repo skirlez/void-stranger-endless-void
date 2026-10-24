@@ -83,3 +83,13 @@ function string_to_array(str) {
 	}
 	return arr;
 }
+
+function left_pad(str, size, char) {
+	var length = string_length(str)
+
+	if length >= size {
+		return str
+	}
+
+	return string_concat(string_repeat(char, size - length), str)
+}

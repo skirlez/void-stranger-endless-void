@@ -197,3 +197,7 @@ function ds_list_to_array(list) {
 function ds_map_keys_to_array_fix(map) {
 	return ds_map_size(map) == 0 ? [] : ds_map_keys_to_array(map)
 }
+
+function number_of_int_digits(num) {
+	return string_length(string(floor(num)))
+}

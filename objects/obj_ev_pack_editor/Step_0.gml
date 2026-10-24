@@ -50,11 +50,14 @@ previous_mouse_y = mouse_y;
 
 if (global.mouse_layer == 0 || selected_thing == pack_things.wrench) {
 	var prev_zoom = zoom
-	if mouse_wheel_down()  {
-		zoom += 1;
-	}
-	if mouse_wheel_up() && zoom > -10 {
-		zoom -= 1;
+
+	if (global.can_zoom_in_pack_editor) {
+		if mouse_wheel_down()  {
+			zoom += 1;
+		}
+		if mouse_wheel_up() && zoom > -10 {
+			zoom -= 1;
+		}
 	}
 
 	if (prev_zoom != zoom) {

@@ -3,6 +3,7 @@ music_select = instance_create_layer(x, y, "WindowElements", agi("obj_ev_music_s
 	base_scale_x : 1,
 	preselected_music : node_instance.properties.music,
 	boost_pack_arrow_progress : true,
+	node_instance : node_instance,
 })
 add_child(music_select)
 global.void_radio_disable_stack++;

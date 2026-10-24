@@ -1641,7 +1641,40 @@ global.music_names = ["", "msc_001", "msc_dungeon_wings", "msc_beecircle", "msc_
 	"msc_monstrail", "msc_endless", "msc_stg_extraboss", "msc_rytmi2", "msc_test2", "msc_voidpiano", "msc_finalapproach", "msc_universe",
 	"snd_ev_music_judgment_jingle", "snd_ev_music_determined_descent", "snd_ev_music_tamarind",  "snd_ev_music_outer_tamarind", "snd_ev_music_darkroom",
 	"snd_ev_music_hadean", "snd_ev_music_badroute", "snd_ev_music_hemcircle", "snd_ev_music_ialbadcircle", "snd_ev_music_ialcircle", "snd_ev_music_rest"]
-	
+global.music_labels = [
+	"...",
+	"Void Symphony",
+	"Affection Air",
+	"Buzzing Boogie",
+	"Greedy Groove",
+	"Rage Rave",
+	"Lax Lullaby",
+	"Muted Motive",
+	"MESSISSÄ",
+	"Estranged Elegy",
+	"Agents of Void",
+	"Bee like that",
+	"Grayish as it may be",
+	"Getting To Your Manager",
+	"... ad astra",
+	"S** **** ****",
+	"Dancing Infinity",
+	"Extended Encore",
+	"A memory just out of reach",
+	"Final Verse",
+	"Universe",
+	"Judgement Jingle",
+	"Determined Descent",
+	"Tamarind 'Elegance'",
+	"Tamarind 'Crushing'",
+	"Darkroom",
+	"Hadean",
+	"Siren room",
+	"Indisious Ignorance",
+	"Faded Fjord",
+	"Wreakless Whirlind",
+	"Sleep room",
+]
 	
 global.music_names_to_index = ds_map_create()
 for (var i = 0; i < array_length(global.music_names); i++) {
@@ -2039,6 +2072,7 @@ global.turn_frames = 0
 global.death_frames = -1
 
 global.instance_touching_mouse = noone;
+global.can_zoom_in_pack_editor = false;
 global.happenings = ds_map_create();
 
 if global.is_merged {
