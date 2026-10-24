@@ -58,18 +58,18 @@ for (var i = 0; i < page_size; i++)
     // draw background color
     if selected_index == filtered_index {
         draw_set_color(selected_bg_color);
-    } else if hovered_index == i {
+    } else if hovered_index == filtered_index {
         draw_set_color(hovered_bg_color);
     }
 
-    if selected_index == filtered_index || hovered_index == i {
+    if selected_index == filtered_index || hovered_index == filtered_index {
         draw_rectangle(px, py, px + width - 1, py + element_height - 1, false);
     }
 
     // draw index + label text
     if selected_index == filtered_index {
         draw_set_color(selected_text_color);
-    } else if hovered_index == i {
+    } else if hovered_index == filtered_index {
         draw_set_color(hovered_text_color);
     } else {
         draw_set_color(text_color)
