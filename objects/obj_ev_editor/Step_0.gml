@@ -26,13 +26,9 @@ var length = instance_position_list(mouse_x, mouse_y, all, list, false)
 var min_depth = infinity
 var min_inst = noone
 var unclickable = agi("obj_unclickable")
-global.can_zoom_in_pack_editor = true
 for (var i = 0; i < length; i++) {
 	var inst = list[| i]
-
-	if asset_has_tags(inst.object_index, "scrollable", asset_object)
-		global.can_zoom_in_pack_editor = false		
-
+	
 	if object_is_ancestor(inst.object_index, unclickable)
 		continue;
 	

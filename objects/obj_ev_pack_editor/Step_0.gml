@@ -51,7 +51,9 @@ previous_mouse_y = mouse_y;
 if (global.mouse_layer == 0 || selected_thing == pack_things.wrench) {
 	var prev_zoom = zoom
 
-	if (global.can_zoom_in_pack_editor) {
+	var can_zoom = !(instance_exists(global.instance_touching_mouse) && 
+		asset_has_tags(global.instance_touching_mouse.object_index, "scrollable", asset_object))
+	if (can_zoom) {
 		if mouse_wheel_down()  {
 			zoom += 1;
 		}

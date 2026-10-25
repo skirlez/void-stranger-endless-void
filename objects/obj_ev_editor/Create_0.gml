@@ -1669,11 +1669,11 @@ global.music_labels = [
 	"Tamarind 'Crushing'",
 	"Darkroom",
 	"Hadean",
-	"Siren room",
+	"Siren_room",
 	"Indisious Ignorance",
 	"Faded Fjord",
 	"Wreakless Whirlind",
-	"Sleep room",
+	"Sleep_room",
 ]
 	
 global.music_names_to_index = ds_map_create()
@@ -2072,7 +2072,6 @@ global.turn_frames = 0
 global.death_frames = -1
 
 global.instance_touching_mouse = noone;
-global.can_zoom_in_pack_editor = false;
 global.happenings = ds_map_create();
 
 if global.is_merged {

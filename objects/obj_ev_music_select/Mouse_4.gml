@@ -5,13 +5,19 @@ audio_play_sound(agi("snd_ev_selector_click"), 10, false)
 
 global.mouse_layer++;
 
+var horizontal_sprite_padding = 2
+var top_sprite_padding = 8
+
 var init_struct = {
-	add_x: false,
-	source_x : x + image_xscale * sprite_get_width(sprite_index) / 2,
-	source_y : y + image_yscale * sprite_get_height(sprite_index) / 2,
+	source_x : x 
+		+ image_xscale 
+		* (sprite_get_width(sprite_index) - horizontal_sprite_padding * 2) / 2,
+	source_y : y 
+		+ image_yscale 
+		* (sprite_get_height(sprite_index) - top_sprite_padding) / 2,
 	source_image_xscale : image_xscale,
 	source_image_yscale : image_yscale,
-	layer: layer_get_id("Windows2"),
+	layer : layer_get_id("Windows2"),
 	selected_index : index,
 	elements: global.music_names,
 	labels: global.music_labels,

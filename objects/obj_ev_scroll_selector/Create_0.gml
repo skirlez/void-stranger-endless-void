@@ -1,4 +1,4 @@
-// page_size, width and element_height in Variable Definition
+// page_size, width and element_height in Variable Definitions
 
 first_displayed_index = min(selected_index + page_size, array_length(elements)) - page_size
 hovered_index = -1
